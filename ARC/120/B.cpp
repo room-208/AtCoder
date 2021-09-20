@@ -24,12 +24,14 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
+const int COM_pskl_N = 60;
 
 long long fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
+vector<vector<long long>> com_pskl;
 
 // テーブルを作る前処理
 void COMinit()
@@ -55,6 +57,21 @@ long long COM(int n, int k)
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
+//パスカルの三角形の二項係数
+void COM_paskal()
+{
+    com_pskl.assign(COM_pskl_N, vector<long long>(COM_pskl_N));
+    com_pskl[0][0] = 1;
+    for (int i = 1; i < COM_pskl_N; ++i)
+    {
+        com_pskl[i][0] = 1;
+        for (int j = 1; j < COM_pskl_N; j++)
+        {
+            com_pskl[i][j] = (com_pskl[i - 1][j - 1] + com_pskl[i - 1][j]);
+        }
+    }
+}
+
 //繰り返し二乗法
 long long MOD_pow(long long a, long long n)
 {
@@ -73,20 +90,6 @@ long long MOD_pow(long long a, long long n)
 long long tousa_sum(long long a, long long d, long long n)
 {
     return (a * 2 + d * (n - 1)) * n / 2;
-}
-
-//転倒数
-long long inv_count(const vector<int> &a)
-{
-    int n = (int)a.size();
-    fenwick_tree<int> fw(n);
-    long long ans = 0;
-    for (int i = 0; i < n; i++)
-    {
-        ans += fw.sum(a[i] + 1, n);
-        fw.add(a[i], 1);
-    }
-    return ans;
 }
 
 //最大公約数
@@ -195,6 +198,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
 //unoderedのハッシュ
 struct HashPair
 {
+
     //注意 constがいる
     template <class T1, class T2>
     size_t operator()(const pair<T1, T2> &p) const
@@ -215,48 +219,45 @@ struct HashPair
 };
 
 //セグ木・遅延セグ木
-namespace seg
+const long long sgt_ID = 0;
+long long sgt_op(long long a, long long b)
 {
-    const long long ID = 0;
-    long long op(long long a, long long b)
-    {
-        return max(a, b);
-    }
-    long long e()
-    {
-        return -INF_ll;
-    }
-    long long sgt_mapping(long long f, long long x)
-    {
-        if (f == ID)
-        {
-            return x;
-        }
-        else
-        {
-            return x + f;
-        }
-    }
-    long long composition(long long f, long long g)
-    {
-        if (f == ID)
-        {
-            return g;
-        }
-        else
-        {
-            return f + g;
-        }
-    }
-    long long id()
-    {
-        return ID;
-    }
-    long long target;
-    bool sgt_f(long long v) { return v < target; }
-    //segtree<long long, sgt_op, sgt_e> sgt;
-    //lazy_segtree<long long, sgt_op, sgt_e, long long, sgt_mapping, sgt_composition, sgt_id> sgt;
+    return max(a, b);
 }
+long long sgt_e()
+{
+    return -INF_ll;
+}
+long long sgt_mapping(long long f, long long x)
+{
+    if (f == sgt_ID)
+    {
+        return x;
+    }
+    else
+    {
+        return x + f;
+    }
+}
+long long sgt_composition(long long f, long long g)
+{
+    if (f == sgt_ID)
+    {
+        return g;
+    }
+    else
+    {
+        return f + g;
+    }
+}
+long long sgt_id()
+{
+    return sgt_ID;
+}
+long long sgt_target;
+bool sgt_f(int v) { return v < sgt_target; }
+//segtree<long long, sgt_op, sgt_e> sgt;
+//lazy_segtree<long long, sgt_op, sgt_e, long long, sgt_mapping, sgt_composition, sgt_id> sgt;
 
 // Union-Find
 struct UnionFind
@@ -533,16 +534,73 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W;
+    cin >> H >> W;
+    vector<string> S(H);
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        cin >> S[i];
     }
 
-    cout << "Yes" << endl;
-    cout << "No" << endl;
+    vector<int> A(3);
+    long long ans = 1;
+    for (int cnt = 0; cnt < H + W - 1; cnt++)
+    {
+        int flag = -1;
+        A.assign(3, 0);
+
+        for (int i = 0; i <= cnt; i++)
+        {
+            int j = cnt - i;
+
+            if (in_out(i, j, H, W))
+            {
+                if (S[i][j] == 'R')
+                {
+                    A[0]++;
+                }
+                else if (S[i][j] == 'B')
+                {
+                    A[1]++;
+                }
+                else if (S[i][j] == '.')
+                {
+                    A[2]++;
+                }
+            }
+        }
+
+        if (A[0] > 0 && A[1] > 0)
+        {
+            flag = -1;
+        }
+        else if (A[0] > 0 && A[1] == 0)
+        {
+            flag = 1;
+        }
+        else if (A[1] > 0 && A[0] == 0)
+        {
+            flag = 1;
+        }
+        else
+        {
+            flag = 2;
+        }
+
+        if (flag == -1)
+        {
+            ans *= 0;
+        }
+        else if (flag == 1)
+        {
+            ans *= 1;
+        }
+        else if (flag == 2)
+        {
+            ans *= 2;
+            ans %= MOD;
+        }
+    }
+
+    cout << ans << endl;
 }
