@@ -543,6 +543,13 @@ int main()
         cin >> A[i];
     }
 
-    cout << "Yes" << endl;
-    cout << "No" << endl;
+    bool flag = true;
+    if (flag)
+    {
+        cout << "Yes" << endl;
+    }
+    else
+    {
+        cout << "No" << endl;
+    }
 }
