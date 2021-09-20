@@ -215,20 +215,18 @@ struct HashPair
 };
 
 //セグ木・遅延セグ木
-//segtree<long long, seg::op, seg::e> sgt;
-//lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
 namespace seg
 {
     const long long ID = 0;
     long long op(long long a, long long b)
     {
-        return min(a, b);
+        return max(a, b);
     }
     long long e()
     {
-        return INF_ll;
+        return -INF_ll;
     }
-    long long mapping(long long f, long long x)
+    long long sgt_mapping(long long f, long long x)
     {
         if (f == ID)
         {
@@ -255,7 +253,9 @@ namespace seg
         return ID;
     }
     long long target;
-    bool f(long long v) { return v < target; }
+    bool sgt_f(long long v) { return v < target; }
+    //segtree<long long, sgt_op, sgt_e> sgt;
+    //lazy_segtree<long long, sgt_op, sgt_e, long long, sgt_mapping, sgt_composition, sgt_id> sgt;
 }
 
 // Union-Find
@@ -533,23 +533,30 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int T;
+    cin >> T;
+    vector<long long> N(T), S(T), K(T);
+    for (int i = 0; i < T; i++)
     {
-        cin >> A[i];
+        cin >> N[i] >> S[i] >> K[i];
     }
 
-    bool flag = true;
-    if (flag)
+    for (int t = 0; t < T; t++)
     {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
+        long long a, b;
+        long long g = extgcd(N[t], K[t], a, b);
+
+        if (S[t] % g != 0)
+        {
+            cout << -1 << endl;
+        }
+        else
+        {
+            N[t] /= g;
+            K[t] /= g;
+            S[t] /= g;
+
+            cout << ((-b) * S[t] + 1000000000L * N[t]) % N[t] << endl;
+        }
     }
 }

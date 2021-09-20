@@ -384,7 +384,7 @@ void BFS(const Graph_int &G, int s)
 }
 
 //01BFS
-void BFS_01(const Graph_Edge &G, int s)
+vector<long long> BFS_01(const Graph_Edge &G, int s)
 {
     int N = (int)G.size();             // 頂点数
     vector<long long> dist(N, INF_ll); // 全頂点を「未訪問」に初期化
@@ -416,6 +416,8 @@ void BFS_01(const Graph_Edge &G, int s)
             }
         }
     }
+
+    return dist;
 }
 
 //ベルマン・フォード法
@@ -533,23 +535,100 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W;
+    cin >> H >> W;
+    vector<vector<char>> a(H, vector<char>(W));
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        for (int j = 0; j < W; j++)
+        {
+            cin >> a[i][j];
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    int s, t;
+    for (int i = 0; i < H; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < W; j++)
+        {
+            if (a[i][j] == 'S')
+            {
+                s = to_node(i, j, W);
+            }
+            if (a[i][j] == 'G')
+            {
+                t = to_node(i, j, W);
+            }
+        }
+    }
+
+    int N = H * W;
+    Graph_Edge G(N + 26);
+    int dx[4] = {1, 0, -1, 0};
+    int dy[4] = {0, 1, 0, -1};
+
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            if (a[i][j] == '#' || a[i][j] == 'G')
+            {
+                continue;
+            }
+
+            if (a[i][j] == '.' || a[i][j] == 'S')
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    int p = i + dx[k];
+                    int q = j + dy[k];
+
+                    if (in_out(p, q, H, W))
+                    {
+                        if (a[p][q] != '#')
+                        {
+                            int u = to_node(i, j, W);
+                            int v = to_node(p, q, W);
+                            G[u].push_back(Edge(v, 1));
+                        }
+                    }
+                }
+
+                continue;
+            }
+
+            for (int k = 0; k < 4; k++)
+            {
+                int p = i + dx[k];
+                int q = j + dy[k];
+
+                if (in_out(p, q, H, W))
+                {
+                    if (a[p][q] != '#')
+                    {
+                        int u = to_node(i, j, W);
+                        int v = to_node(p, q, W);
+                        G[u].push_back(Edge(v, 1));
+                    }
+                }
+            }
+
+            int u = to_node(i, j, W);
+            int n = a[i][j] - 'a';
+            int v = N + n;
+            G[u].push_back(Edge(v, 0));
+            G[v].push_back(Edge(u, 1));
+        }
+    }
+
+    vector<long long> dist = BFS_01(G, s);
+
+    if (dist[t] == INF_ll)
+    {
+        cout << -1 << endl;
     }
     else
     {
-        cout << "No" << endl;
+        cout << dist[t] << endl;
     }
 }

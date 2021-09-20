@@ -215,20 +215,18 @@ struct HashPair
 };
 
 //セグ木・遅延セグ木
-//segtree<long long, seg::op, seg::e> sgt;
-//lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
 namespace seg
 {
     const long long ID = 0;
     long long op(long long a, long long b)
     {
-        return min(a, b);
+        return max(a, b);
     }
     long long e()
     {
-        return INF_ll;
+        return -INF_ll;
     }
-    long long mapping(long long f, long long x)
+    long long sgt_mapping(long long f, long long x)
     {
         if (f == ID)
         {
@@ -255,7 +253,9 @@ namespace seg
         return ID;
     }
     long long target;
-    bool f(long long v) { return v < target; }
+    bool sgt_f(long long v) { return v < target; }
+    //segtree<long long, sgt_op, sgt_e> sgt;
+    //lazy_segtree<long long, sgt_op, sgt_e, long long, sgt_mapping, sgt_composition, sgt_id> sgt;
 }
 
 // Union-Find
@@ -533,23 +533,59 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int A, B, C;
+    cin >> A >> B >> C;
+
+    vector<vector<vector<double>>> p(101, vector<vector<double>>(101, vector<double>(101, 0.)));
+    p[A][B][C] = 1.;
+
+    for (int a = 0; a < 100; a++)
     {
-        cin >> A[i];
+        for (int b = 0; b < 100; b++)
+        {
+            for (int c = 0; c < 100; c++)
+            {
+                if (a == 0 && b == 0 && c == 0)
+                {
+                    continue;
+                }
+
+                double s = a + b + c;
+
+                p[a + 1][b][c] += ((double)a / s) * p[a][b][c];
+                p[a][b + 1][c] += ((double)b / s) * p[a][b][c];
+                p[a][b][c + 1] += ((double)c / s) * p[a][b][c];
+            }
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    double e = 0.;
+    for (int a = 0; a <= 100; a++)
     {
-        cout << "Yes" << endl;
+        for (int b = 0; b <= 100; b++)
+        {
+            for (int c = 0; c <= 100; c++)
+            {
+                double t = (a - A) + (b - B) + (c - C);
+
+                if (a == 100 && b < 100 && c < 100)
+                {
+                    e += t * p[a][b][c];
+                    continue;
+                }
+                if (a < 100 && b == 100 && c < 100)
+                {
+                    e += t * p[a][b][c];
+                    continue;
+                }
+                if (a < 100 && b < 100 && c == 100)
+                {
+                    e += t * p[a][b][c];
+                    continue;
+                }
+            }
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    printf("%.10f\n", e);
 }
