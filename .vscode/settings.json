@@ -22,6 +22,9 @@
         "ratio": "cpp",
         "system_error": "cpp",
         "functional": "cpp",
-        "type_traits": "cpp"
+        "type_traits": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp"
     }
 }
