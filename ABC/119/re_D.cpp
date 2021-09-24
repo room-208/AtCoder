@@ -192,29 +192,6 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベットの貪欲表
-vector<vector<int>> alphabet_greedy_table(string S)
-{
-    int N = (int)S.size();
-    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
-    for (int j = N - 1; j >= 0; j--)
-    {
-        int m = S[j] - 'a';
-        for (int i = 0; i < 26; i++)
-        {
-            if (i == m)
-            {
-                c[i][j] = j;
-            }
-            else
-            {
-                c[i][j] = c[i][j + 1];
-            }
-        }
-    }
-    return c;
-}
-
 //unoderedのハッシュ
 struct HashPair
 {
@@ -556,23 +533,62 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int A, B, Q;
+    cin >> A >> B >> Q;
+    deque<long long> s(A);
+    for (int i = 0; i < A; i++)
     {
-        cin >> A[i];
+        cin >> s[i];
+    }
+    deque<long long> t(B);
+    for (int i = 0; i < B; i++)
+    {
+        cin >> t[i];
+    }
+    vector<long long> x(Q);
+    for (int i = 0; i < Q; i++)
+    {
+        cin >> x[i];
     }
 
-    bool flag = true;
-    if (flag)
+    t.push_front(-INF_ll);
+    t.push_front(-INF_ll);
+    t.push_back(INF_ll);
+    t.push_back(INF_ll);
+
+    s.push_front(-INF_ll);
+    s.push_front(-INF_ll);
+    s.push_back(INF_ll);
+    s.push_back(INF_ll);
+
+    for (int q = 0; q < Q; q++)
     {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
+        long long ans = INF_ll;
+
+        int n = lower_bound(s.begin(), s.end(), x[q]) - s.begin();
+        int n1 = n;
+        int n2 = n - 1;
+
+        int m = lower_bound(t.begin(), t.end(), s[n1]) - t.begin();
+        chmin(ans, llabs(s[n1] - x[q]) + llabs(t[m] - s[n1]));
+        chmin(ans, llabs(s[n1] - x[q]) + llabs(t[m - 1] - s[n1]));
+
+        int k = lower_bound(t.begin(), t.end(), s[n2]) - t.begin();
+        chmin(ans, llabs(s[n2] - x[q]) + llabs(t[k] - s[n2]));
+        chmin(ans, llabs(s[n2] - x[q]) + llabs(t[k - 1] - s[n2]));
+
+        int a = lower_bound(t.begin(), t.end(), x[q]) - t.begin();
+        int a1 = a;
+        int a2 = a - 1;
+
+        int b = lower_bound(s.begin(), s.end(), t[a1]) - s.begin();
+        chmin(ans, llabs(t[a1] - x[q]) + llabs(s[b] - t[a1]));
+        chmin(ans, llabs(t[a1] - x[q]) + llabs(s[b - 1] - t[a1]));
+
+        int c = lower_bound(s.begin(), s.end(), t[a2]) - s.begin();
+        chmin(ans, llabs(t[a2] - x[q]) + llabs(s[c] - t[a2]));
+        chmin(ans, llabs(t[a2] - x[q]) + llabs(s[c - 1] - t[a2]));
+
+        cout << ans << endl;
     }
 }

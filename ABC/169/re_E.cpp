@@ -192,29 +192,6 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベットの貪欲表
-vector<vector<int>> alphabet_greedy_table(string S)
-{
-    int N = (int)S.size();
-    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
-    for (int j = N - 1; j >= 0; j--)
-    {
-        int m = S[j] - 'a';
-        for (int i = 0; i < 26; i++)
-        {
-            if (i == m)
-            {
-                c[i][j] = j;
-            }
-            else
-            {
-                c[i][j] = c[i][j + 1];
-            }
-        }
-    }
-    return c;
-}
-
 //unoderedのハッシュ
 struct HashPair
 {
@@ -558,21 +535,25 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<long long> A(N), B(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> A[i] >> B[i];
     }
+    sort(A.begin(), A.end());
+    sort(B.begin(), B.end());
 
-    bool flag = true;
-    if (flag)
+    if (N % 2 == 1)
     {
-        cout << "Yes" << endl;
+        int a = A[(N - 1) / 2];
+        int b = B[(N - 1) / 2];
+
+        cout << b - a + 1 << endl;
     }
     else
     {
-        cout << "No" << endl;
+        int a = A[(N / 2) - 1] + A[N / 2];
+        int b = B[(N / 2) - 1] + B[N / 2];
+        cout << b - a + 1 << endl;
     }
 }

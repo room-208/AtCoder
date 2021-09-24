@@ -192,29 +192,6 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベットの貪欲表
-vector<vector<int>> alphabet_greedy_table(string S)
-{
-    int N = (int)S.size();
-    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
-    for (int j = N - 1; j >= 0; j--)
-    {
-        int m = S[j] - 'a';
-        for (int i = 0; i < 26; i++)
-        {
-            if (i == m)
-            {
-                c[i][j] = j;
-            }
-            else
-            {
-                c[i][j] = c[i][j + 1];
-            }
-        }
-    }
-    return c;
-}
-
 //unoderedのハッシュ
 struct HashPair
 {
@@ -554,25 +531,80 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+//アルファベットの貪欲表
+vector<vector<int>> alphabet_greedy_table(string S)
+{
+    int N = (int)S.size();
+    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
+    for (int j = N - 1; j >= 0; j--)
+    {
+        int m = S[j] - 'a';
+        for (int i = 0; i < 26; i++)
+        {
+            if (i == m)
+            {
+                c[i][j] = j;
+            }
+            else
+            {
+                c[i][j] = c[i][j + 1];
+            }
+        }
+    }
+    return c;
+}
+
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
-    {
-        cin >> A[i];
-    }
+    string S, T;
+    cin >> S >> T;
 
     bool flag = true;
-    if (flag)
+    unordered_set<char> st;
+    for (int i = 0; i < (int)S.size(); i++)
     {
-        cout << "Yes" << endl;
+        st.insert(S[i]);
     }
-    else
+    for (int i = 0; i < (int)T.size(); i++)
     {
-        cout << "No" << endl;
+        if (!st.count(T[i]))
+        {
+            flag = false;
+            break;
+        }
     }
+
+    if (!flag)
+    {
+        cout << -1 << endl;
+        return 0;
+    }
+
+    int N = (int)S.size();
+
+    vector<vector<int>> c = alphabet_greedy_table(S);
+
+    long long ans = 0;
+    int p = 0;
+    for (int k = 0; k < (int)T.size(); k++)
+    {
+        int t = T[k] - 'a';
+        int n = c[t][p];
+
+        if (n == INF_int)
+        {
+            ans += N;
+            n = 0;
+            n = c[t][n];
+        }
+
+        p = n + 1;
+
+        if (k == (int)T.size() - 1)
+        {
+            ans += p;
+        }
+    }
+
+    cout << ans << endl;
 }

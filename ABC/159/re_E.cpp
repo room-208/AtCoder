@@ -192,29 +192,6 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベットの貪欲表
-vector<vector<int>> alphabet_greedy_table(string S)
-{
-    int N = (int)S.size();
-    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
-    for (int j = N - 1; j >= 0; j--)
-    {
-        int m = S[j] - 'a';
-        for (int i = 0; i < 26; i++)
-        {
-            if (i == m)
-            {
-                c[i][j] = j;
-            }
-            else
-            {
-                c[i][j] = c[i][j + 1];
-            }
-        }
-    }
-    return c;
-}
-
 //unoderedのハッシュ
 struct HashPair
 {
@@ -556,23 +533,88 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W, K;
+    cin >> H >> W >> K;
+    vector<string> S(H);
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        cin >> S[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<int>> A(H + 1, vector<int>(W + 1, 0));
+    for (int i = 0; i <= H; i++)
     {
-        cout << "Yes" << endl;
+        A[i][0] = 0;
     }
-    else
+    for (int j = 0; j <= W; j++)
     {
-        cout << "No" << endl;
+        A[0][j] = 0;
     }
+    for (int i = 1; i <= H; i++)
+    {
+        for (int j = 1; j <= W; j++)
+        {
+            int a = S[i - 1][j - 1] - '0';
+            A[i][j] = A[i - 1][j] + A[i][j - 1] - A[i - 1][j - 1] + a;
+        }
+    }
+
+    vector<int> p;
+    deque<int> que;
+    int ans = INF_int;
+    for (int bit = 0; bit < (1 << H); bit++)
+    {
+        int cnt = 0;
+        p.clear();
+        p.push_back(0);
+        for (int i = 1; i < H; i++)
+        {
+            if (bit & (1 << i))
+            {
+                cnt++;
+                p.push_back(i);
+            }
+        }
+        p.push_back(H);
+
+        bool flag = true;
+        que.push_back(0);
+        for (int j = 1; j <= W; j++)
+        {
+            bool ok = true;
+            int k = que.back();
+
+            for (int i = 0; i < (int)p.size() - 1; i++)
+            {
+                int a = A[p[i + 1]][j] - A[p[i + 1]][k] - A[p[i]][j] + A[p[i]][k];
+
+                if (a > K)
+                {
+                    ok = false;
+                    break;
+                }
+            }
+
+            if (!ok)
+            {
+                if (k == j - 1)
+                {
+                    flag = false;
+                    break;
+                }
+                else
+                {
+                    cnt++;
+                    que.push_back(j - 1);
+                }
+            }
+        }
+
+        if (flag)
+        {
+            chmin(ans, cnt);
+        }
+    }
+
+    cout << ans << endl;
 }

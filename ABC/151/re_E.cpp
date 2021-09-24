@@ -192,29 +192,6 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベットの貪欲表
-vector<vector<int>> alphabet_greedy_table(string S)
-{
-    int N = (int)S.size();
-    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
-    for (int j = N - 1; j >= 0; j--)
-    {
-        int m = S[j] - 'a';
-        for (int i = 0; i < 26; i++)
-        {
-            if (i == m)
-            {
-                c[i][j] = j;
-            }
-            else
-            {
-                c[i][j] = c[i][j + 1];
-            }
-        }
-    }
-    return c;
-}
-
 //unoderedのハッシュ
 struct HashPair
 {
@@ -556,23 +533,35 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    int N, K;
+    cin >> N >> K;
+    vector<long long> A(N);
     for (int i = 0; i < N; i++)
     {
         cin >> A[i];
     }
+    sort(A.begin(), A.end());
 
-    bool flag = true;
-    if (flag)
+    COMinit();
+
+    long long ans = 0;
+    for (int i = N - 1; i >= 0; i--)
     {
-        cout << "Yes" << endl;
+        if (i >= K - 1)
+        {
+            ans += COM(i, K - 1) * A[i];
+            ans %= MOD;
+        }
     }
-    else
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        if (N - 1 - i >= K - 1)
+        {
+            ans -= COM(N - 1 - i, K - 1) * A[i];
+            ans += 10LL * MOD;
+            ans %= MOD;
+        }
     }
+
+    cout << ans << endl;
 }

@@ -24,7 +24,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -190,29 +190,6 @@ vector<pair<char, int>> runLengthEncoding(string s)
 
     res.push_back({pre, cnt});
     return res;
-}
-
-//アルファベットの貪欲表
-vector<vector<int>> alphabet_greedy_table(string S)
-{
-    int N = (int)S.size();
-    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
-    for (int j = N - 1; j >= 0; j--)
-    {
-        int m = S[j] - 'a';
-        for (int i = 0; i < 26; i++)
-        {
-            if (i == m)
-            {
-                c[i][j] = j;
-            }
-            else
-            {
-                c[i][j] = c[i][j + 1];
-            }
-        }
-    }
-    return c;
 }
 
 //unoderedのハッシュ
@@ -556,23 +533,23 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    long long N, M, K;
+    cin >> N >> M >> K;
+
+    COMinit();
+
+    long long ans = 0;
+    for (long long k = 0; k <= K; k++)
     {
-        cin >> A[i];
+        long long tmp = 1;
+        tmp *= M;
+        tmp %= MOD;
+        tmp *= COM(N - 1, k);
+        tmp %= MOD;
+        tmp *= MOD_pow(M - 1, N - 1 - k);
+        ans += tmp;
+        ans %= MOD;
     }
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    cout << ans << endl;
 }
