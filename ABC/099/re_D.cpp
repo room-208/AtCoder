@@ -192,7 +192,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベット表
+//アルファベットの貪欲表
 vector<vector<int>> alphabet_greedy_table(string S)
 {
     int N = (int)S.size();
@@ -236,24 +236,6 @@ struct HashPair
         return seed;
     }
 };
-
-// 行列半時計回り90度回転
-template <class T>
-vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
-{
-    vector<vector<T>> B(W, vector<T>(H));
-    for (int i = 0; i < H; i++)
-    {
-        for (int j = 0; j < W; j++)
-        {
-            int a = -j + (W - 1);
-            int b = i;
-
-            B[a][b] = A[i][j];
-        }
-    }
-    return B;
-}
 
 //セグ木・遅延セグ木
 //segtree<long long, seg::op, seg::e> sgt;
@@ -574,23 +556,67 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    int N, C;
+    cin >> N >> C;
+    vector<vector<long long>> D(C, vector<long long>(C));
+    for (int i = 0; i < C; i++)
+    {
+        for (int j = 0; j < C; j++)
+        {
+            cin >> D[i][j];
+        }
+    }
+    vector<vector<int>> c(N, vector<int>(N));
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        for (int j = 0; j < N; j++)
+        {
+            cin >> c[i][j];
+            c[i][j]--;
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<int>> A(3, vector<int>(C, 0));
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < N; j++)
+        {
+            int x = (i + j) % 3;
+            A[x][c[i][j]]++;
+        }
     }
-    else
+
+    long long ans = INF_ll;
+    vector<long long> tmp(3, INF_ll);
+    for (int i = 0; i < C; i++)
     {
-        cout << "No" << endl;
+        for (int j = 0; j < C; j++)
+        {
+            for (int k = 0; k < C; k++)
+            {
+                if (i == j || j == k || k == i)
+                {
+                    continue;
+                }
+
+                tmp.assign(3, 0);
+
+                for (int m = 0; m < C; m++)
+                {
+                    tmp[0] += D[m][i] * A[0][m];
+                }
+                for (int m = 0; m < C; m++)
+                {
+                    tmp[1] += D[m][j] * A[1][m];
+                }
+                for (int m = 0; m < C; m++)
+                {
+                    tmp[2] += D[m][k] * A[2][m];
+                }
+
+                chmin(ans, tmp[0] + tmp[1] + tmp[2]);
+            }
+        }
     }
+    cout << ans << endl;
 }

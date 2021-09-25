@@ -574,23 +574,113 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W;
+    cin >> H >> W;
+    vector<vector<char>> A(H, vector<char>(W));
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        for (int j = 0; j < W; j++)
+        {
+            cin >> A[i][j];
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    int dx[2] = {1, 0};
+    int dy[2] = {0, 1};
+    vector<vector<long long>> dp(H, vector<long long>(W, INF_ll));
+    dp[H - 1][W - 1] = 0;
+    for (int i = H - 1; i >= 0; i--)
     {
-        cout << "Yes" << endl;
+        for (int j = W - 1; j >= 0; j--)
+        {
+            if (i == H - 1 && j == W - 1)
+            {
+                continue;
+            }
+
+            int r = (i + j) % 2;
+
+            if (r == 0)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    int p = i + dx[k];
+                    int q = j + dy[k];
+
+                    if (in_out(p, q, H, W))
+                    {
+                        if (dp[i][j] == INF_ll)
+                        {
+                            if (A[p][q] == '+')
+                            {
+                                dp[i][j] = dp[p][q] + 1;
+                            }
+                            else if (A[p][q] == '-')
+                            {
+                                dp[i][j] = dp[p][q] - 1;
+                            }
+                        }
+                        else
+                        {
+                            if (A[p][q] == '+')
+                            {
+                                chmax(dp[i][j], dp[p][q] + 1);
+                            }
+                            else if (A[p][q] == '-')
+                            {
+                                chmax(dp[i][j], dp[p][q] - 1);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (r == 1)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    int p = i + dx[k];
+                    int q = j + dy[k];
+
+                    if (in_out(p, q, H, W))
+                    {
+                        if (dp[i][j] == INF_ll)
+                        {
+                            if (A[p][q] == '+')
+                            {
+                                dp[i][j] = dp[p][q] - 1;
+                            }
+                            else if (A[p][q] == '-')
+                            {
+                                dp[i][j] = dp[p][q] + 1;
+                            }
+                        }
+                        else
+                        {
+                            if (A[p][q] == '+')
+                            {
+                                chmin(dp[i][j], dp[p][q] - 1);
+                            }
+                            else if (A[p][q] == '-')
+                            {
+                                chmin(dp[i][j], dp[p][q] + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-    else
+
+    if (dp[0][0] == 0)
     {
-        cout << "No" << endl;
+        cout << "Draw" << endl;
+    }
+    else if (dp[0][0] > 0)
+    {
+        cout << "Takahashi" << endl;
+    }
+    else if (dp[0][0] < 0)
+    {
+        cout << "Aoki" << endl;
     }
 }

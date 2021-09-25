@@ -361,22 +361,6 @@ struct Edge
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen)
-{
-    seen[v] = true;
-
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        DFS(G, next_v, seen);
-    }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int p, int v, vector<int> &par)
 {
@@ -572,25 +556,87 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+void DFS(const Graph_int &G, int p, int v, vector<long long> &c)
+{
+    if (v != p)
+    {
+        c[v] += c[p];
+    }
+
+    for (auto next_v : G[v])
+    {
+        if (next_v == p)
+        {
+            continue;
+        }
+
+        DFS(G, v, next_v, c);
+    }
+}
+
 int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int M = N - 1;
+    vector<int> a(M), b(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        cin >> a[i] >> b[i];
+        a[i]--;
+        b[i]--;
+    }
+    int Q;
+    cin >> Q;
+    vector<int> t(Q), e(Q), x(Q);
+    for (int i = 0; i < Q; i++)
+    {
+        cin >> t[i] >> e[i] >> x[i];
+        e[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    Graph_int G(N);
+    for (int i = 0; i < M; i++)
     {
-        cout << "Yes" << endl;
+        G[a[i]].push_back(b[i]);
+        G[b[i]].push_back(a[i]);
     }
-    else
+
+    vector<long long> c(N, 0);
+    vector<int> par(N);
+    par_cal(G, 0, 0, par);
+    for (int i = 0; i < Q; i++)
     {
-        cout << "No" << endl;
+        if (t[i] == 1)
+        {
+            if (par[a[e[i]]] == b[e[i]])
+            {
+                c[a[e[i]]] += x[i];
+            }
+            else
+            {
+                c[0] += x[i];
+                c[b[e[i]]] -= x[i];
+            }
+        }
+        else if (t[i] == 2)
+        {
+            if (par[b[e[i]]] == a[e[i]])
+            {
+                c[b[e[i]]] += x[i];
+            }
+            else
+            {
+                c[0] += x[i];
+                c[a[e[i]]] -= x[i];
+            }
+        }
+    }
+
+    DFS(G, 0, 0, c);
+
+    for (int i = 0; i < N; i++)
+    {
+        cout << c[i] << endl;
     }
 }

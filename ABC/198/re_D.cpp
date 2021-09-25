@@ -572,25 +572,92 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+long long Num(string S, unordered_map<char, int> &mp)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    reverse(S.begin(), S.end());
+    long long ten = 1LL;
+    long long ans = 0;
+
+    for (int i = 0; i < (int)S.size(); i++)
     {
-        cin >> A[i];
+        long long a = mp[S[i]];
+        ans += a * ten;
+        ten *= 10LL;
     }
 
+    return ans;
+}
+
+int main()
+{
+    vector<string> S(3);
+    cin >> S[0] >> S[1] >> S[2];
+
     bool flag = true;
-    if (flag)
+    unordered_map<char, int> mp;
+    for (int k = 0; k < 3; k++)
     {
-        cout << "Yes" << endl;
+        for (int i = 0; i < (int)S[k].size(); i++)
+        {
+            mp[S[k][i]] = -1;
+        }
+    }
+    if ((int)mp.size() > 10)
+    {
+        flag = false;
+    }
+
+    if (!flag)
+    {
+        cout << "UNSOLVABLE" << endl;
     }
     else
     {
-        cout << "No" << endl;
+        vector<int> p(10);
+        for (int i = 0; i < 10; i++)
+        {
+            p[i] = i;
+        }
+
+        bool ok = false;
+        vector<long long> N(3, 0);
+        do
+        {
+            int n = 0;
+            for (auto itr = mp.begin(); itr != mp.end(); itr++)
+            {
+                itr->second = p[n];
+                n++;
+            }
+
+            if (mp[S[0][0]] == 0 || mp[S[1][0]] == 0 || mp[S[2][0]] == 0)
+            {
+                continue;
+            }
+
+            for (int k = 0; k < 3; k++)
+            {
+                N[k] = Num(S[k], mp);
+            }
+
+            if (N[0] + N[1] == N[2])
+            {
+                ok = true;
+                break;
+            }
+
+        } while (next_permutation(p.begin(), p.end()));
+
+        if (ok)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                cout << N[k] << endl;
+            }
+        }
+        else
+        {
+            cout << "UNSOLVABLE" << endl;
+        }
     }
 }

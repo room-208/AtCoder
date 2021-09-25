@@ -425,7 +425,7 @@ void BFS(const Graph_int &G, int s)
 }
 
 //01BFS
-void BFS_01(const Graph_Edge &G, int s)
+vector<long long> BFS_01(const Graph_Edge &G, int s)
 {
     int N = (int)G.size();             // 頂点数
     vector<long long> dist(N, INF_ll); // 全頂点を「未訪問」に初期化
@@ -457,6 +457,8 @@ void BFS_01(const Graph_Edge &G, int s)
             }
         }
     }
+
+    return dist;
 }
 
 //ベルマン・フォード法
@@ -574,23 +576,67 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W;
+    cin >> H >> W;
+    vector<vector<char>> S(H, vector<char>(W));
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        for (int j = 0; j < W; j++)
+        {
+            cin >> S[i][j];
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    int N = H * W;
+    Graph_Edge G(N);
+    int s = 0;
+    int t = N - 1;
+    int dx[4] = {1, 0, -1, 0};
+    int dy[4] = {0, 1, 0, -1};
+    for (int i = 0; i < H; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < W; j++)
+        {
+            int u = to_node(i, j, W);
+            for (int k = 0; k < 4; k++)
+            {
+                int p = i + dx[k];
+                int q = j + dy[k];
+
+                if (in_out(p, q, H, W))
+                {
+                    if (S[p][q] == '.')
+                    {
+                        int v = to_node(p, q, W);
+                        G[u].push_back(Edge(v, 0));
+                    }
+                }
+            }
+        }
     }
-    else
+
+    int Dx[20] = {-2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2};
+    int Dy[20] = {-1, 0, 1, -2, -1, 0, 1, 2, -2, -1, 1, 2, -2, -1, 0, 1, 2, -1, 0, 1};
+    for (int i = 0; i < H; i++)
     {
-        cout << "No" << endl;
+        for (int j = 0; j < W; j++)
+        {
+            int u = to_node(i, j, W);
+            for (int k = 0; k < 20; k++)
+            {
+                int p = i + Dx[k];
+                int q = j + Dy[k];
+
+                if (in_out(p, q, H, W))
+                {
+                    int v = to_node(p, q, W);
+                    G[u].push_back(Edge(v, 1));
+                }
+            }
+        }
     }
+
+    vector<long long> dist = BFS_01(G, s);
+
+    cout << dist[t] << endl;
 }

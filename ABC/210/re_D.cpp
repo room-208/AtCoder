@@ -193,7 +193,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
 }
 
 //アルファベット表
-vector<vector<int>> alphabet_greedy_table(string S)
+vector<vector<int>> alphabet_table(string S)
 {
     int N = (int)S.size();
     vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
@@ -236,24 +236,6 @@ struct HashPair
         return seed;
     }
 };
-
-// 行列半時計回り90度回転
-template <class T>
-vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
-{
-    vector<vector<T>> B(W, vector<T>(H));
-    for (int i = 0; i < H; i++)
-    {
-        for (int j = 0; j < W; j++)
-        {
-            int a = -j + (W - 1);
-            int b = i;
-
-            B[a][b] = A[i][j];
-        }
-    }
-    return B;
-}
 
 //セグ木・遅延セグ木
 //segtree<long long, seg::op, seg::e> sgt;
@@ -497,7 +479,7 @@ void Bellman_Ford(const Graph_Edge &G, int s)
 }
 
 //ダイクストラ法
-void Dijkstra(const Graph_Edge &G, int s)
+vector<long long> Dijkstra(const Graph_Edge &G, int s)
 {
     int N = (int)G.size();
     vector<long long> dist(N, INF_ll);
@@ -516,6 +498,11 @@ void Dijkstra(const Graph_Edge &G, int s)
         long long d = que.top().first;
         que.pop();
 
+        if (v == N - 1)
+        {
+            break;
+        }
+
         // d > dist[v] は，(d, v) がゴミであることを意味する
         if (d > dist[v])
             continue;
@@ -525,11 +512,14 @@ void Dijkstra(const Graph_Edge &G, int s)
         {
             if (chmin(dist[e.to], dist[v] + e.w))
             {
+                cout << v << " " << e.to << " " << dist[e.to] << endl;
                 // 更新があるならヒープに新たに挿入
                 que.push(make_pair(dist[e.to], e.to));
             }
         }
     }
+
+    return dist;
 }
 
 //オーバーフロー判定
@@ -572,25 +562,115 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+// 行列半時計回り90度回転
+template <class T>
+vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
+{
+    vector<vector<T>> B(W, vector<T>(H));
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            int a = -j + (W - 1);
+            int b = i;
+
+            B[a][b] = A[i][j];
+        }
+    }
+    return B;
+}
+
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W;
+    long long C;
+    cin >> H >> W >> C;
+    vector<vector<long long>> A(H, vector<long long>(W));
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        for (int j = 0; j < W; j++)
+        {
+            cin >> A[i][j];
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    long long ans = INF_ll;
+    vector<vector<long long>> S(H, vector<long long>(W));
+    for (int k = 0; k < H; k++)
     {
-        cout << "Yes" << endl;
+        for (int l = 0; l < W; l++)
+        {
+            S[k][l] = A[k][l] - C * (k + l);
+        }
     }
-    else
+    for (int k = 0; k < H; k++)
     {
-        cout << "No" << endl;
+        for (int l = 0; l < W; l++)
+        {
+            if (k > 0)
+            {
+                S[k][l] = min(S[k][l], S[k - 1][l]);
+            }
+            if (l > 0)
+            {
+                S[k][l] = min(S[k][l], S[k][l - 1]);
+            }
+        }
     }
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            long long tmp = A[i][j] + C * (i + j);
+            if (i > 0)
+            {
+                chmin(ans, tmp + S[i - 1][j]);
+            }
+            if (j > 0)
+            {
+                chmin(ans, tmp + S[i][j - 1]);
+            }
+        }
+    }
+
+    vector<vector<long long>> B = matrix_counter_clockwise(A, H, W);
+    vector<vector<long long>> T(W, vector<long long>(H));
+    for (int k = 0; k < W; k++)
+    {
+        for (int l = 0; l < H; l++)
+        {
+            T[k][l] = B[k][l] - C * (k + l);
+        }
+    }
+    for (int k = 0; k < W; k++)
+    {
+        for (int l = 0; l < H; l++)
+        {
+            if (k > 0)
+            {
+                T[k][l] = min(T[k][l], T[k - 1][l]);
+            }
+            if (l > 0)
+            {
+                T[k][l] = min(T[k][l], T[k][l - 1]);
+            }
+        }
+    }
+    for (int i = 0; i < W; i++)
+    {
+        for (int j = 0; j < H; j++)
+        {
+            long long tmp = B[i][j] + C * (i + j);
+            if (i > 0)
+            {
+                chmin(ans, tmp + T[i - 1][j]);
+            }
+            if (j > 0)
+            {
+                chmin(ans, tmp + T[i][j - 1]);
+            }
+        }
+    }
+
+    cout << ans << endl;
 }

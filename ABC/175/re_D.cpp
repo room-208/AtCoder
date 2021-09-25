@@ -192,7 +192,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベット表
+//アルファベットの貪欲表
 vector<vector<int>> alphabet_greedy_table(string S)
 {
     int N = (int)S.size();
@@ -236,24 +236,6 @@ struct HashPair
         return seed;
     }
 };
-
-// 行列半時計回り90度回転
-template <class T>
-vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
-{
-    vector<vector<T>> B(W, vector<T>(H));
-    for (int i = 0; i < H; i++)
-    {
-        for (int j = 0; j < W; j++)
-        {
-            int a = -j + (W - 1);
-            int b = i;
-
-            B[a][b] = A[i][j];
-        }
-    }
-    return B;
-}
 
 //セグ木・遅延セグ木
 //segtree<long long, seg::op, seg::e> sgt;
@@ -575,22 +557,84 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 int main()
 {
     int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    long long K;
+    cin >> N >> K;
+    vector<int> P(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> P[i];
+        P[i]--;
+    }
+    vector<long long> C(N);
+    for (int i = 0; i < N; i++)
+    {
+        cin >> C[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<long long> A(N);
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        A[i] = C[P[i]];
     }
-    else
+
+    long long ans = -INF_ll;
+    vector<long long> score(N);
+    vector<int> cnt(N);
+    for (int s = 0; s < N; s++)
     {
-        cout << "No" << endl;
+        long long time = K;
+        long long tmp = 0;
+        score.assign(N, 0);
+        cnt.assign(N, -1);
+        cnt[s] = 0;
+        int i = s;
+
+        //サイクルに入るまで
+        while (cnt[P[i]] == -1)
+        {
+            cnt[P[i]] = cnt[i] + 1;
+            score[P[i]] = score[i] + A[i];
+            tmp += A[i];
+            i = P[i];
+            time--;
+            if (time >= 0)
+            {
+                chmax(ans, tmp);
+            }
+        }
+
+        if (time > 0)
+        {
+            long long cyc_cnt = cnt[i] + 1 - cnt[P[i]];
+            long long cyc_score = score[i] + A[i] - score[P[i]];
+            long long r = time % cyc_cnt;
+            long long p = ((time - r) / cyc_cnt);
+
+            //残り一周を残す
+            if (p > 0)
+            {
+                p--;
+            }
+
+            tmp += p * cyc_score;
+            time -= p * cyc_cnt;
+            if (time >= 0)
+            {
+                chmax(ans, tmp);
+            }
+
+            while (time > 0)
+            {
+                tmp += A[i];
+                i = P[i];
+                time--;
+                if (time >= 0)
+                {
+                    chmax(ans, tmp);
+                }
+            }
+        }
     }
+
+    cout << ans << endl;
 }

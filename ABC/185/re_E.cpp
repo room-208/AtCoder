@@ -574,23 +574,35 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
+    int N, M;
+    cin >> N >> M;
     vector<int> A(N);
     for (int i = 0; i < N; i++)
     {
         cin >> A[i];
     }
+    vector<int> B(M);
+    for (int i = 0; i < M; i++)
+    {
+        cin >> B[i];
+    }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<long long>> dp(N + 1, vector<long long>(M + 1, INF_ll));
+    dp[0][0] = 0;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < M; j++)
+        {
+            chmin(dp[i + 1][j], dp[i][j] + 1);
+            chmin(dp[i][j + 1], dp[i][j] + 1);
+            chmin(dp[i + 1][j + 1], dp[i][j] + 1);
+
+            if (A[i] == B[j])
+            {
+                chmin(dp[i + 1][j + 1], dp[i][j]);
+            }
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << dp[N][M] << endl;
 }

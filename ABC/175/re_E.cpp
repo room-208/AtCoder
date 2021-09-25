@@ -574,23 +574,81 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int R, C, K;
+    cin >> R >> C >> K;
+    vector<int> r(K), c(K);
+    vector<long long> v(K);
+    for (int i = 0; i < K; i++)
     {
-        cin >> A[i];
+        cin >> r[i] >> c[i] >> v[i];
+        r[i]--;
+        c[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    unordered_map<pair<int, int>, long long, HashPair> mp;
+    for (int i = 0; i < K; i++)
     {
-        cout << "Yes" << endl;
+        mp[make_pair(r[i], c[i])] = v[i];
     }
-    else
+
+    vector<vector<vector<long long>>> dp(R, vector<vector<long long>>(C, vector<long long>(4, 0)));
+    if (mp.count(make_pair(0, 0)))
     {
-        cout << "No" << endl;
+        for (int r = 1; r <= 3; r++)
+        {
+            dp[0][0][r] = mp[make_pair(0, 0)];
+        }
     }
+    for (int i = 0; i < R; i++)
+    {
+        for (int j = 0; j < C - 1; j++)
+        {
+            for (int r = 0; r <= 3; r++)
+            {
+                chmax(dp[i][j + 1][r], dp[i][j][r]);
+            }
+
+            if (mp.count(make_pair(i, j + 1)))
+            {
+                for (int r = 1; r <= 3; r++)
+                {
+                    chmax(dp[i][j + 1][r], dp[i][j][r - 1] + mp[make_pair(i, j + 1)]);
+                }
+            }
+        }
+
+        if (i < R - 1)
+        {
+            for (int j = 0; j < C; j++)
+            {
+                long long tmp = -INF_ll;
+                for (int r = 0; r <= 3; r++)
+                {
+                    chmax(tmp, dp[i][j][r]);
+                }
+
+                for (int r = 0; r <= 3; r++)
+                {
+                    dp[i + 1][j][r] = tmp;
+                }
+
+                if (mp.count(make_pair(i + 1, j)))
+                {
+                    chmax(dp[i + 1][j][0], dp[i][j][0]);
+                    for (int r = 1; r <= 3; r++)
+                    {
+                        chmax(dp[i + 1][j][r], tmp + mp[make_pair(i + 1, j)]);
+                    }
+                }
+            }
+        }
+    }
+
+    long long ans = -INF_ll;
+    for (int r = 0; r <= 3; r++)
+    {
+        chmax(ans, dp[R - 1][C - 1][r]);
+    }
+
+    cout << ans << endl;
 }

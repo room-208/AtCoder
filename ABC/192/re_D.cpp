@@ -192,7 +192,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベット表
+//アルファベットの貪欲表
 vector<vector<int>> alphabet_greedy_table(string S)
 {
     int N = (int)S.size();
@@ -236,24 +236,6 @@ struct HashPair
         return seed;
     }
 };
-
-// 行列半時計回り90度回転
-template <class T>
-vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
-{
-    vector<vector<T>> B(W, vector<T>(H));
-    for (int i = 0; i < H; i++)
-    {
-        for (int j = 0; j < W; j++)
-        {
-            int a = -j + (W - 1);
-            int b = i;
-
-            B[a][b] = A[i][j];
-        }
-    }
-    return B;
-}
 
 //セグ木・遅延セグ木
 //segtree<long long, seg::op, seg::e> sgt;
@@ -572,25 +554,113 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+long long n_base(const string X, long long n)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    bool flag = true;
+    long long ans = 0;
+    int N = (int)X.size();
+    long long base = 1LL;
+    long long z;
+
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        long long x = X[i] - '0';
+
+        if (__builtin_mul_overflow(x, base, &z))
+        {
+            flag = false;
+            break;
+        }
+        else
+        {
+            x = z;
+        }
+
+        if (__builtin_add_overflow(ans, x, &z))
+        {
+            flag = false;
+            break;
+        }
+        else
+        {
+            ans = z;
+        }
+
+        if (i < N - 1)
+        {
+            if (__builtin_mul_overflow(base, n, &z))
+            {
+                flag = false;
+                break;
+            }
+            else
+            {
+                base = z;
+            }
+        }
     }
 
-    bool flag = true;
     if (flag)
     {
-        cout << "Yes" << endl;
+        return ans;
     }
     else
     {
-        cout << "No" << endl;
+        return INF_ll + 1LL;
+    }
+}
+
+int main()
+{
+    string X;
+    cin >> X;
+    long long M;
+    cin >> M;
+
+    long long d = -1;
+    for (int i = 0; i < (int)X.size(); i++)
+    {
+        long long x = X[i] - '0';
+        chmax(d, x);
+    }
+
+    reverse(X.begin(), X.end());
+
+    if ((int)X.size() == 1)
+    {
+        long long x = X[0] - '0';
+        if (x <= M)
+        {
+            cout << 1 << endl;
+        }
+        else
+        {
+            cout << 0 << endl;
+        }
+    }
+    else if (n_base(X, d + 1) > M)
+    {
+        cout << 0 << endl;
+    }
+    else
+    {
+        long long left = d + 1;
+        long long right = INF_ll + 1LL;
+        while (right - left > 1)
+        {
+            long long mid = (left + right) / 2;
+            long long tmp = n_base(X, mid);
+
+            if (tmp <= M)
+            {
+                left = mid;
+            }
+            else
+            {
+                right = mid;
+            }
+        }
+
+        cout << left - d << endl;
     }
 }

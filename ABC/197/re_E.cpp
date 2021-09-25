@@ -576,21 +576,47 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<long long> X(N), C(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> X[i] >> C[i];
+        C[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    vector<long long> L(N, INF_ll), R(N, -INF_ll);
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        int c = C[i];
+        chmin(L[c], X[i]);
+        chmax(R[c], X[i]);
     }
-    else
+
+    long long ansl = 0;
+    long long ansr = 0;
+    long long xl = 0;
+    long long xr = 0;
+    for (int c = 0; c < N; c++)
     {
-        cout << "No" << endl;
+        if (L[c] != INF_ll && R[c] != -INF_ll)
+        {
+            long long d = llabs(R[c] - L[c]);
+            long long tmpl = INF_ll;
+            long long tmpr = INF_ll;
+
+            chmin(tmpl, d + llabs(xl - R[c]) + ansl);
+            chmin(tmpl, d + llabs(xr - R[c]) + ansr);
+            chmin(tmpr, d + llabs(xl - L[c]) + ansl);
+            chmin(tmpr, d + llabs(xr - L[c]) + ansr);
+
+            ansl = tmpl;
+            ansr = tmpr;
+            xl = L[c];
+            xr = R[c];
+        }
     }
+
+    long long ans = INF_ll;
+    chmin(ans, ansl + llabs(xl));
+    chmin(ans, ansr + llabs(xr));
+    cout << ans << endl;
 }

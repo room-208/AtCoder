@@ -192,7 +192,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
-//アルファベット表
+//アルファベットの貪欲表
 vector<vector<int>> alphabet_greedy_table(string S)
 {
     int N = (int)S.size();
@@ -236,24 +236,6 @@ struct HashPair
         return seed;
     }
 };
-
-// 行列半時計回り90度回転
-template <class T>
-vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
-{
-    vector<vector<T>> B(W, vector<T>(H));
-    for (int i = 0; i < H; i++)
-    {
-        for (int j = 0; j < W; j++)
-        {
-            int a = -j + (W - 1);
-            int b = i;
-
-            B[a][b] = A[i][j];
-        }
-    }
-    return B;
-}
 
 //セグ木・遅延セグ木
 //segtree<long long, seg::op, seg::e> sgt;
@@ -572,25 +554,118 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
-{
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
-    {
-        cin >> A[i];
-    }
+int H, W;
 
-    bool flag = true;
-    if (flag)
+// 深さ優先探索
+void DFS(int i, int j, int A, int B, vector<vector<bool>> &seen, int &cnt)
+{
+    if (seen[i][j])
     {
-        cout << "Yes" << endl;
+        if (j == W - 1)
+        {
+            if (i == H - 1)
+            {
+                if (A == 0 && B == 0)
+                {
+                    cnt++;
+                }
+            }
+            else
+            {
+                DFS(i + 1, 0, A, B, seen, cnt);
+            }
+        }
+        else
+        {
+            DFS(i, j + 1, A, B, seen, cnt);
+        }
     }
     else
     {
-        cout << "No" << endl;
+        //1*1を入れるとき
+        if (B > 0)
+        {
+            seen[i][j] = true;
+            if (j == W - 1)
+            {
+                if (i == H - 1)
+                {
+                    DFS(i, j, A, B - 1, seen, cnt);
+                }
+                if (i < H - 1)
+                {
+                    DFS(i + 1, 0, A, B - 1, seen, cnt);
+                }
+            }
+            else
+            {
+                DFS(i, j + 1, A, B - 1, seen, cnt);
+            }
+            seen[i][j] = false;
+        }
+
+        //横を入れるとき
+        if (A > 0)
+        {
+            if (j < W - 1)
+            {
+                if (!seen[i][j + 1])
+                {
+                    seen[i][j] = true;
+                    seen[i][j + 1] = true;
+                    if (j == W - 1)
+                    {
+                        if (i < H - 1)
+                        {
+                            DFS(i + 1, 0, A - 1, B, seen, cnt);
+                        }
+                    }
+                    else
+                    {
+                        DFS(i, j + 1, A - 1, B, seen, cnt);
+                    }
+                    seen[i][j] = false;
+                    seen[i][j + 1] = false;
+                }
+            }
+        }
+
+        //縦を入れるとき
+        if (A > 0)
+        {
+            if (i < H - 1)
+            {
+                if (!seen[i + 1][j])
+                {
+                    seen[i][j] = true;
+                    seen[i + 1][j] = true;
+                    if (j == W - 1)
+                    {
+                        if (i < H - 1)
+                        {
+                            DFS(i + 1, 0, A - 1, B, seen, cnt);
+                        }
+                    }
+                    else
+                    {
+                        DFS(i, j + 1, A - 1, B, seen, cnt);
+                    }
+                    seen[i][j] = false;
+                    seen[i + 1][j] = false;
+                }
+            }
+        }
     }
+}
+
+int main()
+{
+    cin >> H >> W;
+    int A, B;
+    cin >> A >> B;
+
+    int cnt = 0;
+    vector<vector<bool>> seen(H, vector<bool>(W, false));
+    DFS(0, 0, A, B, seen, cnt);
+    cout << cnt << endl;
 }

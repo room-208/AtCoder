@@ -24,7 +24,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -574,23 +574,50 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, M, K;
+    cin >> N >> M >> K;
+    vector<int> U(M), V(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        cin >> U[i] >> V[i];
+        U[i]--;
+        V[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    Graph_int G(N);
+    for (int i = 0; i < M; i++)
     {
-        cout << "Yes" << endl;
+        G[U[i]].push_back(V[i]);
+        G[V[i]].push_back(U[i]);
     }
-    else
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        G[i].push_back(i);
     }
+
+    vector<vector<long long>> dp(N, vector<long long>(K + 1, 0));
+    vector<long long> S(K, 0);
+    dp[0][0] = 1;
+    for (int k = 1; k <= K; k++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            S[k - 1] += dp[j][k - 1];
+            S[k - 1] %= MOD;
+        }
+
+        for (int i = 0; i < N; i++)
+        {
+            dp[i][k] = S[k - 1];
+
+            for (auto e : G[i])
+            {
+                dp[i][k] -= dp[e][k - 1];
+                dp[i][k] += 10LL * MOD;
+                dp[i][k] %= MOD;
+            }
+        }
+    }
+
+    cout << dp[0][K] << endl;
 }

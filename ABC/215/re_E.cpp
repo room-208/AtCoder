@@ -24,7 +24,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -578,19 +578,53 @@ int main()
     cin >> N;
     string S;
     cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+
+    vector<vector<vector<long long>>> dp((1 << 10), vector<vector<long long>>(11, vector<long long>(N + 1, 0)));
+    dp[0][10][0] = 1LL;
+    for (int j = 1; j <= N; j++)
     {
-        cin >> A[i];
+        int Contest = S[j - 1] - 'A';
+
+        for (int bit = 0; bit < (1 << 10); bit++)
+        {
+            for (int i = 0; i <= 10; i++)
+            {
+                dp[bit][i][j] = dp[bit][i][j - 1];
+            }
+        }
+
+        for (int bit = 0; bit < (1 << 10); bit++)
+        {
+            for (int i = 0; i <= 9; i++)
+            {
+                if (bit & (1 << Contest))
+                {
+                    if (i == Contest)
+                    {
+                        dp[bit | (1 << Contest)][Contest][j] += dp[bit][i][j - 1];
+                        dp[bit | (1 << Contest)][Contest][j] %= MOD;
+                    }
+                }
+                else
+                {
+                    dp[bit | (1 << Contest)][Contest][j] += dp[bit][i][j - 1];
+                    dp[bit | (1 << Contest)][Contest][j] %= MOD;
+                }
+            }
+        }
+
+        dp[(1 << Contest)][Contest][j] += dp[0][10][j - 1];
     }
 
-    bool flag = true;
-    if (flag)
+    long long ans = 0;
+    for (int bit = 0; bit < (1 << 10); bit++)
     {
-        cout << "Yes" << endl;
+        for (int i = 0; i <= 9; i++)
+        {
+            ans += dp[bit][i][N];
+            ans %= MOD;
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans << endl;
 }
