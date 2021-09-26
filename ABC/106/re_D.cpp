@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -575,23 +574,58 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, M, Q;
+    cin >> N >> M >> Q;
+    vector<int> L(M), R(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        cin >> L[i] >> R[i];
+        L[i]--;
+        R[i]--;
+    }
+    vector<int> p(Q), q(Q);
+    for (int i = 0; i < Q; i++)
+    {
+        cin >> p[i] >> q[i];
+        p[i]--;
+        q[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    unordered_map<pair<int, int>, int, HashPair> mp;
+    for (int i = 0; i < M; i++)
     {
-        cout << "Yes" << endl;
+        if (mp.count(make_pair(L[i], R[i])))
+        {
+            mp[make_pair(L[i], R[i])]++;
+        }
+        else
+        {
+            mp[make_pair(L[i], R[i])] = 1;
+        }
     }
-    else
+
+    vector<vector<int>> cnt(N, vector<int>(N, 0));
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        for (int j = i; j < N; j++)
+        {
+            if (j > 0)
+            {
+                cnt[i][j] += cnt[i][j - 1];
+            }
+
+            for (int k = i; k <= j; k++)
+            {
+                if (mp.count(make_pair(k, j)))
+                {
+                    cnt[i][j] += mp[make_pair(k, j)];
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < Q; i++)
+    {
+        cout << cnt[p[i]][q[i]] << endl;
     }
 }

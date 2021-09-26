@@ -575,23 +575,25 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, M;
+    cin >> N >> M;
+    scc_graph g(N);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        int a, b;
+        cin >> a >> b;
+        a--;
+        b--;
+        g.add_edge(a, b);
     }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<int>> S = g.scc();
+    long long ans = 0;
+    for (int i = 0; i < (int)S.size(); i++)
     {
-        cout << "Yes" << endl;
+        long long tmp = (long long)S[i].size();
+        ans += (tmp * (tmp - 1)) / 2;
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans << endl;
 }

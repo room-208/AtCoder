@@ -575,23 +575,50 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, M, K;
+    cin >> N >> M >> K;
+    UnionFind uf(N);
+    vector<int> A(M), B(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        cin >> A[i] >> B[i];
+        A[i]--;
+        B[i]--;
+        uf.unite(A[i], B[i]);
+    }
+    vector<int> C(K), D(K);
+    for (int i = 0; i < K; i++)
+    {
+        cin >> C[i] >> D[i];
+        C[i]--;
+        D[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    vector<int> cnt(N);
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        cnt[i] = uf.size(i);
     }
-    else
+    for (int i = 0; i < M; i++)
     {
-        cout << "No" << endl;
+        if (uf.issame(A[i], B[i]))
+        {
+            cnt[A[i]]--;
+            cnt[B[i]]--;
+        }
     }
+    for (int i = 0; i < K; i++)
+    {
+        if (uf.issame(C[i], D[i]))
+        {
+            cnt[C[i]]--;
+            cnt[D[i]]--;
+        }
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        cout << cnt[i] - 1 << " ";
+    }
+    cout << endl;
 }

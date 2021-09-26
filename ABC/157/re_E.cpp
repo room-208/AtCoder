@@ -579,19 +579,61 @@ int main()
     cin >> N;
     string S;
     cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int Q;
+    cin >> Q;
+    vector<int> t(Q), iq(Q), lq(Q), rq(Q);
+    vector<char> cq(Q);
+    for (int i = 0; i < Q; i++)
     {
-        cin >> A[i];
+        cin >> t[i];
+
+        if (t[i] == 1)
+        {
+            cin >> iq[i] >> cq[i];
+            iq[i]--;
+        }
+        else
+        {
+            cin >> lq[i] >> rq[i];
+            lq[i]--;
+            rq[i]--;
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    vector<set<int>> st(26);
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        int a = S[i] - 'a';
+        st[a].insert(i);
     }
-    else
+    for (int k = 0; k < 26; k++)
     {
-        cout << "No" << endl;
+        st[k].insert(INF_int);
+    }
+
+    for (int i = 0; i < Q; i++)
+    {
+        if (t[i] == 1)
+        {
+            int a = S[iq[i]] - 'a';
+            st[a].erase(iq[i]);
+            S[iq[i]] = cq[i];
+            int b = S[iq[i]] - 'a';
+            st[b].insert(iq[i]);
+        }
+        else
+        {
+            int cnt = 0;
+            for (int k = 0; k < 26; k++)
+            {
+                int n = *st[k].lower_bound(lq[i]);
+
+                if (n <= rq[i])
+                {
+                    cnt++;
+                }
+            }
+            cout << cnt << endl;
+        }
     }
 }

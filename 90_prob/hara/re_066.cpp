@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -577,21 +576,45 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<int> L(N), R(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> L[i] >> R[i];
+        L[i]--;
+        R[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    if (N == 1)
     {
-        cout << "Yes" << endl;
+        cout << 0 << endl;
+        return 0;
     }
-    else
+
+    vector<double> p(N);
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        p[i] = 1. / ((double)(R[i] - L[i] + 1));
     }
+
+    double ans = 0.;
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = i + 1; j < N; j++)
+        {
+            double q = p[i] * p[j];
+
+            for (int x = L[i]; x <= R[i]; x++)
+            {
+                for (int y = L[j]; y <= R[j]; y++)
+                {
+                    if (x > y)
+                    {
+                        ans += q;
+                    }
+                }
+            }
+        }
+    }
+
+    printf("%.10f\n", ans);
 }

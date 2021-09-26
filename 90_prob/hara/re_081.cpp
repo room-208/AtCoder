@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -575,23 +574,74 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    int N, K;
+    cin >> N >> K;
+    vector<int> A(N), B(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> A[i] >> B[i];
     }
 
-    bool flag = true;
-    if (flag)
+    unordered_map<pair<int, int>, int, HashPair> mp;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        if (mp.count((make_pair(A[i], B[i]))))
+        {
+            mp[make_pair(A[i], B[i])]++;
+        }
+        else
+        {
+            mp[make_pair(A[i], B[i])] = 1;
+        }
     }
-    else
+
+    int M = 5000;
+    vector<vector<int>> S(M + 1, vector<int>(M + 1, 0));
+    for (int i = 0; i <= M; i++)
     {
-        cout << "No" << endl;
+        S[i][0] = 0;
     }
+    for (int j = 0; j <= M; j++)
+    {
+        S[0][j] = 0;
+    }
+    for (int i = 1; i <= M; i++)
+    {
+        for (int j = 1; j <= M; j++)
+        {
+            if (mp.count(make_pair(i, j)))
+            {
+                S[i][j] = S[i - 1][j] + S[i][j - 1] - S[i - 1][j - 1] + mp[make_pair(i, j)];
+            }
+            else
+            {
+                S[i][j] = S[i - 1][j] + S[i][j - 1] - S[i - 1][j - 1];
+            }
+        }
+    }
+
+    int ans = -1;
+    for (int i = 0; i <= M; i++)
+    {
+        for (int j = 0; j <= M; j++)
+        {
+            int p = i + K + 1;
+            int q = j + K + 1;
+
+            if (p > M)
+            {
+                p = M;
+            }
+            if (q > M)
+            {
+                q = M;
+            }
+
+            int tmp = S[p][q] - S[i][q] - S[p][j] + S[i][j];
+
+            chmax(ans, tmp);
+        }
+    }
+
+    cout << ans << endl;
 }

@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -565,33 +564,38 @@ bool in_out(int i, int j, int H, int W)
 
 struct my_struct
 {
-    int a, b;
+    int u, v;
+    long long w;
 };
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    return s_1.b > s_2.b;
+    return s_1.w < s_2.w;
 }
 
 int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int M = N - 1;
+    vector<my_struct> s(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        cin >> s[i].u >> s[i].v >> s[i].w;
+        s[i].u--;
+        s[i].v--;
+    }
+    sort(s.begin(), s.end());
+
+    UnionFind uf(N);
+    long long ans = 0;
+    for (int i = 0; i < M; i++)
+    {
+        long long a = uf.size(s[i].u);
+        long long b = uf.size(s[i].v);
+        ans += a * b * s[i].w;
+        uf.unite(s[i].u, s[i].v);
     }
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    cout << ans << endl;
 }

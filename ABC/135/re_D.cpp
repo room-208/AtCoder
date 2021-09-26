@@ -575,23 +575,50 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
     string S;
     cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N = (int)S.size();
+
+    vector<int> r(N);
+    r[0] = 1;
+    for (int i = 1; i < N; i++)
     {
-        cin >> A[i];
+        r[i] = r[i - 1] * 10;
+        r[i] %= 13;
     }
 
-    bool flag = true;
-    if (flag)
+    reverse(S.begin(), S.end());
+
+    vector<vector<long long>> dp(13, vector<long long>(N + 1, 0));
+    dp[0][0] = 1;
+    for (int j = 1; j <= N; j++)
     {
-        cout << "Yes" << endl;
+        if (S[j - 1] == '?')
+        {
+            for (int n = 0; n < 10; n++)
+            {
+                for (int i = 0; i < 13; i++)
+                {
+                    int m = (i + n * r[j - 1]) % 13;
+
+                    dp[m][j] += dp[i][j - 1];
+                    dp[m][j] %= MOD;
+                }
+            }
+        }
+        else
+        {
+            int n = S[j - 1] - '0';
+
+            for (int i = 0; i < 13; i++)
+            {
+                int m = (i + n * r[j - 1]) % 13;
+
+                dp[m][j] += dp[i][j - 1];
+                dp[m][j] %= MOD;
+            }
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << dp[5][N] << endl;
 }

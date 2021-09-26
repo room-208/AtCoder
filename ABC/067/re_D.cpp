@@ -395,7 +395,7 @@ void par_cal(const Graph_int &G, int p, int v, vector<int> &par)
 }
 
 //幅優先探索
-void BFS(const Graph_int &G, int s)
+vector<int> BFS(const Graph_int &G, int s)
 {
     int N = (int)G.size();   // 頂点数
     vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
@@ -423,6 +423,8 @@ void BFS(const Graph_int &G, int s)
             que.push(x);
         }
     }
+
+    return dist;
 }
 
 //01BFS
@@ -577,21 +579,41 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int M = N - 1;
+    Graph_int G(N);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        int a, b;
+        cin >> a >> b;
+        a--;
+        b--;
+        G[a].push_back(b);
+        G[b].push_back(a);
     }
 
-    bool flag = true;
-    if (flag)
+    vector<int> df = BFS(G, 0);
+    vector<int> ds = BFS(G, N - 1);
+
+    int cnt_f = 0;
+    int cnt_s = 0;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        if (df[i] <= ds[i])
+        {
+            cnt_f++;
+        }
+        else
+        {
+            cnt_s++;
+        }
+    }
+
+    if (cnt_f > cnt_s)
+    {
+        cout << "Fennec" << endl;
     }
     else
     {
-        cout << "No" << endl;
+        cout << "Snuke" << endl;
     }
 }

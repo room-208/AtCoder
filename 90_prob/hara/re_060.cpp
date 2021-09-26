@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -577,21 +576,38 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
     vector<int> A(N);
     for (int i = 0; i < N; i++)
     {
         cin >> A[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<int> P(N);
+    vector<int> C(N + 1, INF_int);
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        int n = lower_bound(C.begin(), C.end(), A[i]) - C.begin();
+        C[n] = A[i];
+        int m = lower_bound(C.begin(), C.end(), INF_int) - C.begin();
+        P[i] = m;
     }
-    else
+
+    vector<int> Q(N);
+    C.assign(N + 1, INF_int);
+    reverse(A.begin(), A.end());
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        int n = lower_bound(C.begin(), C.end(), A[i]) - C.begin();
+        C[n] = A[i];
+        int m = lower_bound(C.begin(), C.end(), INF_int) - C.begin();
+        Q[i] = m;
     }
+
+    int ans = -1;
+    for (int i = 0; i < N; i++)
+    {
+        chmax(ans, P[i] + Q[N - 1 - i] - 1);
+    }
+
+    cout << ans << endl;
 }

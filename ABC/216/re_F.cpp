@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -25,7 +24,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -570,28 +569,60 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    return s_1.b > s_2.b;
+    return s_1.a < s_2.a;
 }
 
 int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<my_struct> s(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> s[i].a;
     }
+    for (int i = 0; i < N; i++)
+    {
+        cin >> s[i].b;
+    }
+    sort(s.begin(), s.end());
 
-    bool flag = true;
-    if (flag)
+    int M = 5000;
+    vector<vector<long long>> dp(M + 1, vector<long long>(N + 1, 0));
+    long long ans = 0;
+    dp[0][0] = 1;
+    for (int j = 1; j <= N; j++)
     {
-        cout << "Yes" << endl;
+        for (int i = 0; i <= M; i++)
+        {
+            if (i - s[j - 1].b >= 0)
+            {
+                dp[i][j] += dp[i - s[j - 1].b][j - 1];
+                dp[i][j] %= MOD;
+            }
+        }
+
+        for (int i = 1; i <= s[j - 1].a; i++)
+        {
+            ans += dp[i][j];
+            ans %= MOD;
+        }
+
+        for (int i = 0; i <= M; i++)
+        {
+            dp[i][j] += dp[i][j - 1];
+        }
     }
-    else
+    /*
+    for (int i = 0; i <= M; i++)
     {
-        cout << "No" << endl;
+        for (int j = 0; j <= N; j++)
+        {
+            cout << dp[i][j] << " ";
+        }
+        cout << endl;
     }
+    */
+
+    cout << ans << endl;
 }

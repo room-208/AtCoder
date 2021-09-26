@@ -589,17 +589,30 @@ int main()
 
     vector<vector<long long>> dp(N + 1, vector<long long>(M + 1, INF_ll));
     dp[0][0] = 0;
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i <= N; i++)
     {
-        for (int j = 0; j < M; j++)
+        for (int j = 0; j <= M; j++)
         {
-            chmin(dp[i + 1][j], dp[i][j] + 1);
-            chmin(dp[i][j + 1], dp[i][j] + 1);
-            chmin(dp[i + 1][j + 1], dp[i][j] + 1);
-
-            if (A[i] == B[j])
+            if (i > 0 && j > 0)
             {
-                chmin(dp[i + 1][j + 1], dp[i][j]);
+                if (A[i - 1] == B[j - 1])
+                {
+                    chmin(dp[i][j], dp[i - 1][j - 1]);
+                }
+                else
+                {
+                    chmin(dp[i][j], dp[i - 1][j - 1] + 1);
+                }
+            }
+
+            if (i > 0)
+            {
+                chmin(dp[i][j], dp[i - 1][j] + 1);
+            }
+
+            if (j > 0)
+            {
+                chmin(dp[i][j], dp[i][j - 1] + 1);
             }
         }
     }

@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -577,18 +576,104 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    vector<int> A(N + 1);
+    for (int i = 1; i <= N; i++)
     {
         cin >> A[i];
+        A[i] %= 200;
     }
 
-    bool flag = true;
+    vector<vector<vector<bool>>> dp(200, vector<vector<bool>>(N + 1, vector<bool>(2, false)));
+    vector<vector<vector<tuple<int, int, int, int>>>> p(200, vector<vector<tuple<int, int, int, int>>>(N + 1, vector<tuple<int, int, int, int>>(2, make_tuple(-1, -1, -1, -1))));
+    tuple<int, int, int, int> b, c;
+    bool flag = false;
+    dp[0][0][0] = true;
+    p[0][0][0] = make_tuple(-100, -100, -100, -100);
+    for (int j = 1; j <= N; j++)
+    {
+        for (int i = 0; i < 200; i++)
+        {
+            for (int ok = 0; ok <= 1; ok++)
+            {
+                dp[i][j][ok] = dp[i][j - 1][ok];
+                p[i][j][ok] = p[i][j - 1][ok];
+            }
+        }
+
+        for (int i = 0; i < 200; i++)
+        {
+            for (int ok = 0; ok <= 1; ok++)
+            {
+                if (dp[i][j - 1][ok])
+                {
+                    int next = (i + A[j]) % 200;
+
+                    if (dp[next][j][1])
+                    {
+                        b = p[next][j][1];
+                        c = make_tuple(i, j - 1, ok, j);
+                        flag = true;
+                        break;
+                    }
+                    else
+                    {
+                        p[next][j][1] = make_tuple(i, j - 1, ok, j);
+                        dp[next][j][1] = true;
+                    }
+                }
+            }
+
+            if (flag)
+            {
+                break;
+            }
+        }
+
+        if (flag)
+        {
+            break;
+        }
+    }
+
     if (flag)
     {
         cout << "Yes" << endl;
+        vector<int> B, C;
+        tuple<int, int, int, int> q;
+
+        q = b;
+        B.push_back(get<3>(q));
+        q = p[get<0>(q)][get<1>(q)][get<2>(q)];
+        while (q != make_tuple(-100, -100, -100, -100))
+        {
+            B.push_back(get<3>(q));
+            q = p[get<0>(q)][get<1>(q)][get<2>(q)];
+        }
+
+        q = c;
+        C.push_back(get<3>(q));
+        q = p[get<0>(q)][get<1>(q)][get<2>(q)];
+        while (q != make_tuple(-100, -100, -100, -100))
+        {
+            C.push_back(get<3>(q));
+            q = p[get<0>(q)][get<1>(q)][get<2>(q)];
+        }
+
+        sort(B.begin(), B.end());
+        cout << B.size() << " ";
+        for (auto a : B)
+        {
+            cout << a << " ";
+        }
+        cout << endl;
+
+        sort(C.begin(), C.end());
+        cout << C.size() << " ";
+        for (auto a : C)
+        {
+            cout << a << " ";
+        }
+        cout << endl;
     }
     else
     {

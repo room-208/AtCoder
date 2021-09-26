@@ -17,7 +17,6 @@
 #include <deque>
 #include <queue>
 #include <list>
-#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
@@ -575,23 +574,55 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, S;
+    cin >> N >> S;
+    vector<int> A(N + 1), B(N + 1);
+    for (int i = 1; i <= N; i++)
     {
-        cin >> A[i];
+        cin >> A[i] >> B[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<bool>> dp(S + 1, vector<bool>(N + 1, false));
+    vector<vector<tuple<int, int, char>>> p(S + 1, vector<tuple<int, int, char>>(N + 1, make_tuple(-1, -1, '#')));
+    dp[0][0] = true;
+    p[0][0] = make_tuple(0, 0, '#');
+    for (int j = 1; j <= N; j++)
     {
-        cout << "Yes" << endl;
+        for (int i = 0; i <= S; i++)
+        {
+            if (dp[i][j - 1])
+            {
+                if (i + A[j] <= S)
+                {
+                    dp[i + A[j]][j] = true;
+                    p[i + A[j]][j] = make_tuple(i, j - 1, 'A');
+                }
+                if (i + B[j] <= S)
+                {
+                    dp[i + B[j]][j] = true;
+                    p[i + B[j]][j] = make_tuple(i, j - 1, 'B');
+                }
+            }
+        }
+    }
+
+    if (dp[S][N])
+    {
+        string ans;
+        tuple<int, int, char> q;
+        q = p[S][N];
+
+        while (q != make_tuple(0, 0, '#'))
+        {
+            ans.push_back(get<2>(q));
+            q = p[get<0>(q)][get<1>(q)];
+        }
+        reverse(ans.begin(), ans.end());
+
+        cout << ans << endl;
     }
     else
     {
-        cout << "No" << endl;
+        cout << "Impossible" << endl;
     }
 }
