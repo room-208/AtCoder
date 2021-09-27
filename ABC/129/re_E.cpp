@@ -602,23 +602,31 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    string L;
+    cin >> L;
+    int N = (int)L.size();
+
+    vector<vector<long long>> dp(N + 1, vector<long long>(2, 0));
+    dp[0][0] = 1;
+    for (int j = 1; j <= N; j++)
     {
-        cin >> A[i];
+        if (L[j - 1] == '1')
+        {
+            dp[j][1] += dp[j - 1][0];
+            dp[j][1] %= MOD;
+            dp[j][1] += 3LL * dp[j - 1][1];
+            dp[j][1] %= MOD;
+            dp[j][0] += 2LL * dp[j - 1][0];
+            dp[j][0] %= MOD;
+        }
+        else if (L[j - 1] == '0')
+        {
+            dp[j][1] += 3LL * dp[j - 1][1];
+            dp[j][1] %= MOD;
+            dp[j][0] += dp[j - 1][0];
+            dp[j][0] %= MOD;
+        }
     }
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    cout << (dp[N][0] + dp[N][1]) % MOD << endl;
 }

@@ -25,7 +25,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -602,23 +602,30 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, M, K;
+    cin >> N >> M >> K;
+
+    if (N == 1)
     {
-        cin >> A[i];
+        cout << MOD_pow(K, M) << endl;
+        return 0;
     }
 
-    bool flag = true;
-    if (flag)
+    if (M == 1)
     {
-        cout << "Yes" << endl;
+        cout << MOD_pow(K, N) << endl;
+        return 0;
     }
-    else
+
+    long long ans = 0;
+    for (int k = 1; k <= K; k++)
     {
-        cout << "No" << endl;
+        long long m = MOD_pow(K - k + 1, M) - MOD_pow(K - k, M);
+        m = (m + MOD) % MOD;
+        long long n = MOD_pow(k, N);
+        ans += m * n;
+        ans %= MOD;
     }
+
+    cout << ans << endl;
 }

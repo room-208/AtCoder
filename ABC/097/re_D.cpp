@@ -602,23 +602,36 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    int N, M;
+    cin >> N >> M;
+    vector<int> p(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> p[i];
+        p[i]--;
+    }
+    vector<int> x(M), y(M);
+    for (int i = 0; i < M; i++)
+    {
+        cin >> x[i] >> y[i];
+        x[i]--;
+        y[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    UnionFind uf(N);
+    for (int i = 0; i < M; i++)
     {
-        cout << "Yes" << endl;
+        uf.unite(x[i], y[i]);
     }
-    else
+
+    int ans = 0;
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        if (uf.issame(i, p[i]))
+        {
+            ans++;
+        }
     }
+
+    cout << ans << endl;
 }

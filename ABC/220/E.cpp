@@ -25,7 +25,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -379,7 +379,7 @@ void DFS(const Graph_int &G, int v, vector<bool> &seen)
 }
 
 //根付き木
-void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
+void par_cal(const Graph_int &G, int p, int v, vector<int> &par)
 {
     for (auto next_v : G[v])
     {
@@ -388,37 +388,10 @@ void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
             continue;
         }
 
-        par_cal(G, next_v, par, v);
+        par_cal(G, v, next_v, par);
     }
 
     par[v] = p;
-}
-
-//部分木サイズ
-void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int p = -1)
-{
-    for (auto c : G[v])
-    {
-        if (c == p)
-        {
-            continue;
-        }
-
-        subtree_size_cal(G, c, subtree_size, v);
-    }
-
-    // 帰りがけ時に、部分木サイズを求める
-    subtree_size[v] = 1; // 自分自身
-    for (auto c : G[v])
-    {
-        if (c == p)
-        {
-            continue;
-        }
-
-        // 子頂点を根とする部分きのサイズを加算する
-        subtree_size[v] += subtree_size[c];
-    }
 }
 
 //幅優先探索
@@ -571,7 +544,7 @@ int to_node(int i, int j, int W)
 }
 
 //ij変換
-pair<int, int> to_ij(int v, int W)
+pair<int, int> to_ij(int v, int H, int W)
 {
     int i = v / W;
     int j = v - W * i;
@@ -602,23 +575,28 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    long long N, D;
+    cin >> N >> D;
+
+    long long ans = 0;
+    if (D <= N - 1)
     {
-        cin >> A[i];
+        ans += MOD_pow(2, D);
+        ans %= MOD;
+    }
+    for (int i = 1; i < N; i++)
+    {
+        if (D <= N - 1 - i)
+        {
+            ans += MOD_pow(2, D) * MOD_pow(2, i);
+            ans %= MOD;
+        }
+        if (D + i <= N - 1)
+        {
+            ans += MOD_pow(2, D + i) * MOD_pow(2, i);
+            ans %= MOD;
+        }
     }
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    cout << ans << endl;
 }

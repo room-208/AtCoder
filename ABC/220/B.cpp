@@ -379,7 +379,7 @@ void DFS(const Graph_int &G, int v, vector<bool> &seen)
 }
 
 //根付き木
-void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
+void par_cal(const Graph_int &G, int p, int v, vector<int> &par)
 {
     for (auto next_v : G[v])
     {
@@ -388,37 +388,10 @@ void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
             continue;
         }
 
-        par_cal(G, next_v, par, v);
+        par_cal(G, v, next_v, par);
     }
 
     par[v] = p;
-}
-
-//部分木サイズ
-void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int p = -1)
-{
-    for (auto c : G[v])
-    {
-        if (c == p)
-        {
-            continue;
-        }
-
-        subtree_size_cal(G, c, subtree_size, v);
-    }
-
-    // 帰りがけ時に、部分木サイズを求める
-    subtree_size[v] = 1; // 自分自身
-    for (auto c : G[v])
-    {
-        if (c == p)
-        {
-            continue;
-        }
-
-        // 子頂点を根とする部分きのサイズを加算する
-        subtree_size[v] += subtree_size[c];
-    }
 }
 
 //幅優先探索
@@ -571,7 +544,7 @@ int to_node(int i, int j, int W)
 }
 
 //ij変換
-pair<int, int> to_ij(int v, int W)
+pair<int, int> to_ij(int v, int H, int W)
 {
     int i = v / W;
     int j = v - W * i;
@@ -600,25 +573,30 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+long long K_sin(string X, long long K)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    reverse(X.begin(), X.end());
+
+    long long ans = 0;
+    long long base = 1;
+    for (int i = 0; i < (int)X.size(); i++)
     {
-        cin >> A[i];
+        ans += base * (long long)(X[i] - '0');
+        base *= K;
     }
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    return ans;
+}
+
+int main()
+{
+    long long K;
+    cin >> K;
+    string A, B;
+    cin >> A >> B;
+
+    long long a = K_sin(A, K);
+    long long b = K_sin(B, K);
+
+    cout << a * b << endl;
 }

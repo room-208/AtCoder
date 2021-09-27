@@ -602,23 +602,68 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
+    string N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int K;
+    cin >> K;
+
+    int n = (int)N.size();
+    vector<vector<vector<long long>>> dp(n + 1, vector<vector<long long>>(4, vector<long long>(2, 0)));
+    dp[0][0][0] = 1;
+    for (int j = 1; j <= n; j++)
     {
-        cin >> A[i];
+        int m = N[j - 1] - '0';
+
+        if (m == 0)
+        {
+            for (int k = 0; k < 4; k++)
+            {
+                for (int ok = 0; ok <= 1; ok++)
+                {
+                    dp[j][k][ok] += dp[j - 1][k][ok];
+                }
+            }
+
+            for (int r = 1; r <= 9; r++)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    dp[j][k + 1][1] += dp[j - 1][k][1];
+                }
+            }
+        }
+        else
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                dp[j][k + 1][0] += dp[j - 1][k][0];
+            }
+
+            for (int k = 0; k < 4; k++)
+            {
+                for (int ok = 0; ok <= 1; ok++)
+                {
+                    dp[j][k][1] += dp[j - 1][k][ok];
+                }
+            }
+
+            for (int r = 1; r <= m - 1; r++)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    dp[j][k + 1][1] += dp[j - 1][k][0];
+                }
+            }
+
+            for (int r = 1; r <= 9; r++)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    dp[j][k + 1][1] += dp[j - 1][k][1];
+                }
+            }
+        }
     }
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    cout << dp[n][K][0] + dp[n][K][1] << endl;
 }

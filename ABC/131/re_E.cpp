@@ -602,23 +602,58 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, K;
+    cin >> N >> K;
+
+    if (K > ((N - 1) * (N - 2)) / 2)
     {
-        cin >> A[i];
+        cout << -1 << endl;
+        return 0;
     }
 
-    bool flag = true;
-    if (flag)
+    Graph_int G(N);
+    for (int i = 1; i < N; i++)
     {
-        cout << "Yes" << endl;
+        G[0].push_back(i);
     }
-    else
+
+    int L = (((N - 1) * (N - 2)) / 2) - K;
+
+    if (L > 0)
     {
-        cout << "No" << endl;
+        int cnt = 0;
+
+        for (int i = 1; i < N; i++)
+        {
+            for (int j = i + 1; j < N; j++)
+            {
+                G[i].push_back(j);
+                cnt++;
+
+                if (cnt == L)
+                {
+                    break;
+                }
+            }
+            if (cnt == L)
+            {
+                break;
+            }
+        }
+    }
+
+    int m = 0;
+    for (int i = 0; i < N; i++)
+    {
+        m += (int)G[i].size();
+    }
+    cout << m << endl;
+
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < (int)G[i].size(); j++)
+        {
+            cout << i + 1 << " " << G[i][j] + 1 << endl;
+        }
     }
 }

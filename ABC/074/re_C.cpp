@@ -602,23 +602,105 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    vector<int> A(4);
+    int E, F;
+    cin >> A[0] >> A[1];
+    A[0] *= 100;
+    A[1] *= 100;
+    cin >> A[2] >> A[3];
+    cin >> E >> F;
+
+    vector<vector<tuple<int, int, double>>> dp(F + 1, vector<tuple<int, int, double>>(5, make_tuple(-1, -1, -1)));
+    dp[0][0] = make_tuple(0, 0, 0);
+    for (int j = 1; j <= 2; j++)
     {
-        cin >> A[i];
+        for (int i = 0; i <= F; i++)
+        {
+            dp[i][j] = dp[i][j - 1];
+        }
+
+        for (int i = 0; i <= F; i++)
+        {
+            if (dp[i][j] != make_tuple(-1, -1, -1))
+            {
+                if (i + A[j - 1] <= F)
+                {
+                    int water = get<0>(dp[i][j]);
+                    int sugar = get<1>(dp[i][j]);
+                    double per = get<2>(dp[i][j]);
+
+                    dp[i + A[j - 1]][j] = make_tuple(water + A[j - 1], sugar, per);
+                }
+            }
+        }
+    }
+    for (int j = 3; j <= 4; j++)
+    {
+        for (int i = 0; i <= F; i++)
+        {
+            dp[i][j] = dp[i][j - 1];
+        }
+
+        for (int i = 0; i <= F; i++)
+        {
+            if (dp[i][j] != make_tuple(-1, -1, -1))
+            {
+                if (i + A[j - 1] <= F)
+                {
+                    if (dp[i + A[j - 1]][j] != make_tuple(-1, -1, -1))
+                    {
+                        int water = get<0>(dp[i][j]);
+                        int sugar = get<1>(dp[i][j]);
+
+                        if (E * water < 100 * (sugar + A[j - 1]))
+                        {
+                            continue;
+                        }
+
+                        double per_new = (double)(sugar + A[j - 1]) / (double)(water + sugar + A[j - 1]);
+                        double per_ext = get<2>(dp[i + A[j - 1]][j]);
+
+                        if (per_ext < per_new)
+                        {
+                            dp[i + A[j - 1]][j] = make_tuple(water, sugar + A[j - 1], per_new);
+                        }
+                    }
+                    else
+                    {
+                        int water = get<0>(dp[i][j]);
+                        int sugar = get<1>(dp[i][j]);
+
+                        if (E * water < 100 * (sugar + A[j - 1]))
+                        {
+                            continue;
+                        }
+
+                        double per = (double)(sugar + A[j - 1]) / (double)(water + sugar + A[j - 1]);
+                        dp[i + A[j - 1]][j] = make_tuple(water, sugar + A[j - 1], per);
+                    }
+                }
+            }
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    pair<int, int> p = make_pair(0, 0);
+    double ans = 0.;
+    for (int i = 0; i <= F; i++)
     {
-        cout << "Yes" << endl;
+        double per = get<2>(dp[i][4]);
+        if (chmax(ans, per))
+        {
+            p.first = get<0>(dp[i][4]);
+            p.second = get<1>(dp[i][4]);
+        }
+    }
+
+    if (ans == 0.)
+    {
+        cout << A[0] << " " << 0 << endl;
     }
     else
     {
-        cout << "No" << endl;
+        cout << p.first + p.second << " " << p.second << endl;
     }
 }

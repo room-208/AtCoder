@@ -602,23 +602,56 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    int N, K;
+    cin >> N >> K;
+    vector<long long> x(N), y(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> x[i] >> y[i];
     }
 
-    bool flag = true;
-    if (flag)
+    long long ans = 5LL * INF_ll;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < N; j++)
+        {
+            if (x[i] > x[j])
+            {
+                continue;
+            }
+
+            for (int k = 0; k < N; k++)
+            {
+                for (int l = 0; l < N; l++)
+                {
+                    if (y[k] > y[l])
+                    {
+                        continue;
+                    }
+
+                    int cnt = 0;
+
+                    for (int m = 0; m < N; m++)
+                    {
+                        if (x[i] <= x[m] && x[m] <= x[j])
+                        {
+                            if (y[k] <= y[m] && y[m] <= y[l])
+                            {
+                                cnt++;
+                            }
+                        }
+                    }
+
+                    if (cnt >= K)
+                    {
+                        long long tmp = llabs(x[i] - x[j]) * llabs(y[k] - y[l]);
+
+                        chmin(ans, tmp);
+                    }
+                }
+            }
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans << endl;
 }

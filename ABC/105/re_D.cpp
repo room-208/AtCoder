@@ -602,23 +602,31 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    int N, M;
+    cin >> N >> M;
+    vector<long long> A(N);
     for (int i = 0; i < N; i++)
     {
         cin >> A[i];
+        A[i] %= M;
     }
 
-    bool flag = true;
-    if (flag)
+    vector<long long> S(N + 1, 0);
+    long long ans = 0;
+    S[0] = 0;
+    for (int i = 1; i <= N; i++)
     {
-        cout << "Yes" << endl;
+        S[i] = S[i - 1] + A[i - 1];
+        S[i] %= M;
     }
-    else
+
+    unordered_map<int, int> mp;
+    mp[0] = 1;
+    for (int i = 1; i <= N; i++)
     {
-        cout << "No" << endl;
+        ans += mp[S[i]];
+        mp[S[i]]++;
     }
+
+    cout << ans << endl;
 }

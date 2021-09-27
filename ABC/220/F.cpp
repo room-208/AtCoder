@@ -394,35 +394,8 @@ void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
     par[v] = p;
 }
 
-//部分木サイズ
-void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int p = -1)
-{
-    for (auto c : G[v])
-    {
-        if (c == p)
-        {
-            continue;
-        }
-
-        subtree_size_cal(G, c, subtree_size, v);
-    }
-
-    // 帰りがけ時に、部分木サイズを求める
-    subtree_size[v] = 1; // 自分自身
-    for (auto c : G[v])
-    {
-        if (c == p)
-        {
-            continue;
-        }
-
-        // 子頂点を根とする部分きのサイズを加算する
-        subtree_size[v] += subtree_size[c];
-    }
-}
-
 //幅優先探索
-void BFS(const Graph_int &G, int s)
+vector<int> BFS(const Graph_int &G, int s)
 {
     int N = (int)G.size();   // 頂点数
     vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
@@ -450,6 +423,8 @@ void BFS(const Graph_int &G, int s)
             que.push(x);
         }
     }
+
+    return dist;
 }
 
 //01BFS
@@ -571,7 +546,7 @@ int to_node(int i, int j, int W)
 }
 
 //ij変換
-pair<int, int> to_ij(int v, int W)
+pair<int, int> to_ij(int v, int H, int W)
 {
     int i = v / W;
     int j = v - W * i;
@@ -600,25 +575,82 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<long long> &ans, vector<int> &subtree_size, int p = -1)
+{
+    int N = (int)G.size();
+
+    if (p != -1)
+    {
+        ans[v] = ans[p] + N - 2LL * subtree_size[v];
+    }
+
+    for (auto next_v : G[v])
+    {
+        if (next_v == p)
+        {
+            continue;
+        }
+
+        DFS(G, next_v, ans, subtree_size, v);
+    }
+}
+
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int p = -1)
+{
+    for (auto c : G[v])
+    {
+        if (c == p)
+        {
+            continue;
+        }
+
+        subtree_size_cal(G, c, subtree_size, v);
+    }
+
+    // 帰りがけ時に、部分木サイズを求める
+    subtree_size[v] = 1; // 自分自身
+    for (auto c : G[v])
+    {
+        if (c == p)
+        {
+            continue;
+        }
+
+        // 子頂点を根とする部分きのサイズを加算する
+        subtree_size[v] += subtree_size[c];
+    }
+}
+
 int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int M = N - 1;
+    Graph_int G(N);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        int a, b;
+        cin >> a >> b;
+        a--;
+        b--;
+        G[a].push_back(b);
+        G[b].push_back(a);
     }
 
-    bool flag = true;
-    if (flag)
+    vector<int> dist = BFS(G, 0);
+    vector<long long> ans(N, 0);
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        ans[0] += dist[i];
     }
-    else
+
+    vector<int> subtree_size(N, 0);
+    subtree_size_cal(G, 0, subtree_size);
+    DFS(G, 0, ans, subtree_size);
+
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        cout << ans[i] << endl;
     }
 }
