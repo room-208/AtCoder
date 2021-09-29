@@ -602,65 +602,52 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int H, W, K;
-    cin >> H >> W >> K;
-    K--;
-
-    vector<vector<long long>> dp(H + 1, vector<long long>(W, 0));
-    vector<int> vec;
-    unordered_set<int> st;
-    dp[0][0] = 1;
-    for (int i = 1; i <= H; i++)
+    int N;
+    long long K;
+    cin >> N >> K;
+    vector<long long> A(N);
+    for (int i = 0; i < N; i++)
     {
-        for (int bit = 0; bit < (1 << W - 1); bit++)
+        cin >> A[i];
+    }
+    vector<long long> F(N);
+    for (int i = 0; i < N; i++)
+    {
+        cin >> F[i];
+    }
+
+    sort(A.begin(), A.end());
+    sort(F.begin(), F.end());
+    reverse(F.begin(), F.end());
+
+    long long left = -1;
+    long long right = INF_ll;
+    while (right - left > 1)
+    {
+        long long mid = (right + left) / 2LL;
+
+        long long cnt = 0;
+        for (int i = 0; i < N; i++)
         {
-            vec.clear();
+            long long tmp = A[i] - (mid / F[i]);
 
-            for (int j = 0; j < W; j++)
+            if (tmp < 0)
             {
-                if (bit & (1 << j))
-                {
-                    vec.push_back(j);
-                }
+                tmp = 0;
             }
 
-            bool flag = true;
-            st.clear();
-            for (auto v : vec)
-            {
-                st.insert(v);
-            }
-            for (auto v : vec)
-            {
-                if (st.count(v - 1))
-                {
-                    flag = false;
-                }
-            }
+            cnt += tmp;
+        }
 
-            if (flag)
-            {
-                for (int j = 0; j < W; j++)
-                {
-                    if (st.count(j))
-                    {
-                        dp[i][j + 1] += dp[i - 1][j];
-                        dp[i][j + 1] %= MOD;
-                    }
-                    else if (st.count(j - 1))
-                    {
-                        dp[i][j - 1] += dp[i - 1][j];
-                        dp[i][j - 1] %= MOD;
-                    }
-                    else
-                    {
-                        dp[i][j] += dp[i - 1][j];
-                        dp[i][j] %= MOD;
-                    }
-                }
-            }
+        if (cnt <= K)
+        {
+            right = mid;
+        }
+        else
+        {
+            left = mid;
         }
     }
 
-    cout << dp[H][K] << endl;
+    cout << right << endl;
 }

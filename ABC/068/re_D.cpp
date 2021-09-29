@@ -602,65 +602,29 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int H, W, K;
-    cin >> H >> W >> K;
-    K--;
+    long long K;
+    cin >> K;
 
-    vector<vector<long long>> dp(H + 1, vector<long long>(W, 0));
-    vector<int> vec;
-    unordered_set<int> st;
-    dp[0][0] = 1;
-    for (int i = 1; i <= H; i++)
+    int N = 50;
+    vector<long long> a(N);
+    for (int i = 0; i < N; i++)
     {
-        for (int bit = 0; bit < (1 << W - 1); bit++)
-        {
-            vec.clear();
-
-            for (int j = 0; j < W; j++)
-            {
-                if (bit & (1 << j))
-                {
-                    vec.push_back(j);
-                }
-            }
-
-            bool flag = true;
-            st.clear();
-            for (auto v : vec)
-            {
-                st.insert(v);
-            }
-            for (auto v : vec)
-            {
-                if (st.count(v - 1))
-                {
-                    flag = false;
-                }
-            }
-
-            if (flag)
-            {
-                for (int j = 0; j < W; j++)
-                {
-                    if (st.count(j))
-                    {
-                        dp[i][j + 1] += dp[i - 1][j];
-                        dp[i][j + 1] %= MOD;
-                    }
-                    else if (st.count(j - 1))
-                    {
-                        dp[i][j - 1] += dp[i - 1][j];
-                        dp[i][j - 1] %= MOD;
-                    }
-                    else
-                    {
-                        dp[i][j] += dp[i - 1][j];
-                        dp[i][j] %= MOD;
-                    }
-                }
-            }
-        }
+        a[i] = N - i - 1;
+    }
+    for (int i = 0; i < N; i++)
+    {
+        a[i] += (K / N);
+    }
+    int r = K % N;
+    for (int i = 0; i < r; i++)
+    {
+        a[i] += 1;
     }
 
-    cout << dp[H][K] << endl;
+    cout << N << endl;
+    for (int i = 0; i < N; i++)
+    {
+        cout << a[i] << " ";
+    }
+    cout << endl;
 }

@@ -602,65 +602,52 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int H, W, K;
-    cin >> H >> W >> K;
-    K--;
-
-    vector<vector<long long>> dp(H + 1, vector<long long>(W, 0));
-    vector<int> vec;
-    unordered_set<int> st;
-    dp[0][0] = 1;
-    for (int i = 1; i <= H; i++)
+    int H, W, D;
+    cin >> H >> W >> D;
+    vector<vector<int>> A(H, vector<int>(W));
+    for (int i = 0; i < H; i++)
     {
-        for (int bit = 0; bit < (1 << W - 1); bit++)
+        for (int j = 0; j < W; j++)
         {
-            vec.clear();
+            cin >> A[i][j];
+        }
+    }
+    int Q;
+    cin >> Q;
+    vector<int> L(Q), R(Q);
+    for (int i = 0; i < Q; i++)
+    {
+        cin >> L[i] >> R[i];
+    }
 
-            for (int j = 0; j < W; j++)
-            {
-                if (bit & (1 << j))
-                {
-                    vec.push_back(j);
-                }
-            }
+    map<int, pair<int, int>> mp;
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            mp[A[i][j]] = make_pair(i, j);
+        }
+    }
+    vector<long long> S(H * W + 1, 0);
+    for (auto itr = mp.begin(); itr != mp.end(); itr++)
+    {
+        int n = itr->first;
+        int i = itr->second.first;
+        int j = itr->second.second;
+        int r = n % D;
 
-            bool flag = true;
-            st.clear();
-            for (auto v : vec)
-            {
-                st.insert(v);
-            }
-            for (auto v : vec)
-            {
-                if (st.count(v - 1))
-                {
-                    flag = false;
-                }
-            }
+        if (r != n)
+        {
+            int m = n - D;
+            int x = mp[m].first;
+            int y = mp[m].second;
 
-            if (flag)
-            {
-                for (int j = 0; j < W; j++)
-                {
-                    if (st.count(j))
-                    {
-                        dp[i][j + 1] += dp[i - 1][j];
-                        dp[i][j + 1] %= MOD;
-                    }
-                    else if (st.count(j - 1))
-                    {
-                        dp[i][j - 1] += dp[i - 1][j];
-                        dp[i][j - 1] %= MOD;
-                    }
-                    else
-                    {
-                        dp[i][j] += dp[i - 1][j];
-                        dp[i][j] %= MOD;
-                    }
-                }
-            }
+            S[n] = S[m] + llabs(x - i) + llabs(y - j);
         }
     }
 
-    cout << dp[H][K] << endl;
+    for (int i = 0; i < Q; i++)
+    {
+        cout << S[R[i]] - S[L[i]] << endl;
+    }
 }

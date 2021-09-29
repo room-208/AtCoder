@@ -602,65 +602,38 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int H, W, K;
-    cin >> H >> W >> K;
-    K--;
-
-    vector<vector<long long>> dp(H + 1, vector<long long>(W, 0));
-    vector<int> vec;
-    unordered_set<int> st;
-    dp[0][0] = 1;
-    for (int i = 1; i <= H; i++)
+    long long N, M;
+    cin >> N >> M;
+    vector<int> a(M), b(M);
+    for (int i = 0; i < M; i++)
     {
-        for (int bit = 0; bit < (1 << W - 1); bit++)
+        cin >> a[i] >> b[i];
+        a[i]--;
+        b[i]--;
+    }
+
+    vector<long long> ans(M);
+    UnionFind uf(N);
+    ans[M - 1] = (N * (N - 1)) / 2;
+    for (int i = M - 1; i > 0; i--)
+    {
+        if (!uf.issame(a[i], b[i]))
         {
-            vec.clear();
+            long long A = uf.size(a[i]);
+            long long B = uf.size(b[i]);
 
-            for (int j = 0; j < W; j++)
-            {
-                if (bit & (1 << j))
-                {
-                    vec.push_back(j);
-                }
-            }
+            ans[i - 1] = ans[i] - A * B;
 
-            bool flag = true;
-            st.clear();
-            for (auto v : vec)
-            {
-                st.insert(v);
-            }
-            for (auto v : vec)
-            {
-                if (st.count(v - 1))
-                {
-                    flag = false;
-                }
-            }
-
-            if (flag)
-            {
-                for (int j = 0; j < W; j++)
-                {
-                    if (st.count(j))
-                    {
-                        dp[i][j + 1] += dp[i - 1][j];
-                        dp[i][j + 1] %= MOD;
-                    }
-                    else if (st.count(j - 1))
-                    {
-                        dp[i][j - 1] += dp[i - 1][j];
-                        dp[i][j - 1] %= MOD;
-                    }
-                    else
-                    {
-                        dp[i][j] += dp[i - 1][j];
-                        dp[i][j] %= MOD;
-                    }
-                }
-            }
+            uf.unite(a[i], b[i]);
+        }
+        else
+        {
+            ans[i - 1] = ans[i];
         }
     }
 
-    cout << dp[H][K] << endl;
+    for (int i = 0; i < M; i++)
+    {
+        cout << ans[i] << endl;
+    }
 }

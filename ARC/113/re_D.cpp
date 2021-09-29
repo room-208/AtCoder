@@ -25,7 +25,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -602,65 +602,30 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int H, W, K;
-    cin >> H >> W >> K;
-    K--;
+    int N, M, K;
+    cin >> N >> M >> K;
 
-    vector<vector<long long>> dp(H + 1, vector<long long>(W, 0));
-    vector<int> vec;
-    unordered_set<int> st;
-    dp[0][0] = 1;
-    for (int i = 1; i <= H; i++)
+    if (N == 1)
     {
-        for (int bit = 0; bit < (1 << W - 1); bit++)
-        {
-            vec.clear();
-
-            for (int j = 0; j < W; j++)
-            {
-                if (bit & (1 << j))
-                {
-                    vec.push_back(j);
-                }
-            }
-
-            bool flag = true;
-            st.clear();
-            for (auto v : vec)
-            {
-                st.insert(v);
-            }
-            for (auto v : vec)
-            {
-                if (st.count(v - 1))
-                {
-                    flag = false;
-                }
-            }
-
-            if (flag)
-            {
-                for (int j = 0; j < W; j++)
-                {
-                    if (st.count(j))
-                    {
-                        dp[i][j + 1] += dp[i - 1][j];
-                        dp[i][j + 1] %= MOD;
-                    }
-                    else if (st.count(j - 1))
-                    {
-                        dp[i][j - 1] += dp[i - 1][j];
-                        dp[i][j - 1] %= MOD;
-                    }
-                    else
-                    {
-                        dp[i][j] += dp[i - 1][j];
-                        dp[i][j] %= MOD;
-                    }
-                }
-            }
-        }
+        cout << MOD_pow(K, M) << endl;
+        return 0;
     }
 
-    cout << dp[H][K] << endl;
+    if (M == 1)
+    {
+        cout << MOD_pow(K, N) << endl;
+        return 0;
+    }
+
+    long long ans = 0;
+    for (int k = 1; k <= K; k++)
+    {
+        long long m = MOD_pow(K - k + 1, M) - MOD_pow(K - k, M);
+        m = (m + MOD) % MOD;
+        long long n = MOD_pow(k, N);
+        ans += m * n;
+        ans %= MOD;
+    }
+
+    cout << ans << endl;
 }

@@ -421,37 +421,6 @@ void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int 
     }
 }
 
-//幅優先探索
-void BFS(const Graph_int &G, int s)
-{
-    int N = (int)G.size();   // 頂点数
-    vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
-    queue<int> que;
-
-    // 初期条件 (頂点 s を初期頂点とする)
-    dist[s] = 0;
-    que.push(s); // s を橙色頂点にする
-
-    // BFS 開始 (キューが空になるまで探索を行う)
-    while (!que.empty())
-    {
-        int v = que.front(); // キューから先頭頂点を取り出す
-        que.pop();
-
-        // v からたどれる頂点をすべて調べる
-        for (int x : G[v])
-        {
-            // すでに発見済みの頂点は探索しない
-            if (dist[x] != -1)
-                continue;
-
-            // 新たな白色頂点 x について距離情報を更新してキューに挿入
-            dist[x] = dist[v] + 1;
-            que.push(x);
-        }
-    }
-}
-
 //01BFS
 void BFS_01(const Graph_Edge &G, int s)
 {
@@ -600,67 +569,89 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+//幅優先探索
+void BFS(const Graph_int &G, int s, long long &ans, int K)
 {
-    int H, W, K;
-    cin >> H >> W >> K;
-    K--;
+    int N = (int)G.size();   // 頂点数
+    vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
+    queue<int> que;
 
-    vector<vector<long long>> dp(H + 1, vector<long long>(W, 0));
-    vector<int> vec;
-    unordered_set<int> st;
-    dp[0][0] = 1;
-    for (int i = 1; i <= H; i++)
+    // 初期条件 (頂点 s を初期頂点とする)
+    dist[s] = 0;
+    que.push(s); // s を橙色頂点にする
+    ans *= K;
+
+    // BFS 開始 (キューが空になるまで探索を行う)
+    while (!que.empty())
     {
-        for (int bit = 0; bit < (1 << W - 1); bit++)
+        int v = que.front(); // キューから先頭頂点を取り出す
+        que.pop();
+
+        if (v == s)
         {
-            vec.clear();
+            int c = K - 1;
 
-            for (int j = 0; j < W; j++)
+            // v からたどれる頂点をすべて調べる
+            for (int x : G[v])
             {
-                if (bit & (1 << j))
+                if (dist[x] != -1)
                 {
-                    vec.push_back(j);
+                    continue;
                 }
-            }
 
-            bool flag = true;
-            st.clear();
-            for (auto v : vec)
-            {
-                st.insert(v);
+                // 新たな白色頂点 x について距離情報を更新してキューに挿入
+                dist[x] = dist[v] + 1;
+                que.push(x);
+                ans *= c;
+                ans %= MOD;
+                c--;
             }
-            for (auto v : vec)
-            {
-                if (st.count(v - 1))
-                {
-                    flag = false;
-                }
-            }
+        }
+        else
+        {
+            int c = K - 2;
 
-            if (flag)
+            // v からたどれる頂点をすべて調べる
+            for (int x : G[v])
             {
-                for (int j = 0; j < W; j++)
+                if (dist[x] != -1)
                 {
-                    if (st.count(j))
-                    {
-                        dp[i][j + 1] += dp[i - 1][j];
-                        dp[i][j + 1] %= MOD;
-                    }
-                    else if (st.count(j - 1))
-                    {
-                        dp[i][j - 1] += dp[i - 1][j];
-                        dp[i][j - 1] %= MOD;
-                    }
-                    else
-                    {
-                        dp[i][j] += dp[i - 1][j];
-                        dp[i][j] %= MOD;
-                    }
+                    continue;
                 }
+
+                // 新たな白色頂点 x について距離情報を更新してキューに挿入
+                dist[x] = dist[v] + 1;
+                que.push(x);
+                ans *= c;
+                ans %= MOD;
+                c--;
             }
         }
     }
+}
 
-    cout << dp[H][K] << endl;
+int main()
+{
+    int N, K;
+    cin >> N >> K;
+    int M = N - 1;
+    Graph_int G(N);
+    for (int i = 0; i < M; i++)
+    {
+        int a, b;
+        cin >> a >> b;
+        a--;
+        b--;
+        G[a].push_back(b);
+        G[b].push_back(a);
+    }
+
+    /*
+    long long ans = 1;
+    BFS(G, 0, ans, K);
+    cout << ans << endl;
+    */
+
+    long long ans = K;
+    vector<bool> seen(N, false);
 }

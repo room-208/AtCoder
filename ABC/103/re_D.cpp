@@ -597,70 +597,31 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    return s_1.b > s_2.b;
+    return s_1.b < s_2.b;
 }
 
 int main()
 {
-    int H, W, K;
-    cin >> H >> W >> K;
-    K--;
-
-    vector<vector<long long>> dp(H + 1, vector<long long>(W, 0));
-    vector<int> vec;
-    unordered_set<int> st;
-    dp[0][0] = 1;
-    for (int i = 1; i <= H; i++)
+    int N, M;
+    cin >> N >> M;
+    vector<my_struct> s(M);
+    for (int i = 0; i < M; i++)
     {
-        for (int bit = 0; bit < (1 << W - 1); bit++)
+        cin >> s[i].a >> s[i].b;
+        s[i].a--;
+        s[i].b--;
+    }
+    sort(s.begin(), s.end());
+
+    int ans = 0;
+    int t = -1;
+    for (int i = 0; i < M; i++)
+    {
+        if (t <= s[i].a)
         {
-            vec.clear();
-
-            for (int j = 0; j < W; j++)
-            {
-                if (bit & (1 << j))
-                {
-                    vec.push_back(j);
-                }
-            }
-
-            bool flag = true;
-            st.clear();
-            for (auto v : vec)
-            {
-                st.insert(v);
-            }
-            for (auto v : vec)
-            {
-                if (st.count(v - 1))
-                {
-                    flag = false;
-                }
-            }
-
-            if (flag)
-            {
-                for (int j = 0; j < W; j++)
-                {
-                    if (st.count(j))
-                    {
-                        dp[i][j + 1] += dp[i - 1][j];
-                        dp[i][j + 1] %= MOD;
-                    }
-                    else if (st.count(j - 1))
-                    {
-                        dp[i][j - 1] += dp[i - 1][j];
-                        dp[i][j - 1] %= MOD;
-                    }
-                    else
-                    {
-                        dp[i][j] += dp[i - 1][j];
-                        dp[i][j] %= MOD;
-                    }
-                }
-            }
+            t = s[i].b;
+            ans++;
         }
     }
-
-    cout << dp[H][K] << endl;
+    cout << ans << endl;
 }
