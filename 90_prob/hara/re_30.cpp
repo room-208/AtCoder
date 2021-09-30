@@ -604,21 +604,35 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int K;
+    cin >> K;
+
+    vector<int> q = osa_k(N);
+    vector<int> prime;
+    for (int n = 2; n <= N; n++)
     {
-        cin >> A[i];
+        if (n == q[n])
+        {
+            prime.push_back(n);
+        }
+    }
+    vector<int> cnt(N + 1, 0);
+    int ans = 0;
+    for (auto p : prime)
+    {
+        for (int n = p; n <= N; n += p)
+        {
+            cnt[n]++;
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    for (int n = 1; n <= N; n++)
     {
-        cout << "Yes" << endl;
+        if (cnt[n] >= K)
+        {
+            ans++;
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans << endl;
 }

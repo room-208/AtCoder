@@ -194,7 +194,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
 }
 
 //アルファベット表
-vector<vector<int>> alphabet_table(string S)
+vector<vector<int>> alphabet_greedy_table(string S)
 {
     int N = (int)S.size();
     vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
@@ -604,21 +604,26 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+
+    vector<int> osak = osa_k(1000000);
+    deque<int> prime;
+    for (int i = 2; i <= 55555; i++)
     {
-        cin >> A[i];
+        if (osak[i] == i)
+        {
+            prime.push_back(i);
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<int>> S(5);
+    for (auto p : prime)
     {
-        cout << "Yes" << endl;
+        S[p % 5].push_back(p);
     }
-    else
+
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        cout << S[1][i] << " ";
     }
+    cout << endl;
 }

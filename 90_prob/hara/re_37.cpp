@@ -194,7 +194,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
 }
 
 //アルファベット表
-vector<vector<int>> alphabet_table(string S)
+vector<vector<int>> alphabet_greedy_table(string S)
 {
     int N = (int)S.size();
     vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
@@ -264,11 +264,11 @@ namespace seg
     const long long ID = 0;
     long long op(long long a, long long b)
     {
-        return min(a, b);
+        return max(a, b);
     }
     long long e()
     {
-        return INF_ll;
+        return -INF_ll;
     }
     long long mapping(long long f, long long x)
     {
@@ -602,23 +602,62 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int W, N;
+    cin >> W >> N;
+    vector<int> L(N + 1), R(N + 1);
+    vector<long long> V(N + 1);
+    for (int i = 1; i <= N; i++)
     {
-        cin >> A[i];
+        cin >> L[i] >> R[i] >> V[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<long long>> dp(W + 1, vector<long long>(N + 1, -1));
+    vector<long long> a(W + 1);
+    dp[0][0] = 0;
+    for (int j = 1; j <= N; j++)
     {
-        cout << "Yes" << endl;
+        for (int i = 0; i <= W; i++)
+        {
+            dp[i][j] = dp[i][j - 1];
+            a[i] = dp[i][j - 1];
+        }
+
+        segtree<long long, seg::op, seg::e> sgt(a);
+
+        for (int i = 0; i <= W; i++)
+        {
+            int l = i - L[j];
+            int r = i - R[j];
+
+            if (l < 0)
+            {
+                continue;
+            }
+
+            if (r < 0)
+            {
+                r = 0;
+            }
+
+            long long tmp = sgt.prod(r, l + 1);
+
+            if (tmp != -1)
+            {
+                chmax(dp[i][j], tmp + V[j]);
+            }
+        }
     }
-    else
+
+    /*
+    for (int i = 0; i <= W; i++)
     {
-        cout << "No" << endl;
+        for (int j = 0; j <= N; j++)
+        {
+            cout << dp[i][j] << " ";
+        }
+        cout << endl;
     }
+    */
+
+    cout << dp[W][N] << endl;
 }

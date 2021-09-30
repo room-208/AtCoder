@@ -25,7 +25,7 @@
 using namespace std;
 using namespace atcoder;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -194,7 +194,7 @@ vector<pair<char, int>> runLengthEncoding(string s)
 }
 
 //アルファベット表
-vector<vector<int>> alphabet_table(string S)
+vector<vector<int>> alphabet_greedy_table(string S)
 {
     int N = (int)S.size();
     vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
@@ -600,25 +600,95 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+long long per(int n)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    long long ans = 1;
+    while (n != 0)
     {
-        cin >> A[i];
+        ans *= n;
+        ans %= MOD;
+        n--;
     }
 
-    bool flag = true;
-    if (flag)
+    return ans;
+}
+
+int main()
+{
+    int N, K;
+    cin >> N >> K;
+    vector<vector<int>> a(N, vector<int>(N));
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < N; j++)
+        {
+            cin >> a[i][j];
+        }
     }
-    else
+
+    long long ans = 1;
+
+    UnionFind uf1(N);
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        for (int k = i + 1; k < N; k++)
+        {
+            bool flag = true;
+
+            for (int j = 0; j < N; j++)
+            {
+                if (a[i][j] + a[k][j] > K)
+                {
+                    flag = false;
+                }
+            }
+
+            if (flag)
+            {
+                uf1.unite(i, k);
+            }
+        }
     }
+
+    for (int i = 0; i < N; i++)
+    {
+        if (i == uf1.root(i))
+        {
+            ans *= per(uf1.size(i));
+            ans %= MOD;
+        }
+    }
+
+    UnionFind uf2(N);
+    for (int j = 0; j < N; j++)
+    {
+        for (int k = j + 1; k < N; k++)
+        {
+            bool flag = true;
+
+            for (int i = 0; i < N; i++)
+            {
+                if (a[i][j] + a[i][k] > K)
+                {
+                    flag = false;
+                }
+            }
+
+            if (flag)
+            {
+                uf2.unite(j, k);
+            }
+        }
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        if (i == uf2.root(i))
+        {
+            ans *= per(uf2.size(i));
+            ans %= MOD;
+        }
+    }
+
+    cout << ans << endl;
 }

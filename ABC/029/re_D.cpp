@@ -602,23 +602,102 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
+    string N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int n = (int)N.size();
+
+    int P = 20;
+    vector<vector<vector<long long>>> dp(n + 1, vector<vector<long long>>(P, vector<long long>(2, 0)));
+    dp[0][0][0] = 1;
+    for (int j = 1; j <= n; j++)
     {
-        cin >> A[i];
+        int c = N[j - 1] - '0';
+
+        if (c == 0)
+        {
+            //最大桁を採用
+            for (int k = 0; k < P; k++)
+            {
+                dp[j][k][0] += dp[j - 1][k][0];
+            }
+
+            //1を採用
+            for (int k = 0; k < P - 1; k++)
+            {
+                dp[j][k + 1][1] += dp[j - 1][k][1];
+            }
+
+            //1以外を採用
+            for (int k = 0; k < P; k++)
+            {
+                dp[j][k][1] += 9LL * dp[j - 1][k][1];
+            }
+        }
+        else if (c == 1)
+        {
+            //最大桁を採用
+            for (int k = 0; k < P - 1; k++)
+            {
+                dp[j][k + 1][0] += dp[j - 1][k][0];
+            }
+
+            //0を採用
+            for (int k = 0; k < P; k++)
+            {
+                dp[j][k][1] += dp[j - 1][k][0];
+            }
+
+            //1を採用
+            for (int k = 0; k < P - 1; k++)
+            {
+                dp[j][k + 1][1] += dp[j - 1][k][1];
+            }
+
+            //1以外を採用
+            for (int k = 0; k < P; k++)
+            {
+                dp[j][k][1] += 9LL * dp[j - 1][k][1];
+            }
+        }
+        else
+        {
+            //最大桁を採用
+            for (int k = 0; k < P; k++)
+            {
+                dp[j][k][0] += dp[j - 1][k][0];
+            }
+
+            //1を採用
+            for (int k = 0; k < P - 1; k++)
+            {
+                for (int ok = 0; ok <= 1; ok++)
+                {
+                    dp[j][k + 1][1] += dp[j - 1][k][ok];
+                }
+            }
+
+            //0,2からc-1を採用
+            for (int k = 0; k < P; k++)
+            {
+                dp[j][k][1] += ((long long)c - 1) * dp[j - 1][k][0];
+            }
+
+            //1以外を採用
+            for (int k = 0; k < P; k++)
+            {
+                dp[j][k][1] += 9LL * dp[j - 1][k][1];
+            }
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    long long ans = 0;
+    for (int k = 0; k < P; k++)
     {
-        cout << "Yes" << endl;
+        for (int ok = 0; ok <= 1; ok++)
+        {
+            ans += ((long long)k) * dp[n][k][ok];
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans << endl;
 }
