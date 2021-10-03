@@ -21,11 +21,13 @@
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
+#include <atcoder/modint>
 
 using namespace std;
 using namespace atcoder;
+using mint = modint998244353; //modint1000000007
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -600,25 +602,49 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+void zahyou_assyuku(vector<int> &A)
+{
+    int N = (int)A.size();
+
+    map<int, int> mp;
+    for (int i = 0; i < N; i++)
+    {
+        mp[A[i]] = 0;
+    }
+
+    int cnt = 0;
+    for (auto itr = mp.begin(); itr != mp.end(); itr++)
+    {
+        itr->second = cnt;
+        cnt++;
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        A[i] = mp[A[i]];
+    }
+}
+
 int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
     vector<int> A(N);
     for (int i = 0; i < N; i++)
     {
         cin >> A[i];
     }
 
-    bool flag = true;
-    if (flag)
+    zahyou_assyuku(A);
+
+    fenwick_tree<mint> fw(N);
+    mint x = 2LL;
+    mint ans = 0;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        ans += fw.sum(0, A[i] + 1) * x.pow(i);
+        fw.add(A[i], x.inv().pow(i + 1));
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans.val() << endl;
 }

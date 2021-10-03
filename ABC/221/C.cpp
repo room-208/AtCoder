@@ -600,25 +600,55 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+long long ten(string S)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    long long res = 0;
+    reverse(S.begin(), S.end());
+
+    long long base = 1;
+
+    for (int i = 0; i < (int)S.size(); i++)
     {
-        cin >> A[i];
+        res += (long long)(S[i] - '0') * base;
+        base *= 10;
     }
 
-    bool flag = true;
-    if (flag)
+    return res;
+}
+
+int main()
+{
+    string N;
+    cin >> N;
+    int n = (int)N.size();
+
+    long long ans = -1;
+    for (int bit = 0; bit < (1 << n); bit++)
     {
-        cout << "Yes" << endl;
+        string A, B;
+
+        for (int i = 0; i < n; i++)
+        {
+            if (bit & (1 << i))
+            {
+                A.push_back(N[i]);
+            }
+            else
+            {
+                B.push_back(N[i]);
+            }
+        }
+
+        sort(A.begin(), A.end());
+        reverse(A.begin(), A.end());
+        sort(B.begin(), B.end());
+        reverse(B.begin(), B.end());
+
+        long long a = ten(A);
+        long long b = ten(B);
+
+        chmax(ans, a * b);
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans << endl;
 }

@@ -602,23 +602,10 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
-    {
-        cin >> A[i];
-    }
+    int A, B;
+    cin >> A >> B;
+    int C = A - B;
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    long long n = pow(32LL, C);
+    cout << n << endl;
 }

@@ -604,21 +604,47 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<int> A(N), B(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> A[i] >> B[i];
+        A[i];
+        B[i] += A[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<pair<int, int>> p;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        p.push_back(make_pair(A[i], 1));
+        p.push_back(make_pair(B[i], -1));
     }
-    else
+    sort(p.begin(), p.end());
+
+    vector<int> D(N + 1, 0);
+    int back_t = p[0].first;
+    int cnt = 1;
+    for (int i = 1; i < (int)p.size(); i++)
     {
-        cout << "No" << endl;
+        int t = p[i].first;
+        int flag = p[i].second;
+
+        if (flag == 1)
+        {
+            D[cnt] += t - back_t;
+            back_t = t;
+            cnt++;
+        }
+        else if (flag == -1)
+        {
+            D[cnt] += t - back_t;
+            back_t = t;
+            cnt--;
+        }
     }
+
+    for (int i = 1; i <= N; i++)
+    {
+        cout << D[i] << " ";
+    }
+    cout << endl;
 }

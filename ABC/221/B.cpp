@@ -602,17 +602,30 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    string S, T;
+    cin >> S >> T;
+    int N = (int)S.size();
+
+    bool flag = false;
+
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        for (int j = i - 1; j <= i + 1; j++)
+        {
+            if (0 <= j && j < N)
+            {
+                string A = S;
+
+                swap(A[i], A[j]);
+
+                if (A == T)
+                {
+                    flag = true;
+                }
+            }
+        }
     }
 
-    bool flag = true;
     if (flag)
     {
         cout << "Yes" << endl;

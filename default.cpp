@@ -21,9 +21,11 @@
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
+#include <atcoder/modint>
 
 using namespace std;
 using namespace atcoder;
+using mint = modint998244353; //modint1000000007
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
