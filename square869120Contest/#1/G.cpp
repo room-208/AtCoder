@@ -29,7 +29,7 @@ using mint = modint998244353; //modint1000000007
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
-const long long INF_ll = 1000000000000000000LL;
+const long long INF_ll = 2LL * 1000000000000000000LL;
 const int COM_MAX = 510000;
 
 long long fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
@@ -604,23 +604,105 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, M;
+    cin >> N >> M;
+    vector<int> s(M), t(M);
+    vector<long long> d(M), time(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        cin >> s[i] >> t[i] >> d[i] >> time[i];
+        s[i]--;
+        t[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    Graph_Edge G(N);
+    for (int i = 0; i < M; i++)
     {
-        cout << "Yes" << endl;
+        G[s[i]].push_back(Edge(t[i], d[i]));
+        G[t[i]].push_back(Edge(s[i], d[i]));
+    }
+
+    unordered_map<pair<int, int>, long long, HashPair> mp;
+    for (int i = 0; i < M; i++)
+    {
+        mp[make_pair(s[i], t[i])] = time[i];
+        mp[make_pair(t[i], s[i])] = time[i];
+    }
+
+    vector<vector<long long>> dp((1 << N), vector<long long>(N, INF_ll));
+    vector<vector<long long>> cnt((1 << N), vector<long long>(N, 0));
+    dp[1][0] = 0;
+    cnt[1][0] = 1;
+    for (int bit = 0; bit < (1 << N); bit++)
+    {
+        for (int u = 0; u < N; u++)
+        {
+            if (bit & (1 << u))
+            {
+                for (auto e : G[u])
+                {
+                    int v = e.to;
+                    long long dist = e.w;
+                    long long time_ = mp[make_pair(u, v)];
+
+                    if (bit & (1 << v))
+                    {
+                        continue;
+                    }
+
+                    if (dp[bit][u] + dist <= time_)
+                    {
+                        if (chmin(dp[bit | (1 << v)][v], dp[bit][u] + dist))
+                        {
+                            cnt[bit | (1 << v)][v] = cnt[bit][u];
+                        }
+                        else if (dp[bit | (1 << v)][v] == dp[bit][u] + dist)
+                        {
+                            cnt[bit | (1 << v)][v] += cnt[bit][u];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    long long ans = INF_ll;
+    for (auto e : G[0])
+    {
+        int bit = (1 << N) - 1;
+        int v = e.to;
+        long long dist = e.w;
+        long long time_ = mp[make_pair(0, v)];
+
+        if (dp[bit][v] + dist <= time_)
+        {
+            chmin(ans, dp[bit][v] + dist);
+        }
+    }
+
+    int ans_cnt = 0;
+    for (auto e : G[0])
+    {
+        int bit = (1 << N) - 1;
+        int v = e.to;
+        long long dist = e.w;
+        long long time_ = mp[make_pair(0, v)];
+
+        if (dp[bit][v] + dist <= time_)
+        {
+            if (ans == dp[bit][v] + dist)
+            {
+                ans_cnt += cnt[bit][v];
+            }
+        }
+    }
+
+    if (ans == INF_ll)
+    {
+        cout << "IMPOSSIBLE" << endl;
     }
     else
     {
-        cout << "No" << endl;
+        cout << ans << " " << ans_cnt << endl;
     }
 }
