@@ -27,7 +27,7 @@ using namespace std;
 using namespace atcoder;
 using mint = modint998244353; //modint1000000007
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -364,38 +364,6 @@ struct Edge
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen)
-{
-    seen[v] = true;
-
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        DFS(G, next_v, seen);
-    }
-}
-
-//根付き木
-void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
-{
-    for (auto next_v : G[v])
-    {
-        if (next_v == p)
-        {
-            continue;
-        }
-
-        par_cal(G, next_v, par, v);
-    }
-
-    par[v] = p;
-}
-
 //部分木サイズ
 void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int p = -1)
 {
@@ -602,25 +570,114 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+//根付き木
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    for (auto next_v : G[v])
     {
-        cin >> A[i];
+        if (next_v == p)
+        {
+            continue;
+        }
+
+        par_cal(G, next_v, par, v);
     }
 
-    bool flag = true;
-    if (flag)
+    par[v] = p;
+}
+
+int main()
+{
+    int N, M, K;
+    cin >> N >> M >> K;
+    vector<int> A(M);
+    for (int i = 0; i < M; i++)
     {
-        cout << "Yes" << endl;
+        cin >> A[i];
+        A[i]--;
     }
-    else
+    Graph_int G(N);
+    vector<int> U(N - 1), V(N - 1);
+    for (int i = 0; i < N - 1; i++)
     {
-        cout << "No" << endl;
+        cin >> U[i] >> V[i];
+        U[i]--;
+        V[i]--;
+        G[U[i]].push_back(V[i]);
+        G[V[i]].push_back(U[i]);
     }
+
+    unordered_map<pair<int, int>, long long, HashPair> mp;
+    for (int i = 0; i < N - 1; i++)
+    {
+        mp[make_pair(U[i], V[i])] = 0;
+        mp[make_pair(V[i], U[i])] = 0;
+    }
+
+    vector<int> par(N);
+    for (int i = 0; i < M - 1; i++)
+    {
+        par.assign(N, -1);
+        par_cal(G, A[i], par);
+
+        int q = A[i + 1];
+        while (q != A[i])
+        {
+            mp[make_pair(q, par[q])] += 1;
+            mp[make_pair(par[q], q)] += 1;
+            q = par[q];
+        }
+    }
+
+    for (int i = 0; i < N - 1; i++)
+    {
+        K += mp[make_pair(U[i], V[i])];
+    }
+
+    if (K % 2 == 1)
+    {
+        cout << 0 << endl;
+        return 0;
+    }
+    else if (K < 0)
+    {
+        cout << 0 << endl;
+        return 0;
+    }
+
+    K /= 2;
+
+    vector<long long> cnt(N, 0LL);
+    for (int i = 0; i < N - 1; i++)
+    {
+        cnt[i + 1] = mp[make_pair(U[i], V[i])];
+        cnt[i + 1] %= MOD;
+    }
+
+    vector<long long> dp(K + 1, 0LL);
+    dp[0] = 1;
+    for (int j = 1; j < N; j++)
+    {
+        for (int i = K; i >= 0; i--)
+        {
+            if (i - cnt[j] >= 0)
+            {
+                dp[i] += dp[i - cnt[j]];
+                dp[i] %= MOD;
+            }
+        }
+    }
+
+    /*
+    for (int i = 0; i <= K; i++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            cout << dp[i][j] << " ";
+        }
+        cout << endl;
+    }
+    */
+
+    cout << dp[K] << endl;
 }

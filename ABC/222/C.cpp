@@ -604,23 +604,79 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, M;
+    cin >> N >> M;
+    vector<vector<char>> A(2 * N, vector<char>(M));
+    for (int i = 0; i < 2 * N; i++)
     {
-        cin >> A[i];
+        for (int j = 0; j < M; j++)
+        {
+            cin >> A[i][j];
+        }
     }
 
-    bool flag = true;
-    if (flag)
+    set<pair<int, int>> st;
+    for (int i = 0; i < 2 * N; i++)
     {
-        cout << "Yes" << endl;
+        st.insert(make_pair(0, i));
     }
-    else
+
+    vector<pair<int, int>> p;
+    for (int j = 0; j < M; j++)
     {
-        cout << "No" << endl;
+        p.clear();
+        for (auto s : st)
+        {
+            p.push_back(s);
+        }
+
+        st.clear();
+        for (int k = 0; k < N; k++)
+        {
+            int a = p[2 * k].second;
+            int b = p[2 * k + 1].second;
+
+            if (A[a][j] == A[b][j])
+            {
+                st.insert(p[2 * k]);
+                st.insert(p[2 * k + 1]);
+            }
+
+            if (A[a][j] == 'G' && A[b][j] == 'C')
+            {
+                st.insert(make_pair(p[2 * k].first - 1, p[2 * k].second));
+                st.insert(p[2 * k + 1]);
+            }
+            if (A[a][j] == 'G' && A[b][j] == 'P')
+            {
+                st.insert(p[2 * k]);
+                st.insert(make_pair(p[2 * k + 1].first - 1, p[2 * k + 1].second));
+            }
+            if (A[a][j] == 'C' && A[b][j] == 'G')
+            {
+                st.insert(p[2 * k]);
+                st.insert(make_pair(p[2 * k + 1].first - 1, p[2 * k + 1].second));
+            }
+            if (A[a][j] == 'C' && A[b][j] == 'P')
+            {
+                st.insert(make_pair(p[2 * k].first - 1, p[2 * k].second));
+                st.insert(p[2 * k + 1]);
+            }
+            if (A[a][j] == 'P' && A[b][j] == 'C')
+            {
+                st.insert(p[2 * k]);
+                st.insert(make_pair(p[2 * k + 1].first - 1, p[2 * k + 1].second));
+            }
+            if (A[a][j] == 'P' && A[b][j] == 'G')
+            {
+                st.insert(make_pair(p[2 * k].first - 1, p[2 * k].second));
+                st.insert(p[2 * k + 1]);
+            }
+        }
+    }
+
+    for (auto s : st)
+    {
+        cout << s.second + 1 << endl;
     }
 }

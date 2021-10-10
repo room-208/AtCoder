@@ -680,7 +680,7 @@ int main()
         }
     }
 
-    int ans_cnt = 0;
+    long long ans_cnt = 0;
     for (auto e : G[0])
     {
         int bit = (1 << N) - 1;

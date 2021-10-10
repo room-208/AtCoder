@@ -604,23 +604,14 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
+    string N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    reverse(N.begin(), N.end());
+    while ((int)N.size() != 4)
     {
-        cin >> A[i];
+        N.push_back('0');
     }
+    reverse(N.begin(), N.end());
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    cout << N << endl;
 }

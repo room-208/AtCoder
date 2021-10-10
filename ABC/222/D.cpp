@@ -27,7 +27,7 @@ using namespace std;
 using namespace atcoder;
 using mint = modint998244353; //modint1000000007
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -263,43 +263,14 @@ vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
 //lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
 namespace seg
 {
-    const long long ID = 0;
-    long long op(long long a, long long b)
+    mint op(mint a, mint b)
     {
-        return min(a, b);
+        return a + b;
     }
-    long long e()
+    mint e()
     {
-        return INF_ll;
+        return 0;
     }
-    long long mapping(long long f, long long x)
-    {
-        if (f == ID)
-        {
-            return x;
-        }
-        else
-        {
-            return x + f;
-        }
-    }
-    long long composition(long long f, long long g)
-    {
-        if (f == ID)
-        {
-            return g;
-        }
-        else
-        {
-            return f + g;
-        }
-    }
-    long long id()
-    {
-        return ID;
-    }
-    long long target;
-    bool f(long long v) { return v < target; }
 }
 
 // Union-Find
@@ -606,21 +577,43 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<int> a(N), b(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> a[i];
+    }
+    for (int i = 0; i < N; i++)
+    {
+        cin >> b[i];
     }
 
-    bool flag = true;
-    if (flag)
+    int M = 10000;
+    mint ans = 0;
+    vector<mint> cnt(M + 1);
+    for (int k = a[0]; k <= b[0]; k++)
     {
-        cout << "Yes" << endl;
+        cnt[k] = 1;
     }
-    else
+    for (int i = 0; i < N - 1; i++)
     {
-        cout << "No" << endl;
+        segtree<mint, seg::op, seg::e> sgt(M + 1);
+        for (int k = 0; k <= M; k++)
+        {
+            sgt.set(k, cnt[k]);
+        }
+
+        cnt.assign(M + 1, 0);
+
+        for (int k = a[i + 1]; k <= b[i + 1]; k++)
+        {
+            cnt[k] = sgt.prod(0, k + 1);
+        }
     }
+
+    for (int k = 0; k <= M; k++)
+    {
+        ans += cnt[k];
+    }
+
+    cout << ans.val() << endl;
 }
