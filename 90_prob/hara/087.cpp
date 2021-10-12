@@ -29,7 +29,7 @@ using mint = modint998244353; //modint1000000007
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
-const long long INF_ll = 1000000000000000000LL;
+const long long INF_ll = 4LL * 1000000000000000000LL;
 const int COM_MAX = 510000;
 
 long long fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
@@ -602,25 +602,133 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+int floid_warshal_counter(vector<vector<long long>> &A, long long X, long long P, int N)
 {
-    int N;
-    cin >> N;
+    vector<vector<long long>> dp(N, vector<long long>(N, INF_ll));
 
-    long long bit = (1LL << N);
-
-    string zero, two;
-
-    two = to_string(bit);
-
-    zero.push_back('0');
-    zero.push_back('.');
-    for (int i = 1; i <= N - (int)two.size(); i++)
+    for (int i = 0; i < N; ++i)
     {
-        zero.push_back('0');
+        for (int j = 0; j < N; ++j)
+        {
+            if (A[i][j] == -1)
+            {
+                dp[i][j] = X;
+            }
+            else
+            {
+                dp[i][j] = A[i][j];
+            }
+        }
     }
 
-    string ans = zero + two;
+    // dp 遷移 (フロイド・ワーシャル法)
+    for (int k = 0; k < N; ++k)
+    {
+        for (int i = 0; i < N; ++i)
+        {
+            for (int j = 0; j < N; ++j)
+            {
+                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+            }
+        }
+    }
 
-    cout << ans << endl;
+    int cnt = 0;
+    for (int i = 0; i < N; ++i)
+    {
+        for (int j = i + 1; j < N; ++j)
+        {
+            if (dp[i][j] <= P)
+            {
+                cnt++;
+            }
+        }
+    }
+
+    return cnt;
+}
+
+int main()
+{
+    int N, K;
+    long long P;
+    cin >> N >> P >> K;
+    vector<vector<long long>> A(N, vector<long long>(N));
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            cin >> A[i][j];
+        }
+    }
+
+    bool flag = false;
+
+    long long ans_left;
+    long long left = 0;
+    long long right = INF_ll;
+    while (right - left > 1)
+    {
+        long long mid = (right + left) / 2LL;
+
+        int cnt = floid_warshal_counter(A, mid, P, N);
+
+        if (cnt < K)
+        {
+            right = mid;
+        }
+        else if (cnt > K)
+        {
+            left = mid;
+        }
+        else if (cnt == K)
+        {
+            flag = true;
+            right = mid;
+        }
+    }
+
+    ans_left = right;
+
+    long long ans_right;
+    left = 0;
+    right = INF_ll;
+    while (right - left > 1)
+    {
+        long long mid = (right + left) / 2LL;
+
+        int cnt = floid_warshal_counter(A, mid, P, N);
+
+        if (cnt < K)
+        {
+            right = mid;
+        }
+        else if (cnt > K)
+        {
+            left = mid;
+        }
+        else if (cnt == K)
+        {
+            flag = true;
+            left = mid;
+        }
+    }
+
+    ans_right = left;
+
+    if (flag)
+    {
+        if (ans_right == INF_ll - 1LL)
+        {
+            cout << "Infinity" << endl;
+        }
+        else
+        {
+            cout << ans_right - ans_left + 1 << endl;
+        }
+    }
+    else
+    {
+        cout << 0 << endl;
+    }
 }

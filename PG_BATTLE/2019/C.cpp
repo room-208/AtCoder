@@ -627,20 +627,15 @@ int main()
 
     int N = H * W;
     Graph_int G(4 * N);
-    vector<vector<int>> dx(4, vector<int>(4)), dy(4, vector<int>(4)), m(4, vector<int>(4));
-    dx[0] = {1, 0, -1, 0};
-    dy[0] = {0, -1, 0, 1};
-    m[0] = {3, 0, 1, 2};
-    dx[1] = {0, -1, 0, 1};
-    dy[1] = {-1, 0, 1, 0};
-    m[1] = {0, 1, 2, 3};
-    dx[2] = {-1, 0, 1, 0};
-    dy[2] = {0, 1, 0, -1};
-    m[2] = {1, 2, 3, 0};
-    dx[3] = {0, 1, 0, -1};
-    dy[3] = {1, 0, -1, 0};
-    m[3] = {2, 3, 0, 1};
+    deque<int> dx(4), dy(4), m(4);
+    dx = {1, 0, -1, 0};
+    dy = {0, -1, 0, 1};
+    m = {3, 0, 1, 2};
 
+    // n==0は左向き
+    // n==1は上向き
+    // n==2は右向き
+    // n==3は下向き
     for (int n = 0; n < 4; n++)
     {
         for (int i = 0; i < H; i++)
@@ -656,14 +651,14 @@ int main()
 
                 for (int k = 0; k < 4; k++)
                 {
-                    int p = i + dx[n][k];
-                    int q = j + dy[n][k];
+                    int p = i + dx[k];
+                    int q = j + dy[k];
 
                     if (in_out(p, q, H, W))
                     {
                         if (S[p][q] == '.')
                         {
-                            int v = to_node(p, q, W) + m[n][k] * N;
+                            int v = to_node(p, q, W) + m[k] * N;
                             G[u].push_back(v);
                             break;
                         }
@@ -671,9 +666,21 @@ int main()
                 }
             }
         }
+
+        int tmp_dx = dx.front();
+        int tmp_dy = dy.front();
+        int tmp_m = m.front();
+
+        dx.pop_front();
+        dy.pop_front();
+        m.pop_front();
+
+        dx.push_back(tmp_dx);
+        dy.push_back(tmp_dy);
+        m.push_back(tmp_m);
     }
 
-    int s = to_node(Px, Py, W);
+    int s = to_node(Px, Py, W) + N;
     vector<int> t(4);
     for (int k = 0; k < 4; k++)
     {
@@ -681,19 +688,21 @@ int main()
     }
 
     vector<int> d = BFS(G, s);
-    bool flag = true;
+    int ans = INF_int;
     for (int k = 0; k < 4; k++)
     {
         if (d[t[k]] != -1)
         {
-            cout << d[t[k]] << endl;
-            flag = false;
-            break;
+            chmin(ans, d[t[k]]);
         }
     }
 
-    if (flag)
+    if (ans == INF_int)
     {
         cout << -1 << endl;
+    }
+    else
+    {
+        cout << ans << endl;
     }
 }

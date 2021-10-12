@@ -17,21 +17,22 @@
 #include <deque>
 #include <queue>
 #include <list>
+#include <atcoder/scc>
 #include <atcoder/fenwicktree>
 #include <atcoder/segtree>
 #include <atcoder/lazysegtree>
+#include <atcoder/modint>
 
 using namespace std;
 using namespace atcoder;
+using mint = modint998244353; //modint1000000007
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
-const int COM_pskl_N = 60;
 
 long long fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
-vector<vector<long long>> com_pskl;
 
 // テーブルを作る前処理
 void COMinit()
@@ -57,21 +58,6 @@ long long COM(int n, int k)
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
-//パスカルの三角形の二項係数
-void COM_paskal()
-{
-    com_pskl.assign(COM_pskl_N, vector<long long>(COM_pskl_N));
-    com_pskl[0][0] = 1;
-    for (int i = 1; i < COM_pskl_N; ++i)
-    {
-        com_pskl[i][0] = 1;
-        for (int j = 1; j < COM_pskl_N; j++)
-        {
-            com_pskl[i][j] = (com_pskl[i - 1][j - 1] + com_pskl[i - 1][j]);
-        }
-    }
-}
-
 //繰り返し二乗法
 long long MOD_pow(long long a, long long n)
 {
@@ -90,6 +76,20 @@ long long MOD_pow(long long a, long long n)
 long long tousa_sum(long long a, long long d, long long n)
 {
     return (a * 2 + d * (n - 1)) * n / 2;
+}
+
+//転倒数
+long long inv_count(const vector<int> &a)
+{
+    int n = (int)a.size();
+    fenwick_tree<int> fw(n);
+    long long ans = 0;
+    for (int i = 0; i < n; i++)
+    {
+        ans += fw.sum(a[i] + 1, n);
+        fw.add(a[i], 1);
+    }
+    return ans;
 }
 
 //最大公約数
@@ -195,10 +195,32 @@ vector<pair<char, int>> runLengthEncoding(string s)
     return res;
 }
 
+//アルファベット表
+vector<vector<int>> alphabet_table(string S)
+{
+    int N = (int)S.size();
+    vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
+    for (int j = N - 1; j >= 0; j--)
+    {
+        int m = S[j] - 'a';
+        for (int i = 0; i < 26; i++)
+        {
+            if (i == m)
+            {
+                c[i][j] = j;
+            }
+            else
+            {
+                c[i][j] = c[i][j + 1];
+            }
+        }
+    }
+    return c;
+}
+
 //unoderedのハッシュ
 struct HashPair
 {
-
     //注意 constがいる
     template <class T1, class T2>
     size_t operator()(const pair<T1, T2> &p) const
@@ -218,109 +240,414 @@ struct HashPair
     }
 };
 
+// 行列半時計回り90度回転
+template <class T>
+vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
+{
+    vector<vector<T>> B(W, vector<T>(H));
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            int a = -j + (W - 1);
+            int b = i;
+
+            B[a][b] = A[i][j];
+        }
+    }
+    return B;
+}
+
 //セグ木・遅延セグ木
-struct S
+//segtree<long long, seg::op, seg::e> sgt;
+//lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
+namespace seg
 {
-    long long value;
-    int index;
+    const long long ID = 0;
+    long long op(long long a, long long b)
+    {
+        return min(a, b);
+    }
+    long long e()
+    {
+        return INF_ll;
+    }
+    long long mapping(long long f, long long x)
+    {
+        if (f == ID)
+        {
+            return x;
+        }
+        else
+        {
+            return x + f;
+        }
+    }
+    long long composition(long long f, long long g)
+    {
+        if (f == ID)
+        {
+            return g;
+        }
+        else
+        {
+            return f + g;
+        }
+    }
+    long long id()
+    {
+        return ID;
+    }
+    long long target;
+    bool f(long long v) { return v < target; }
+}
+
+// Union-Find
+struct UnionFind
+{
+    vector<int> par, siz;
+
+    // 初期化
+    UnionFind(int n) : par(n, -1), siz(n, 1) {}
+
+    // 根を求める
+    int root(int x)
+    {
+        if (par[x] == -1)
+            return x; // x が根の場合は x を返す
+        else
+            return par[x] = root(par[x]);
+    }
+
+    // x と y が同じグループに属するかどうか (根が一致するかどうか)
+    bool issame(int x, int y)
+    {
+        return root(x) == root(y);
+    }
+
+    // x を含むグループと y を含むグループとを併合する
+    bool unite(int x, int y)
+    {
+        // x, y をそれぞれ根まで移動する
+        x = root(x);
+        y = root(y);
+
+        // すでに同じグループのときは何もしない
+        if (x == y)
+            return false;
+
+        // union by size (y 側のサイズが小さくなるようにする)
+        if (siz[x] < siz[y])
+            swap(x, y);
+
+        // y を x の子とする
+        par[y] = x;
+        siz[x] += siz[y];
+        return true;
+    }
+
+    // x を含むグループのサイズ
+    int size(int x)
+    {
+        return siz[root(x)];
+    }
 };
-S op_max(S a, S b)
+
+//エッジ集合
+struct Edge
 {
-    if (a.value > b.value)
+    int to;
+    long long w;
+    Edge(int to, long long w) : to(to), w(w) {}
+};
+
+using Graph_int = vector<vector<int>>;
+using Graph_Edge = vector<vector<Edge>>;
+
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen)
+{
+    seen[v] = true;
+
+    for (auto next_v : G[v])
     {
-        return a;
-    }
-    else
-    {
-        return b;
+        if (seen[next_v])
+        {
+            continue;
+        }
+
+        DFS(G, next_v, seen);
     }
 }
-S e_max()
+
+//根付き木
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
 {
-    return {-INF_ll, -1};
-}
-S op_min(S a, S b)
-{
-    if (a.value < b.value)
+    for (auto next_v : G[v])
     {
-        return a;
+        if (next_v == p)
+        {
+            continue;
+        }
+
+        par_cal(G, next_v, par, v);
     }
-    else
+
+    par[v] = p;
+}
+
+//部分木サイズ
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int p = -1)
+{
+    for (auto c : G[v])
     {
-        return b;
+        if (c == p)
+        {
+            continue;
+        }
+
+        subtree_size_cal(G, c, subtree_size, v);
+    }
+
+    // 帰りがけ時に、部分木サイズを求める
+    subtree_size[v] = 1; // 自分自身
+    for (auto c : G[v])
+    {
+        if (c == p)
+        {
+            continue;
+        }
+
+        // 子頂点を根とする部分きのサイズを加算する
+        subtree_size[v] += subtree_size[c];
     }
 }
-S e_min()
+
+//幅優先探索
+void BFS(const Graph_int &G, int s)
 {
-    return {INF_ll, -1};
+    int N = (int)G.size();   // 頂点数
+    vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
+    queue<int> que;
+
+    // 初期条件 (頂点 s を初期頂点とする)
+    dist[s] = 0;
+    que.push(s); // s を橙色頂点にする
+
+    // BFS 開始 (キューが空になるまで探索を行う)
+    while (!que.empty())
+    {
+        int v = que.front(); // キューから先頭頂点を取り出す
+        que.pop();
+
+        // v からたどれる頂点をすべて調べる
+        for (int x : G[v])
+        {
+            // すでに発見済みの頂点は探索しない
+            if (dist[x] != -1)
+                continue;
+
+            // 新たな白色頂点 x について距離情報を更新してキューに挿入
+            dist[x] = dist[v] + 1;
+            que.push(x);
+        }
+    }
+}
+
+//01BFS
+void BFS_01(const Graph_Edge &G, int s)
+{
+    int N = (int)G.size();             // 頂点数
+    vector<long long> dist(N, INF_ll); // 全頂点を「未訪問」に初期化
+    deque<int> que;
+
+    // 初期条件 (頂点 s を初期頂点とする)
+    dist[s] = 0;
+    que.push_front(s);
+
+    // BFS 開始 (キューが空になるまで探索を行う)
+    while (!que.empty())
+    {
+        int v = que.front(); // キューから先頭頂点を取り出す
+        que.pop_front();
+
+        // v からたどれる頂点をすべて調べる
+        for (auto x : G[v])
+        {
+            if (chmin(dist[x.to], dist[v] + x.w))
+            {
+                if (x.w == 0)
+                {
+                    que.push_front(x.to);
+                }
+                if (x.w == 1)
+                {
+                    que.push_back(x.to);
+                }
+            }
+        }
+    }
+}
+
+//ベルマン・フォード法
+void Bellman_Ford(const Graph_Edge &G, int s)
+{
+    int N = (int)G.size();
+    bool exist_negative_cycle = false; // 負閉路をもつかどうか
+    vector<long long> dist(N, INF_ll);
+    dist[s] = 0;
+
+    for (int iter = 0; iter < N; ++iter)
+    {
+        bool update = false; // 更新が発生したかどうかを表すフラグ
+        for (int v = 0; v < N; ++v)
+        {
+            // dist[v] = INF のときは頂点 v からの緩和を行わない
+            if (dist[v] == INF_ll)
+                continue;
+
+            for (auto e : G[v])
+            {
+                // 緩和処理を行い，更新されたら update を true にする
+                if (chmin(dist[e.to], dist[v] + e.w))
+                {
+                    update = true;
+                }
+            }
+        }
+
+        // 更新が行われなかったら，すでに最短路が求められている
+        if (!update)
+            break;
+
+        // N 回目の反復で更新が行われたならば，負閉路をもつ
+        if (iter == N - 1 && update)
+            exist_negative_cycle = true;
+    }
+}
+
+//ダイクストラ法
+void Dijkstra(const Graph_Edge &G, int s)
+{
+    int N = (int)G.size();
+    vector<long long> dist(N, INF_ll);
+    dist[s] = 0;
+
+    // (d[v], v) のペアを要素としたヒープを作る
+    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> que;
+    que.push(make_pair(dist[s], s));
+
+    // ダイクストラ法の反復を開始
+    while (!que.empty())
+    {
+        // v: 使用済みでない頂点のうち d[v] が最小の頂点
+        // d: v に対するキー値
+        int v = que.top().second;
+        long long d = que.top().first;
+        que.pop();
+
+        // d > dist[v] は，(d, v) がゴミであることを意味する
+        if (d > dist[v])
+            continue;
+
+        // 頂点 v を始点とした各辺を緩和
+        for (auto e : G[v])
+        {
+            if (chmin(dist[e.to], dist[v] + e.w))
+            {
+                // 更新があるならヒープに新たに挿入
+                que.push(make_pair(dist[e.to], e.to));
+            }
+        }
+    }
+}
+
+//オーバーフロー判定
+//__builtin_add_overflow
+//__builtin_mul_overflow
+
+//ノード変換
+int to_node(int i, int j, int W)
+{
+    return W * i + j;
+}
+
+//ij変換
+pair<int, int> to_ij(int v, int W)
+{
+    int i = v / W;
+    int j = v - W * i;
+
+    return make_pair(i, j);
+}
+
+//in_out判定
+bool in_out(int i, int j, int H, int W)
+{
+    if (0 <= i && i < H && 0 <= j && j < W)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+struct my_struct
+{
+    int a, b;
+};
+
+bool operator<(const my_struct &s_1, const my_struct &s_2)
+{
+    return s_1.b > s_2.b;
 }
 
 int main()
 {
     int N;
+    cin >> N;
     long long Z, W;
-    cin >> N >> Z >> W;
+    cin >> Z >> W;
     vector<long long> a(N);
     for (int i = 0; i < N; i++)
     {
         cin >> a[i];
     }
 
-    vector<S> b(N);
+    vector<vector<long long>> dp(2, vector<long long>(N));
     for (int i = 0; i < N; i++)
     {
-        b[i].value = a[i];
-        b[i].index = i;
+        dp[0][i] = -INF_ll;
     }
-    long long X = Z;
-    long long Y = W;
-    int flag = 0;
-    int n = 0;
-    segtree<S, op_max, e_max> sgt_max(b);
-    segtree<S, op_min, e_min> sgt_min(b);
-    while (n != N)
+    for (int i = 0; i < N; i++)
     {
-        if (flag == 0)
-        {
-            S x_max = sgt_max.prod(n, N);
-            X = x_max.value;
-            n = x_max.index + 1;
-        }
-        else if (flag == 1)
-        {
-            S x_min = sgt_min.prod(n, N);
-            Y = x_min.value;
-            n = x_min.index + 1;
-        }
-
-        flag = 1 - flag;
+        dp[1][i] = INF_ll;
     }
 
-    long long ans = -1;
-    chmax(ans, llabs(X - Y));
-
-    X = Z;
-    Y = W;
-    flag = 0;
-    n = 0;
-    while (n != N)
+    for (int i = N - 1; i >= 0; i--)
     {
-        if (flag == 0)
+        long long X, Y;
+
+        if (i - 1 >= 0)
         {
-            S x_min = sgt_min.prod(n, N);
-            X = x_min.value;
-            n = x_min.index + 1;
+            X = a[i - 1];
+            Y = a[i - 1];
         }
-        else if (flag == 1)
+        else
         {
-            S x_max = sgt_max.prod(n, N);
-            Y = x_max.value;
-            n = x_max.index + 1;
+            X = Z;
+            Y = W;
         }
 
-        flag = 1 - flag;
+        dp[0][i] = llabs(Y - a[N - 1]);
+        dp[1][i] = llabs(X - a[N - 1]);
+
+        for (int j = i + 1; j < N; j++)
+        {
+            chmax(dp[0][i], dp[1][j]);
+            chmin(dp[1][i], dp[0][j]);
+        }
     }
-    chmax(ans, llabs(X - Y));
 
-    cout << ans << endl;
+    cout << dp[0][0] << endl;
 }

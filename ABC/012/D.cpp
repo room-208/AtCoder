@@ -604,23 +604,64 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-
-    long long bit = (1LL << N);
-
-    string zero, two;
-
-    two = to_string(bit);
-
-    zero.push_back('0');
-    zero.push_back('.');
-    for (int i = 1; i <= N - (int)two.size(); i++)
+    int N, M;
+    cin >> N >> M;
+    Graph_Edge G(N);
+    for (int i = 0; i < M; i++)
     {
-        zero.push_back('0');
+        int a, b;
+        long long t;
+        cin >> a >> b >> t;
+        a--;
+        b--;
+
+        G[a].push_back(Edge(b, t));
+        G[b].push_back(Edge(a, t));
     }
 
-    string ans = zero + two;
+    vector<vector<long long>> dp(N, vector<long long>(N, INF_ll));
+    for (int i = 0; i < N; i++)
+    {
+        dp[i][i] = 0;
+    }
+    for (int u = 0; u < N; u++)
+    {
+        if (G[u].empty())
+        {
+            continue;
+        }
+
+        for (auto v : G[u])
+        {
+            dp[u][v.to] = v.w;
+        }
+    }
+
+    for (int k = 0; k < N; k++)
+    {
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
+            {
+                chmin(dp[i][j], dp[i][k] + dp[k][j]);
+            }
+        }
+    }
+
+    vector<long long> d(N, -1);
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            chmax(d[i], dp[i][j]);
+        }
+    }
+
+    long long ans = INF_ll;
+    for (int i = 0; i < N; i++)
+    {
+        chmin(ans, d[i]);
+    }
 
     cout << ans << endl;
 }

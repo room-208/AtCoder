@@ -364,38 +364,6 @@ struct Edge
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen)
-{
-    seen[v] = true;
-
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        DFS(G, next_v, seen);
-    }
-}
-
-//根付き木
-void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
-{
-    for (auto next_v : G[v])
-    {
-        if (next_v == p)
-        {
-            continue;
-        }
-
-        par_cal(G, next_v, par, v);
-    }
-
-    par[v] = p;
-}
-
 //部分木サイズ
 void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int p = -1)
 {
@@ -602,25 +570,135 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+//根付き木
+void par_cal(const Graph_int &G, int v, vector<int> &par, vector<bool> &seen, int p = -1)
 {
-    int N;
-    cin >> N;
+    seen[v] = true;
 
-    long long bit = (1LL << N);
-
-    string zero, two;
-
-    two = to_string(bit);
-
-    zero.push_back('0');
-    zero.push_back('.');
-    for (int i = 1; i <= N - (int)two.size(); i++)
+    for (auto next_v : G[v])
     {
-        zero.push_back('0');
+        if (seen[next_v])
+        {
+            continue;
+        }
+
+        par_cal(G, next_v, par, seen, v);
     }
 
-    string ans = zero + two;
+    par[v] = p;
+}
 
-    cout << ans << endl;
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<long long> &A, unordered_map<pair<int, int>, long long, HashPair> &mp, vector<bool> &seen, int p = -1)
+{
+    seen[v] = true;
+
+    if (p != -1)
+    {
+        long long V = mp[make_pair(p, v)];
+        A[v] = V - A[p];
+    }
+
+    for (auto next_v : G[v])
+    {
+        if (seen[next_v])
+        {
+            continue;
+        }
+
+        DFS(G, next_v, A, mp, seen, v);
+    }
+}
+
+int main()
+{
+    int N, Q;
+    cin >> N >> Q;
+    vector<int> T(Q), X(Q), Y(Q);
+    vector<long long> V(Q);
+    for (int i = 0; i < Q; i++)
+    {
+        cin >> T[i] >> X[i] >> Y[i] >> V[i];
+        X[i]--;
+        Y[i]--;
+    }
+
+    unordered_map<pair<int, int>, long long, HashPair> mp;
+    for (int i = 0; i < Q; i++)
+    {
+        if (T[i] == 0)
+        {
+            mp[make_pair(X[i], Y[i])] = V[i];
+            mp[make_pair(Y[i], X[i])] = V[i];
+        }
+    }
+
+    Graph_int G(N);
+    for (int i = 0; i < Q; i++)
+    {
+        if (T[i] == 0)
+        {
+            G[X[i]].push_back(Y[i]);
+            G[Y[i]].push_back(X[i]);
+        }
+    }
+
+    vector<int> par(N, -1);
+    vector<bool> seen(N, false);
+    for (int v = 0; v < N; v++)
+    {
+        if (par[v] == -1)
+        {
+            par_cal(G, v, par, seen);
+        }
+    }
+
+    vector<vector<long long>> A(2, vector<long long>(N, INF_ll));
+    for (int k = 0; k <= 1; k++)
+    {
+        for (int v = 0; v < N; v++)
+        {
+            if (par[v] == -1)
+            {
+                A[k][v] = k;
+            }
+        }
+    }
+
+    for (int k = 0; k <= 1; k++)
+    {
+        seen.assign(N, false);
+
+        for (int v = 0; v < N; v++)
+        {
+            if (par[v] == -1)
+            {
+                DFS(G, v, A[k], mp, seen);
+            }
+        }
+    }
+
+    UnionFind uf(N);
+    for (int i = 0; i < Q; i++)
+    {
+        if (T[i] == 0)
+        {
+            uf.unite(X[i], Y[i]);
+        }
+        else if (T[i] == 1)
+        {
+            if (uf.issame(X[i], Y[i]))
+            {
+                vector<long long> d(2);
+
+                d[0] = A[1][X[i]] - A[0][X[i]];
+                d[1] = A[1][Y[i]] - A[0][Y[i]];
+                cout << A[0][Y[i]] + d[0] * d[1] * (V[i] - A[0][X[i]]) << endl;
+            }
+            else
+            {
+                cout << "Ambiguous" << endl;
+            }
+        }
+    }
 }

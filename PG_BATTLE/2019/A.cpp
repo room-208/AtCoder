@@ -615,11 +615,7 @@ int main()
     long long ans = 0;
     for (int i = 0; i < N; i++)
     {
-        if (S[i] == "WA")
-        {
-            ans += 5;
-        }
-        else if (S[i] == "-")
+        if (S[i] != "AC")
         {
             ans += 5;
         }
