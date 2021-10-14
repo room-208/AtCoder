@@ -606,103 +606,31 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int H, W;
-    cin >> H >> W;
-    int Px, Py;
-    cin >> Px >> Py;
-    Px--;
-    Py--;
-    int Qx, Qy;
-    cin >> Qx >> Qy;
-    Qx--;
-    Qy--;
-    vector<vector<char>> S(H, vector<char>(W));
-    for (int i = 0; i < H; i++)
+    int N, M;
+    cin >> N >> M;
+    Graph_int G(N + 1);
+    for (int i = 0; i < M; i++)
     {
-        for (int j = 0; j < W; j++)
+        int a, b;
+        cin >> a >> b;
+        G[b].push_back(a);
+    }
+
+    vector<int> d = BFS(G, 0);
+
+    for (int i = 1; i <= N; i++)
+    {
+        if (d[i] == -1)
         {
-            cin >> S[i][j];
+            cout << "No" << endl;
         }
-    }
-
-    int N = H * W;
-    Graph_int G(4 * N);
-    deque<int> dx(4), dy(4), m(4);
-    dx = {1, 0, -1, 0};
-    dy = {0, -1, 0, 1};
-    m = {3, 0, 1, 2};
-
-    // n==0は左向き
-    // n==1は上向き
-    // n==2は右向き
-    // n==3は下向き
-    for (int n = 0; n < 4; n++)
-    {
-        for (int i = 0; i < H; i++)
+        else if (d[i] > 3)
         {
-            for (int j = 0; j < W; j++)
-            {
-                if (S[i][j] == '#')
-                {
-                    continue;
-                }
-
-                int u = to_node(i, j, W) + n * N;
-
-                for (int k = 0; k < 4; k++)
-                {
-                    int p = i + dx[k];
-                    int q = j + dy[k];
-
-                    if (in_out(p, q, H, W))
-                    {
-                        if (S[p][q] == '.')
-                        {
-                            int v = to_node(p, q, W) + m[k] * N;
-                            G[u].push_back(v);
-                            break;
-                        }
-                    }
-                }
-            }
+            cout << "No" << endl;
         }
-
-        int tmp_dx = dx.front();
-        int tmp_dy = dy.front();
-        int tmp_m = m.front();
-
-        dx.pop_front();
-        dy.pop_front();
-        m.pop_front();
-
-        dx.push_back(tmp_dx);
-        dy.push_back(tmp_dy);
-        m.push_back(tmp_m);
-    }
-
-    int s = to_node(Px, Py, W) + N;
-    vector<int> t(4);
-    for (int k = 0; k < 4; k++)
-    {
-        t[k] = to_node(Qx, Qy, W) + k * N;
-    }
-
-    vector<int> d = BFS(G, s);
-    int ans = INF_int;
-    for (int k = 0; k < 4; k++)
-    {
-        if (d[t[k]] != -1)
+        else
         {
-            chmin(ans, d[t[k]]);
+            cout << "Yes" << endl;
         }
-    }
-
-    if (ans == INF_int)
-    {
-        cout << -1 << endl;
-    }
-    else
-    {
-        cout << ans << endl;
     }
 }

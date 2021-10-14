@@ -30,6 +30,9 @@
         "unordered_map": "cpp",
         "unordered_set": "cpp",
         "lazysegtree": "cpp",
-        "modint": "cpp"
+        "modint": "cpp",
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "future": "cpp"
     }
 }

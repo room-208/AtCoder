@@ -263,7 +263,7 @@ vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
 //lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
 namespace seg
 {
-    const long long ID = 0;
+    const long long ID = -INF_ll;
     long long op(long long a, long long b)
     {
         return min(a, b);
@@ -280,7 +280,7 @@ namespace seg
         }
         else
         {
-            return x + f;
+            return f;
         }
     }
     long long composition(long long f, long long g)
@@ -291,15 +291,13 @@ namespace seg
         }
         else
         {
-            return f + g;
+            return f;
         }
     }
     long long id()
     {
         return ID;
     }
-    long long target;
-    bool f(long long v) { return v < target; }
 }
 
 // Union-Find
@@ -363,6 +361,22 @@ struct Edge
 
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
+
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen)
+{
+    seen[v] = true;
+
+    for (auto next_v : G[v])
+    {
+        if (seen[next_v])
+        {
+            continue;
+        }
+
+        DFS(G, next_v, seen);
+    }
+}
 
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
@@ -576,114 +590,116 @@ bool in_out(int i, int j, int H, int W)
     return false;
 }
 
-void DFS(int i, int j, const int bit, int next_bit, vector<int> &seen, vector<vector<long long>> &dp, int H, int W)
+void compress(vector<long long> &x)
 {
-    //すでに埋まっている
-    if (seen[i] == 1)
+    map<long long, long long> mp;
+
+    for (int i = 0; i < (int)x.size(); i++)
     {
-        if (i + 1 < H)
-        {
-            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
-            return;
-        }
-        else
-        {
-            dp[next_bit][j + 1] += dp[bit][j];
-            dp[next_bit][j + 1] %= MOD;
-            return;
-        }
-    }
-    else if (seen[i] == -1)
-    {
-        if (i + 1 < H)
-        {
-            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
-            return;
-        }
-        else
-        {
-            dp[next_bit][j + 1] += dp[bit][j];
-            dp[next_bit][j + 1] %= MOD;
-            return;
-        }
+        mp[x[i]] = 0;
     }
 
-    //まだに空白
-    if (i + 1 < H)
+    long long cnt = 1;
+    for (auto itr = mp.begin(); itr != mp.end(); itr++)
     {
-        if (seen[i + 1] == 1)
-        {
-            //横向き
-            seen[i] = 1;
-            next_bit |= (1 << i);
-            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
-            seen[i] = 0;
-            next_bit &= ~(1 << i);
-        }
-        else if (seen[i + 1] == -1)
-        {
-            //横向き
-            seen[i] = 1;
-            next_bit |= (1 << i);
-            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
-            seen[i] = 0;
-            next_bit &= ~(1 << i);
-        }
-        else
-        {
-            //横向き
-            seen[i] = 1;
-            next_bit |= (1 << i);
-            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
-            seen[i] = 0;
-            next_bit &= ~(1 << i);
-
-            //縦向き
-            seen[i] = 1;
-            seen[i + 1] = 1;
-            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
-            seen[i] = 0;
-            seen[i + 1] = 0;
-        }
+        itr->second = cnt;
+        cnt++;
     }
-    else
+
+    for (int i = 0; i < (int)x.size(); i++)
     {
-        //横向き
-        seen[i] = 1;
-        next_bit |= (1 << i);
-        dp[next_bit][j + 1] += dp[bit][j];
-        dp[next_bit][j + 1] %= MOD;
-        seen[i] = 0;
-        next_bit &= ~(1 << i);
-        return;
+        x[i] = mp[x[i]];
     }
 }
 
 int main()
 {
-    int H, W;
-    cin >> H >> W;
-
-    vector<vector<long long>> dp((1 << H), vector<long long>(W + 1, 0LL));
-    vector<int> seen(H);
-    dp[0][0] = 1LL;
-    for (int j = 0; j < W; j++)
+    int N;
+    cin >> N;
+    vector<long long> x(N), y(N), z(N);
+    for (int i = 0; i < N; i++)
     {
-        for (int bit = 0; bit < (1 << H); bit++)
-        {
-            seen.assign(H, 0);
+        cin >> x[i] >> y[i] >> z[i];
+    }
 
-            for (int i = 0; i < H; i++)
+    vector<tuple<long long, long long, long long, int>> t;
+    for (int i = 0; i < N; i++)
+    {
+        t.push_back(make_tuple(z[i], x[i], y[i], i));
+    }
+    sort(t.begin(), t.end());
+
+    vector<int> index(N);
+    for (int i = 0; i < N; i++)
+    {
+        z[i] = get<0>(t[i]);
+        x[i] = get<1>(t[i]);
+        y[i] = get<2>(t[i]);
+        index[i] = get<3>(t[i]);
+    }
+
+    compress(x);
+    compress(y);
+
+    segtree<long long, seg::op, seg::e> sgt(N + 1);
+    vector<bool> ans(N);
+
+    int i = 0;
+    while (1)
+    {
+        if (i >= N)
+        {
+            break;
+        }
+
+        long long Z = z[i];
+        vector<pair<long long, long long>> p;
+
+        while (Z == z[i])
+        {
+            long long v = sgt.prod(0, x[i]);
+
+            if (v >= y[i])
             {
-                if (bit & (1 << i))
-                {
-                    seen[i] = -1;
-                }
+                ans[index[i]] = false;
+            }
+            else
+            {
+                ans[index[i]] = true;
             }
 
-            DFS(0, j, bit, 0, seen, dp, H, W);
+            p.push_back(make_pair(x[i], y[i]));
+
+            i++;
+
+            if (i >= N)
+            {
+                break;
+            }
+        }
+
+        for (auto itr = p.begin(); itr != p.end(); itr++)
+        {
+            long long a = itr->first;
+            long long b = itr->second;
+            long long v = sgt.get(a);
+
+            if (v > b)
+            {
+                sgt.set(a, b);
+            }
         }
     }
 
-    cout << dp[0][W] << endl;
+    for (int k = 0; k < N; k++)
+    {
+        if (ans[k])
+        {
+            cout << "Yes" << endl;
+        }
+        else
+        {
+            cout << "No" << endl;
+        }
+    }
 }

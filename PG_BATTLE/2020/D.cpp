@@ -364,22 +364,6 @@ struct Edge
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen)
-{
-    seen[v] = true;
-
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        DFS(G, next_v, seen);
-    }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
 {
@@ -592,35 +576,114 @@ bool in_out(int i, int j, int H, int W)
     return false;
 }
 
-struct my_struct
+void DFS(int i, int j, const int bit, int next_bit, vector<int> &seen, vector<vector<long long>> &dp, int H, int W)
 {
-    int a, b;
-};
+    //すでに埋まっている
+    if (seen[i] == 1)
+    {
+        if (i + 1 < H)
+        {
+            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
+            return;
+        }
+        else
+        {
+            dp[next_bit][j + 1] += dp[bit][j];
+            dp[next_bit][j + 1] %= MOD;
+            return;
+        }
+    }
+    else if (seen[i] == -1)
+    {
+        if (i + 1 < H)
+        {
+            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
+            return;
+        }
+        else
+        {
+            dp[next_bit][j + 1] += dp[bit][j];
+            dp[next_bit][j + 1] %= MOD;
+            return;
+        }
+    }
 
-bool operator<(const my_struct &s_1, const my_struct &s_2)
-{
-    return s_1.b > s_2.b;
+    //まだに空白
+    if (i + 1 < H)
+    {
+        if (seen[i + 1] == 1)
+        {
+            //横向き
+            seen[i] = 1;
+            next_bit |= (1 << i);
+            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
+            seen[i] = 0;
+            next_bit &= ~(1 << i);
+        }
+        else if (seen[i + 1] == -1)
+        {
+            //横向き
+            seen[i] = 1;
+            next_bit |= (1 << i);
+            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
+            seen[i] = 0;
+            next_bit &= ~(1 << i);
+        }
+        else
+        {
+            //横向き
+            seen[i] = 1;
+            next_bit |= (1 << i);
+            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
+            seen[i] = 0;
+            next_bit &= ~(1 << i);
+
+            //縦向き
+            seen[i] = 1;
+            seen[i + 1] = 1;
+            DFS(i + 1, j, bit, next_bit, seen, dp, H, W);
+            seen[i] = 0;
+            seen[i + 1] = 0;
+        }
+    }
+    else
+    {
+        //横向き
+        seen[i] = 1;
+        next_bit |= (1 << i);
+        dp[next_bit][j + 1] += dp[bit][j];
+        dp[next_bit][j + 1] %= MOD;
+        seen[i] = 0;
+        next_bit &= ~(1 << i);
+        return;
+    }
 }
 
 int main()
 {
-    int N;
-    long long K;
-    cin >> N >> K;
-    vector<long long> A(N);
-    for (int i = 0; i < N; i++)
-    {
-        cin >> A[i];
-    }
+    int H, W;
+    cin >> H >> W;
 
-    long long S = 0;
-    for (int i = 0; i < N; i++)
+    vector<vector<long long>> dp((1 << H), vector<long long>(W + 1, 0LL));
+    vector<int> seen(H);
+    dp[0][0] = 1LL;
+    for (int j = 0; j < W; j++)
     {
-        if (A[i] > K)
+        for (int bit = 0; bit < (1 << H); bit++)
         {
-            S += (A[i] - K);
+            seen.assign(H, 0);
+
+            for (int i = 0; i < H; i++)
+            {
+                if (bit & (1 << i))
+                {
+                    seen[i] = -1;
+                }
+            }
+
+            DFS(0, j, bit, 0, seen, dp, H, W);
         }
     }
 
-    cout << S << endl;
+    cout << dp[0][W] << endl;
 }

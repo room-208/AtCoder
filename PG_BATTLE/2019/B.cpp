@@ -604,23 +604,77 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
+    long long N;
     cin >> N;
+    long long M;
+    cin >> M;
+    long long A, B, C;
+    cin >> A >> B >> C;
 
-    long long bit = (1LL << N);
+    M += N;
+    A += 1;
+    B += 1;
+    C += 1;
 
-    string zero, two;
+    bool flag = false;
+    long long a = -1;
+    long long b = -1;
+    long long c = -1;
 
-    two = to_string(bit);
-
-    zero.push_back('0');
-    zero.push_back('.');
-    for (int i = 1; i <= N - (int)two.size(); i++)
+    if (B == C)
     {
-        zero.push_back('0');
+        for (long long x = 0; x <= N; x++)
+        {
+            if ((M - A * x) % B == 0)
+            {
+                if (((M - A * x) / B) == (N - x))
+                {
+                    if ((N - x) >= 0)
+                    {
+                        a = x;
+                        b = (N - x);
+                        c = 0;
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        long long D = B - C;
+
+        for (long long x = 0; x <= N; x++)
+        {
+            long long Y = C * N - M + (A - C) * x;
+            long long Z = B * N - M + (A - B) * x;
+
+            if ((Y % D) != 0 || (Z % D) != 0)
+            {
+                continue;
+            }
+
+            long long y = -(Y / D);
+            long long z = (Z / D);
+
+            if (0 <= y && y <= N && 0 <= z && z <= N)
+            {
+                a = x;
+                b = y;
+                c = z;
+                flag = true;
+                break;
+            }
+        }
     }
 
-    string ans = zero + two;
-
-    cout << ans << endl;
+    if (flag)
+    {
+        cout << a << " " << b << " " << c << endl;
+    }
+    else
+    {
+        cout << a << " " << b << " " << c << endl;
+    }
 }

@@ -605,22 +605,21 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 int main()
 {
     int N;
-    long long K;
-    cin >> N >> K;
-    vector<long long> A(N);
+    cin >> N;
+    vector<string> S(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> S[i];
     }
 
-    long long S = 0;
+    long long ans = 0;
     for (int i = 0; i < N; i++)
     {
-        if (A[i] > K)
+        if (S[i] != "AC")
         {
-            S += (A[i] - K);
+            ans += 5;
         }
     }
 
-    cout << S << endl;
+    cout << ans << endl;
 }
