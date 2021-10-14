@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353; //modint1000000007
+using mint = modint998244353; // modint1000000007
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -122,7 +122,7 @@ long long extgcd(long long a, long long b, long long &x, long long &y)
     return gcd;
 }
 
-//osa_k法
+// osa_k法
 vector<int> osa_k(int n)
 {
     vector<int> res(n + 1);
@@ -218,7 +218,7 @@ vector<vector<int>> alphabet_table(string S)
     return c;
 }
 
-//unoderedのハッシュ
+// unoderedのハッシュ
 struct HashPair
 {
     //注意 constがいる
@@ -226,10 +226,10 @@ struct HashPair
     size_t operator()(const pair<T1, T2> &p) const
     {
 
-        //first分をハッシュ化する
+        // first分をハッシュ化する
         auto hash1 = hash<T1>{}(p.first);
 
-        //second分をハッシュ化する
+        // second分をハッシュ化する
         auto hash2 = hash<T2>{}(p.second);
 
         //重複しないようにハッシュ処理
@@ -258,9 +258,32 @@ vector<vector<T>> matrix_counter_clockwise(vector<vector<T>> &A, int H, int W)
     return B;
 }
 
+//座標圧縮
+void compress(vector<long long> &x)
+{
+    map<long long, long long> mp;
+
+    for (int i = 0; i < (int)x.size(); i++)
+    {
+        mp[x[i]] = 0;
+    }
+
+    long long compress = 1;
+    for (auto itr = mp.begin(); itr != mp.end(); itr++)
+    {
+        itr->second = compress;
+        compress++;
+    }
+
+    for (int i = 0; i < (int)x.size(); i++)
+    {
+        x[i] = mp[x[i]];
+    }
+}
+
 //セグ木・遅延セグ木
-//segtree<long long, seg::op, seg::e> sgt;
-//lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
+// segtree<long long, seg::op, seg::e> sgt;
+// lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
 namespace seg
 {
     const long long ID = 0;
@@ -454,7 +477,7 @@ void BFS(const Graph_int &G, int s)
     }
 }
 
-//01BFS
+// 01BFS
 void BFS_01(const Graph_Edge &G, int s)
 {
     int N = (int)G.size();             // 頂点数
@@ -572,7 +595,7 @@ int to_node(int i, int j, int W)
     return W * i + j;
 }
 
-//ij変換
+// ij変換
 pair<int, int> to_ij(int v, int W)
 {
     int i = v / W;
@@ -581,7 +604,7 @@ pair<int, int> to_ij(int v, int W)
     return make_pair(i, j);
 }
 
-//in_out判定
+// in_out判定
 bool in_out(int i, int j, int H, int W)
 {
     if (0 <= i && i < H && 0 <= j && j < W)
