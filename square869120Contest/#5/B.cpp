@@ -625,40 +625,82 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+bool judge(int i, int j, vector<double> &x, vector<double> &y, vector<double> &r)
+{
+    double dx = x[i] - x[j];
+    double dy = y[i] - y[j];
+    double d = sqrt(dx * dx + dy * dy);
+
+    if (d < r[i] + r[j])
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 int main()
 {
-    long long N, M;
+    int N, M;
     cin >> N >> M;
-    vector<int> A(M), B(M);
-    for (int i = 0; i < M; i++)
+    vector<double> x(N + M), y(N + M), r(N + M, 0.);
+    for (int i = 0; i < N; i++)
     {
-        cin >> A[i] >> B[i];
-        A[i]--;
-        B[i]--;
+        cin >> x[i] >> y[i] >> r[i];
+    }
+    for (int i = N; i < N + M; i++)
+    {
+        cin >> x[i] >> y[i];
     }
 
-    vector<long long> ans(M);
-    UnionFind uf(N);
-    ans[M - 1] = (N * (N - 1)) / 2LL;
-    for (int i = M - 1; i >= 1; i--)
+    if (M == 0)
     {
-        if (uf.issame(A[i], B[i]))
+        double ans = (double)INF_int;
+        for (int i = 0; i < N; i++)
         {
-            ans[i - 1] = ans[i];
+            chmin(ans, r[i]);
+        }
+
+        printf("%.10f", ans);
+
+        return 0;
+    }
+
+    double left = 0.;
+    double right = (double)INF_int;
+    while (right - left > 1e-10)
+    {
+        double mid = (right + left) / 2.;
+
+        for (int i = N; i < N + M; i++)
+        {
+            r[i] = mid;
+        }
+
+        bool flag = true;
+
+        for (int i = 0; i < N + M; i++)
+        {
+            for (int j = i + 1; j < N + M; j++)
+            {
+                if (!judge(i, j, x, y, r))
+                {
+                    flag = false;
+                }
+            }
+        }
+
+        if (flag)
+        {
+            left = mid;
         }
         else
         {
-            long long sa = uf.size(A[i]);
-            long long sb = uf.size(B[i]);
-
-            ans[i - 1] = ans[i] - sa * sb;
+            right = mid;
         }
-
-        uf.unite(A[i], B[i]);
     }
 
-    for (int i = 0; i < M; i++)
-    {
-        cout << ans[i] << endl;
-    }
+    printf("%.10f", left);
 }

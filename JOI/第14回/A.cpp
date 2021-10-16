@@ -627,38 +627,60 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    long long N, M;
+    int N, M;
     cin >> N >> M;
-    vector<int> A(M), B(M);
+    vector<int> P(M);
     for (int i = 0; i < M; i++)
     {
-        cin >> A[i] >> B[i];
-        A[i]--;
-        B[i]--;
+        cin >> P[i];
+        P[i]--;
+    }
+    vector<long long> A(N - 1), B(N - 1), C(N - 1);
+    for (int i = 0; i < N - 1; i++)
+    {
+        cin >> A[i] >> B[i] >> C[i];
     }
 
-    vector<long long> ans(M);
-    UnionFind uf(N);
-    ans[M - 1] = (N * (N - 1)) / 2LL;
-    for (int i = M - 1; i >= 1; i--)
+    vector<long long> cnt(N, 0);
+    for (int i = 0; i < M - 1; i++)
     {
-        if (uf.issame(A[i], B[i]))
+        int a = P[i];
+        int b = P[i + 1];
+
+        if (a > b)
         {
-            ans[i - 1] = ans[i];
+            swap(a, b);
+        }
+
+        cnt[a]++;
+        cnt[b]--;
+    }
+
+    for (int i = 0; i < N - 1; i++)
+    {
+        cnt[i + 1] += cnt[i];
+    }
+
+    long long ans = 0;
+    for (int i = 0; i < N - 1; i++)
+    {
+        if (cnt[i] == 0)
+        {
+            continue;
+        }
+
+        long long a = cnt[i] * A[i];
+        long long b = cnt[i] * B[i] + C[i];
+
+        if (a > b)
+        {
+            ans += b;
         }
         else
         {
-            long long sa = uf.size(A[i]);
-            long long sb = uf.size(B[i]);
-
-            ans[i - 1] = ans[i] - sa * sb;
+            ans += a;
         }
-
-        uf.unite(A[i], B[i]);
     }
 
-    for (int i = 0; i < M; i++)
-    {
-        cout << ans[i] << endl;
-    }
+    cout << ans << endl;
 }

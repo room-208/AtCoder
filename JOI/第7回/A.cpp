@@ -627,38 +627,70 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    long long N, M;
-    cin >> N >> M;
-    vector<int> A(M), B(M);
-    for (int i = 0; i < M; i++)
+    int N;
+    cin >> N;
+    vector<int> c(N + 1);
+    for (int i = 1; i <= N; i++)
     {
-        cin >> A[i] >> B[i];
-        A[i]--;
-        B[i]--;
+        cin >> c[i];
     }
 
-    vector<long long> ans(M);
-    UnionFind uf(N);
-    ans[M - 1] = (N * (N - 1)) / 2LL;
-    for (int i = M - 1; i >= 1; i--)
+    vector<pair<int, int>> p;
+    p.push_back(make_pair(c[1], 1));
+    for (int i = 2; i <= N; i++)
     {
-        if (uf.issame(A[i], B[i]))
+        auto q = p.back();
+
+        if (i % 2 == 1)
         {
-            ans[i - 1] = ans[i];
+            if (q.first == c[i])
+            {
+                auto tmp = make_pair(c[i], q.second + 1);
+                p.pop_back();
+                p.push_back(tmp);
+            }
+            else
+            {
+                auto tmp = make_pair(c[i], 1);
+                p.push_back(tmp);
+            }
         }
         else
         {
-            long long sa = uf.size(A[i]);
-            long long sb = uf.size(B[i]);
+            if (q.first == c[i])
+            {
+                auto tmp = make_pair(c[i], q.second + 1);
+                p.pop_back();
+                p.push_back(tmp);
+            }
+            else
+            {
+                p.pop_back();
 
-            ans[i - 1] = ans[i] - sa * sb;
+                if (p.empty())
+                {
+                    auto tmp = make_pair(c[i], q.second + 1);
+                    p.push_back(tmp);
+                }
+                else
+                {
+                    auto k = p.back();
+                    p.pop_back();
+                    auto tmp = make_pair(c[i], q.second + k.second + 1);
+                    p.push_back(tmp);
+                }
+            }
         }
-
-        uf.unite(A[i], B[i]);
     }
 
-    for (int i = 0; i < M; i++)
+    int ans = 0;
+    for (auto q : p)
     {
-        cout << ans[i] << endl;
+        if (q.first == 0)
+        {
+            ans += q.second;
+        }
     }
+
+    cout << ans << endl;
 }

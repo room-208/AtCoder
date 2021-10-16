@@ -625,40 +625,103 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+void Init(vector<string> &c, vector<vector<long long>> &a, int H, int W)
+{
+    for (int j = 0; j < W; j++)
+    {
+        a[j].clear();
+    }
+
+    for (int j = 0; j < W; j++)
+    {
+        for (int i = H - 1; i >= 0; i--)
+        {
+            int tmp = c[i][j] - '0';
+            a[j].push_back(tmp);
+        }
+    }
+}
+
 int main()
 {
-    long long N, M;
-    cin >> N >> M;
-    vector<int> A(M), B(M);
-    for (int i = 0; i < M; i++)
+    int H, W, K;
+    cin >> H >> W >> K;
+    vector<string> c(H);
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i] >> B[i];
-        A[i]--;
-        B[i]--;
+        cin >> c[i];
     }
 
-    vector<long long> ans(M);
-    UnionFind uf(N);
-    ans[M - 1] = (N * (N - 1)) / 2LL;
-    for (int i = M - 1; i >= 1; i--)
+    long long ans = -1;
+    vector<vector<long long>> a(W);
+    for (int y = 0; y < H; y++)
     {
-        if (uf.issame(A[i], B[i]))
+        for (int x = 0; x < W; x++)
         {
-            ans[i - 1] = ans[i];
-        }
-        else
-        {
-            long long sa = uf.size(A[i]);
-            long long sb = uf.size(B[i]);
+            //初期化
+            Init(c, a, H, W);
 
-            ans[i - 1] = ans[i] - sa * sb;
-        }
+            set<pair<int, int>> st;
+            st.insert(make_pair(y, x));
 
-        uf.unite(A[i], B[i]);
+            long long score = -a[x][y];
+            long long two = 1LL;
+
+            while (!st.empty())
+            {
+                for (int i = H - 1; i >= 0; i--)
+                {
+                    for (int j = 0; j < W; j++)
+                    {
+                        if (st.count(make_pair(i, j)))
+                        {
+                            score += two * a[j][i];
+                            a[j].erase(a[j].begin() + i);
+                            a[j].push_back(-1);
+                        }
+                    }
+                }
+
+                st.clear();
+
+                for (int i = 0; i < H; i++)
+                {
+                    for (int j = 0; j < W; j++)
+                    {
+                        if (j + K - 1 < W)
+                        {
+                            bool ok = true;
+
+                            for (int k = j; k < j + K - 1; k++)
+                            {
+                                if (a[k][i] != a[k + 1][i])
+                                {
+                                    ok = false;
+                                }
+
+                                if (a[k][i] == -1 || a[k + 1][i] == -1)
+                                {
+                                    ok = false;
+                                }
+                            }
+
+                            if (ok)
+                            {
+                                for (int k = j; k <= j + K - 1; k++)
+                                {
+                                    st.insert(make_pair(i, k));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                two *= 2LL;
+            }
+
+            chmax(ans, score / 2LL);
+        }
     }
 
-    for (int i = 0; i < M; i++)
-    {
-        cout << ans[i] << endl;
-    }
+    cout << ans << endl;
 }
