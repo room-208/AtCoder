@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353; // modint1000000007 static_modint<1000000009>;
+using mint = modint998244353; // modint1000000007
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -447,7 +447,7 @@ void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int 
 }
 
 //幅優先探索
-void BFS(const Graph_int &G, int s)
+vector<int> BFS(const Graph_int &G, int s)
 {
     int N = (int)G.size();   // 頂点数
     vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
@@ -475,6 +475,8 @@ void BFS(const Graph_int &G, int s)
             que.push(x);
         }
     }
+
+    return dist;
 }
 
 // 01BFS
@@ -627,23 +629,80 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W, N;
+    cin >> H >> W >> N;
+    vector<string> S(H);
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        cin >> S[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<int> node(N + 1);
+    for (int i = 0; i < H; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < W; j++)
+        {
+            if (S[i][j] == 'S')
+            {
+                node[0] = to_node(i, j, W);
+            }
+
+            for (int k = 1; k <= N; k++)
+            {
+                char t = '0' + k;
+
+                if (S[i][j] == t)
+                {
+                    node[k] = to_node(i, j, W);
+                }
+            }
+        }
     }
-    else
+
+    int n = H * W;
+    Graph_int G(n);
+    int dx[4] = {1, 0, -1, 0};
+    int dy[4] = {0, 1, 0, -1};
+    for (int i = 0; i < H; i++)
     {
-        cout << "No" << endl;
+        for (int j = 0; j < W; j++)
+        {
+            if (S[i][j] == 'X')
+            {
+                continue;
+            }
+
+            int u = to_node(i, j, W);
+
+            for (int k = 0; k < 4; k++)
+            {
+                int p = i + dx[k];
+                int q = j + dy[k];
+
+                if (in_out(p, q, H, W))
+                {
+                    if (S[p][q] != 'X')
+                    {
+                        int v = to_node(p, q, W);
+
+                        G[u].push_back(v);
+                    }
+                }
+            }
+        }
     }
+
+    int ans = 0;
+
+    for (int k = 1; k <= N; k++)
+    {
+        int s = node[k - 1];
+        int t = node[k];
+
+        vector<int> d = BFS(G, s);
+
+        ans += d[t];
+    }
+
+    cout << ans << endl;
 }

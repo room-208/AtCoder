@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353; // modint1000000007 static_modint<1000000009>;
+using mint = modint998244353; // modint1000000007
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -629,21 +629,28 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    vector<int> a(N + 1);
+    for (int i = 1; i <= N; i++)
     {
-        cin >> A[i];
+        cin >> a[i];
     }
 
-    bool flag = true;
-    if (flag)
+    vector<vector<long long>> dp(21, vector<long long>(N, 0LL));
+    dp[a[1]][1] = 1LL;
+    for (int j = 2; j <= N - 1; j++)
     {
-        cout << "Yes" << endl;
+        for (int i = 0; i <= 20; i++)
+        {
+            if (i + a[j] <= 20)
+            {
+                dp[i + a[j]][j] += dp[i][j - 1];
+            }
+            if (i - a[j] >= 0)
+            {
+                dp[i - a[j]][j] += dp[i][j - 1];
+            }
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << dp[a[N]][N - 1] << endl;
 }

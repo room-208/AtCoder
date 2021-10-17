@@ -387,22 +387,6 @@ struct Edge
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen)
-{
-    seen[v] = true;
-
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        DFS(G, next_v, seen);
-    }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
 {
@@ -625,25 +609,91 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen, long long &d, long long &ans)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    seen[v] = true;
+    d += 1;
+    chmax(ans, d);
+
+    for (auto next_v : G[v])
     {
-        cin >> A[i];
+        if (seen[next_v])
+        {
+            continue;
+        }
+
+        DFS(G, next_v, seen, d, ans);
     }
 
-    bool flag = true;
-    if (flag)
+    seen[v] = false;
+    d -= 1;
+}
+
+int main()
+{
+    int H, W;
+    cin >> H >> W;
+    vector<vector<int>> a(H, vector<int>(W));
+    for (int i = 0; i < H; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = 0; j < W; j++)
+        {
+            cin >> a[i][j];
+        }
     }
-    else
+
+    int N = H * W;
+    Graph_int G(N);
+    int dx[4] = {1, 0, -1, 0};
+    int dy[4] = {0, 1, 0, -1};
+    for (int i = 0; i < H; i++)
     {
-        cout << "No" << endl;
+        for (int j = 0; j < W; j++)
+        {
+            if (a[i][j] == 0)
+            {
+                continue;
+            }
+
+            int u = to_node(i, j, W);
+
+            for (int k = 0; k < 4; k++)
+            {
+                int p = i + dy[k];
+                int q = j + dx[k];
+
+                if (in_out(p, q, H, W))
+                {
+                    if (a[p][q] == 1)
+                    {
+                        int v = to_node(p, q, W);
+
+                        G[u].push_back(v);
+                    }
+                }
+            }
+        }
     }
+
+    long long ans = 0;
+    vector<bool> seen(N);
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            if (a[i][j] == 0)
+            {
+                continue;
+            }
+
+            int v = to_node(i, j, W);
+            long long d = 0;
+            seen.assign(N, false);
+
+            DFS(G, v, seen, d, ans);
+        }
+    }
+
+    cout << ans << endl;
 }

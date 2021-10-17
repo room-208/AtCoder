@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353; // modint1000000007 static_modint<1000000009>;
+using mint = static_modint<10000>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -627,23 +627,75 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int N, K;
+    cin >> N >> K;
+    vector<int> A(K);
+    vector<char> B(K);
+    for (int i = 0; i < K; i++)
     {
-        cin >> A[i];
+        cin >> A[i] >> B[i];
     }
 
-    bool flag = true;
-    if (flag)
+    unordered_map<int, char> mp;
+    for (int i = 0; i < K; i++)
     {
-        cout << "Yes" << endl;
+        mp[A[i]] = B[i];
     }
-    else
+
+    map<string, mint> dp, dp_tmp;
+    dp["00"] = 1;
+
+    for (int i = 1; i <= N; i++)
     {
-        cout << "No" << endl;
+        dp_tmp = dp;
+
+        dp.clear();
+        if (mp.count(i))
+        {
+            char b = mp[i];
+
+            for (auto a : dp_tmp)
+            {
+                if (a.first[0] == b && a.first[1] == b)
+                {
+                    continue;
+                }
+
+                string s;
+                s.push_back(a.first[1]);
+                s.push_back(b);
+
+                dp[s] += a.second;
+            }
+        }
+        else
+        {
+            for (int k = 1; k <= 3; k++)
+            {
+                char b = '0' + k;
+
+                for (auto a : dp_tmp)
+                {
+                    if (a.first[0] == b && a.first[1] == b)
+                    {
+                        continue;
+                    }
+
+                    string s;
+                    s.push_back(a.first[1]);
+                    s.push_back(b);
+
+                    dp[s] += a.second;
+                }
+            }
+        }
     }
+
+    mint ans = 0;
+    for (auto a : dp)
+    {
+        ans += a.second;
+    }
+
+    cout << ans.val() << endl;
 }

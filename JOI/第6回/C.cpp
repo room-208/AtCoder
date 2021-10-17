@@ -625,25 +625,77 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+int area_cal(int i, int j, vector<int> &x, vector<int> &y)
+{
+    int dx = x[i] - x[j];
+    int dy = y[i] - y[j];
+    return dx * dx + dy * dy;
+}
+
+pair<int, int> rotate(int p, int r, vector<int> &x, vector<int> &y, int theta)
+{
+    int dx = x[r] - x[p];
+    int dy = y[r] - y[p];
+
+    int c, s;
+
+    if (theta == 90)
+    {
+        c = 0;
+        s = 1;
+    }
+    else if (theta == -90)
+    {
+        c = 0;
+        s = -1;
+    }
+
+    int Dx = c * dx - s * dy;
+    int Dy = s * dx + c * dy;
+
+    return make_pair(x[p] + Dx, y[p] + Dy);
+}
+
 int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<int> x(N), y(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> x[i] >> y[i];
     }
 
-    bool flag = true;
-    if (flag)
+    unordered_set<pair<int, int>, HashPair> st;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        st.insert(make_pair(x[i], y[i]));
     }
-    else
+
+    double PI = M_PI;
+    int ans = 0;
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        for (int j = 0; j < N; j++)
+        {
+            if (i == j)
+            {
+                continue;
+            }
+
+            int area = area_cal(i, j, x, y);
+
+            if (st.count(rotate(i, j, x, y, 90)) && st.count(rotate(j, i, x, y, -90)))
+            {
+                chmax(ans, area);
+            }
+
+            if (st.count(rotate(i, j, x, y, -90)) && st.count(rotate(j, i, x, y, 90)))
+            {
+                chmax(ans, area);
+            }
+        }
     }
+
+    cout << ans << endl;
 }
