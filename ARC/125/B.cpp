@@ -58,6 +58,20 @@ long long COM(int n, int k)
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
+//繰り返し二乗法
+long long MOD_pow(long long a, long long n)
+{
+    long long res = 1;
+    while (n > 0)
+    {
+        if (n & 1)
+            res = res * a % MOD;
+        a = a * a % MOD;
+        n >>= 1;
+    }
+    return res;
+}
+
 //等差数列の和
 long long tousa_sum(long long a, long long d, long long n)
 {
@@ -611,25 +625,46 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-//繰り返し二乗法
-long long MOD_pow(long long a, long long n, long long mod)
-{
-    long long res = 1;
-    while (n > 0)
-    {
-        if (n & 1)
-            res = res * a % mod;
-        a = a * a % mod;
-        n >>= 1;
-    }
-    return res;
-}
-
 int main()
 {
-    long long N, M;
-    cin >> N >> M;
-    long long X = MOD_pow(10LL, N, M * M);
+    long long N;
+    cin >> N;
 
-    cout << X / M << endl;
+    mint ans = 0;
+
+    for (long long a = 1; a * a <= N; a++)
+    {
+        long long b1 = N / a;
+        long long b2 = 2LL * N - a;
+
+        long long b = min(b1, b2);
+
+        if (a <= b)
+        {
+            if (a % 2 == 0)
+            {
+                if (b % 2 == 0)
+                {
+                    ans += ((b - a) / 2LL) + 1LL;
+                }
+                else
+                {
+                    ans += ((b - 1 - a) / 2LL) + 1LL;
+                }
+            }
+            else
+            {
+                if (b % 2 == 0)
+                {
+                    ans += ((b - 1 - a) / 2LL) + 1LL;
+                }
+                else
+                {
+                    ans += ((b - a) / 2LL) + 1LL;
+                }
+            }
+        }
+    }
+
+    cout << ans.val() << endl;
 }

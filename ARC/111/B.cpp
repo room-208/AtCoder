@@ -58,6 +58,20 @@ long long COM(int n, int k)
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
+//繰り返し二乗法
+long long MOD_pow(long long a, long long n)
+{
+    long long res = 1;
+    while (n > 0)
+    {
+        if (n & 1)
+            res = res * a % MOD;
+        a = a * a % MOD;
+        n >>= 1;
+    }
+    return res;
+}
+
 //等差数列の和
 long long tousa_sum(long long a, long long d, long long n)
 {
@@ -611,25 +625,73 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-//繰り返し二乗法
-long long MOD_pow(long long a, long long n, long long mod)
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen, bool &flag, int p = -1)
 {
-    long long res = 1;
-    while (n > 0)
+    seen[v] = true;
+
+    for (auto next_v : G[v])
     {
-        if (n & 1)
-            res = res * a % mod;
-        a = a * a % mod;
-        n >>= 1;
+        if (next_v == p)
+        {
+            continue;
+        }
+
+        if (seen[next_v])
+        {
+            flag = true;
+            continue;
+        }
+
+        DFS(G, next_v, seen, flag, v);
     }
-    return res;
 }
 
 int main()
 {
-    long long N, M;
-    cin >> N >> M;
-    long long X = MOD_pow(10LL, N, M * M);
+    int N;
+    cin >> N;
+    vector<int> a(N), b(N);
+    for (int i = 0; i < N; i++)
+    {
+        cin >> a[i] >> b[i];
+        a[i]--;
+        b[i]--;
+    }
 
-    cout << X / M << endl;
+    Graph_int G(400000);
+    for (int i = 0; i < N; i++)
+    {
+        G[a[i]].push_back(b[i]);
+        G[b[i]].push_back(a[i]);
+    }
+
+    UnionFind uf(400000);
+    for (int i = 0; i < N; i++)
+    {
+        uf.unite(a[i], b[i]);
+    }
+
+    int ans = 0;
+    vector<bool> seen(400000, false);
+    for (int v = 0; v < 400000; v++)
+    {
+        if (v == uf.root(v))
+        {
+            bool flag = false;
+
+            DFS(G, v, seen, flag);
+
+            if (flag)
+            {
+                ans += uf.size(v);
+            }
+            else
+            {
+                ans += uf.size(v) - 1;
+            }
+        }
+    }
+
+    cout << ans << endl;
 }

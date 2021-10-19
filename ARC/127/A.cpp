@@ -58,6 +58,20 @@ long long COM(int n, int k)
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
+//繰り返し二乗法
+long long MOD_pow(long long a, long long n)
+{
+    long long res = 1;
+    while (n > 0)
+    {
+        if (n & 1)
+            res = res * a % MOD;
+        a = a * a % MOD;
+        n >>= 1;
+    }
+    return res;
+}
+
 //等差数列の和
 long long tousa_sum(long long a, long long d, long long n)
 {
@@ -611,25 +625,107 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-//繰り返し二乗法
-long long MOD_pow(long long a, long long n, long long mod)
-{
-    long long res = 1;
-    while (n > 0)
-    {
-        if (n & 1)
-            res = res * a % mod;
-        a = a * a % mod;
-        n >>= 1;
-    }
-    return res;
-}
-
 int main()
 {
-    long long N, M;
-    cin >> N >> M;
-    long long X = MOD_pow(10LL, N, M * M);
+    string N;
+    cin >> N;
 
-    cout << X / M << endl;
+    long long ans = 0;
+    while (!N.empty())
+    {
+        int n = (int)N.size();
+
+        vector<vector<vector<vector<long long>>>> dp(2, vector<vector<vector<long long>>>(2, vector<vector<long long>>(n + 1, vector<long long>(n + 1, 0LL))));
+        dp[0][0][0][0] = 1;
+        for (int k = 1; k <= n; k++)
+        {
+            // 0→0
+            if (N[k - 1] == '1')
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    dp[0][0][j + 1][k] += dp[0][0][j][k - 1];
+                }
+                for (int j = 0; j <= n; j++)
+                {
+                    dp[0][1][j][k] += dp[0][1][j][k - 1];
+                }
+            }
+            else
+            {
+                for (int f = 0; f <= 1; f++)
+                {
+                    for (int j = 0; j <= n; j++)
+                    {
+                        dp[0][1][j][k] += dp[0][f][j][k - 1];
+                    }
+                }
+            }
+
+            // 1→1
+            for (int f = 0; f <= 1; f++)
+            {
+                for (int j = 0; j <= n; j++)
+                {
+                    dp[1][1][j][k] += 9LL * dp[1][f][j][k - 1];
+                }
+            }
+            for (int j = 0; j < n; j++)
+            {
+                dp[1][0][j + 1][k] += dp[1][0][j][k - 1];
+            }
+            for (int j = 0; j <= n; j++)
+            {
+                dp[1][1][j][k] += dp[1][1][j][k - 1];
+            }
+
+            // 0→1
+            if (N[k - 1] == '0')
+            {
+                continue;
+            }
+            else if (N[k - 1] == '1')
+            {
+                for (int j = 0; j <= n; j++)
+                {
+                    dp[1][1][j][k] += dp[0][0][j][k - 1];
+                    dp[1][1][j][k] += dp[0][1][j][k - 1];
+                }
+            }
+            else
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    dp[1][0][j + 1][k] += dp[0][0][j][k - 1];
+                }
+                for (int j = 0; j <= n; j++)
+                {
+                    dp[1][1][j][k] += dp[0][1][j][k - 1];
+                }
+
+                long long c = N[k - 1] - '0';
+
+                for (int f = 0; f <= 1; f++)
+                {
+                    for (int j = 0; j <= n; j++)
+                    {
+                        dp[1][1][j][k] += (c - 1) * dp[0][f][j][k - 1];
+                    }
+                }
+            }
+        }
+
+        for (int f = 0; f <= 1; f++)
+        {
+            for (int j = 0; j <= n; j++)
+            {
+                ans += dp[0][f][j][n] * (long long)j;
+                ans += dp[1][f][j][n] * (long long)j;
+            }
+        }
+
+        N.erase(N.begin());
+    }
+
+    cout << ans << endl;
 }

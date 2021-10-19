@@ -58,6 +58,20 @@ long long COM(int n, int k)
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
+//繰り返し二乗法
+long long MOD_pow(long long a, long long n)
+{
+    long long res = 1;
+    while (n > 0)
+    {
+        if (n & 1)
+            res = res * a % MOD;
+        a = a * a % MOD;
+        n >>= 1;
+    }
+    return res;
+}
+
 //等差数列の和
 long long tousa_sum(long long a, long long d, long long n)
 {
@@ -611,25 +625,85 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-//繰り返し二乗法
-long long MOD_pow(long long a, long long n, long long mod)
-{
-    long long res = 1;
-    while (n > 0)
-    {
-        if (n & 1)
-            res = res * a % mod;
-        a = a * a % mod;
-        n >>= 1;
-    }
-    return res;
-}
-
 int main()
 {
-    long long N, M;
+    int N, M;
     cin >> N >> M;
-    long long X = MOD_pow(10LL, N, M * M);
+    deque<int> S(N);
+    vector<int> T(M);
+    for (int i = 0; i < N; i++)
+    {
+        cin >> S[i];
+    }
+    for (int i = 0; i < M; i++)
+    {
+        cin >> T[i];
+    }
 
-    cout << X / M << endl;
+    unordered_set<int> st;
+    for (int i = 0; i < N; i++)
+    {
+        st.insert(S[i]);
+    }
+
+    bool flag = true;
+    for (int i = 0; i < M; i++)
+    {
+        if (!st.count(T[i]))
+        {
+            flag = false;
+        }
+    }
+
+    if (!flag)
+    {
+        cout << -1 << endl;
+        return 0;
+    }
+
+    long long ans = 0;
+    for (int i = 0; i < M; i++)
+    {
+        if (S[0] == T[i])
+        {
+            ans++;
+            continue;
+        }
+
+        int cnt = 0;
+        int front = 0;
+        int end = N - 1;
+
+        while (S[front] != T[i] && S[end] != T[i])
+        {
+            cnt++;
+            front++;
+            end--;
+        }
+
+        if (S[front] == T[i])
+        {
+            ans += cnt + 1;
+
+            while (S[0] != T[i])
+            {
+                int s = S.front();
+                S.pop_front();
+                S.push_back(s);
+            }
+        }
+        else if (S[end] == T[i])
+        {
+            ans += cnt + 2;
+
+            while (S[0] != T[i])
+            {
+                int s = S.back();
+                S.pop_back();
+                S.push_front(s);
+            }
+        }
+    }
+
+    cout << ans << endl;
 }

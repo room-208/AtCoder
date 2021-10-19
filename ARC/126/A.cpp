@@ -58,6 +58,20 @@ long long COM(int n, int k)
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
+//繰り返し二乗法
+long long MOD_pow(long long a, long long n)
+{
+    long long res = 1;
+    while (n > 0)
+    {
+        if (n & 1)
+            res = res * a % MOD;
+        a = a * a % MOD;
+        n >>= 1;
+    }
+    return res;
+}
+
 //等差数列の和
 long long tousa_sum(long long a, long long d, long long n)
 {
@@ -611,25 +625,68 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-//繰り返し二乗法
-long long MOD_pow(long long a, long long n, long long mod)
-{
-    long long res = 1;
-    while (n > 0)
-    {
-        if (n & 1)
-            res = res * a % mod;
-        a = a * a % mod;
-        n >>= 1;
-    }
-    return res;
-}
-
 int main()
 {
-    long long N, M;
-    cin >> N >> M;
-    long long X = MOD_pow(10LL, N, M * M);
+    int T;
+    cin >> T;
+    vector<long long> N2(T), N3(T), N4(T);
+    for (int i = 0; i < T; i++)
+    {
+        cin >> N2[i] >> N3[i] >> N4[i];
+        N3[i] /= 2LL;
+    }
 
-    cout << X / M << endl;
+    for (int i = 0; i < T; i++)
+    {
+        long long ans = 0;
+
+        if (N4[i] >= N3[i])
+        {
+            ans += N3[i];
+            N4[i] -= N3[i];
+
+            if (N4[i] >= 2LL * N2[i])
+            {
+                ans += (N2[i]);
+            }
+            else
+            {
+                ans += (N4[i] / 2LL);
+                N2[i] -= (N4[i] / 2LL);
+                N4[i] %= 2LL;
+
+                if (N4[i] == 0)
+                {
+                    ans += N2[i] / 5LL;
+                }
+                else
+                {
+                    if (N2[i] >= 3)
+                    {
+                        ans += 1;
+                        N2[i] -= 3;
+                        ans += N2[i] / 5LL;
+                    }
+                }
+            }
+        }
+        else
+        {
+            ans += N4[i];
+            N3[i] -= N4[i];
+
+            if (N2[i] >= 2LL * N3[i])
+            {
+                ans += N3[i];
+                N2[i] -= 2LL * N3[i];
+                ans += N2[i] / 5LL;
+            }
+            else
+            {
+                ans += N2[i] / 2LL;
+            }
+        }
+
+        cout << ans << endl;
+    }
 }
