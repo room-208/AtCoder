@@ -627,36 +627,65 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<int> a(M), b(M);
-    for (int i = 0; i < M; i++)
+    int H, W;
+    cin >> H >> W;
+    vector<string> S(H);
+    for (int i = 0; i < H; i++)
     {
-        cin >> a[i] >> b[i];
-        a[i]--;
-        b[i]--;
+        cin >> S[i];
     }
 
-    unordered_multimap<int, int> ump_0, ump_1;
-    for (int i = 0; i < M; i++)
+    int N = H * W;
+    UnionFind uf(N);
+    int dx[4] = {1, 0, -1, 0};
+    int dy[4] = {0, 1, 0, -1};
+    for (int i = 0; i < H; i++)
     {
-        ump_0.insert(make_pair(a[i], i));
-        ump_1.insert(make_pair(b[i], i));
-    }
-
-    int cnt = 0;
-    unordered_map<int, int> mp;
-    for (int i = 0; i < N; i++)
-    {
-        if (ump_0.count(i))
+        for (int j = 0; j < W; j++)
         {
-            auto range = ump_0.equal_range(i);
-        }
-        if (ump_1.count(i))
-        {
-            auto range = ump_1.equal_range(i);
+            for (int k = 0; k < 4; k++)
+            {
+                int p = i + dy[k];
+                int q = j + dx[k];
+
+                if (in_out(p, q, H, W))
+                {
+                    if (S[i][j] != S[p][q])
+                    {
+                        int v = to_node(i, j, W);
+                        int u = to_node(p, q, W);
+
+                        uf.unite(v, u);
+                    }
+                }
+            }
         }
     }
 
-    cout << cnt << endl;
+    vector<long long> cnt0(N, 0), cnt1(N, 0);
+    for (int i = 0; i < H; i++)
+    {
+        for (int j = 0; j < W; j++)
+        {
+            int v = to_node(i, j, W);
+            int r = uf.root(v);
+
+            if (S[i][j] == '.')
+            {
+                cnt0[r]++;
+            }
+            if (S[i][j] == '#')
+            {
+                cnt1[r]++;
+            }
+        }
+    }
+
+    long long ans = 0;
+    for (int x = 0; x < N; x++)
+    {
+        ans += cnt0[x] * cnt1[x];
+    }
+
+    cout << ans << endl;
 }

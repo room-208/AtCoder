@@ -59,14 +59,14 @@ long long COM(int n, int k)
 }
 
 //繰り返し二乗法
-long long MOD_pow(long long a, long long n)
+long long MOD_pow(long long a, long long n, long long mod)
 {
     long long res = 1;
     while (n > 0)
     {
         if (n & 1)
-            res = res * a % MOD;
-        a = a * a % MOD;
+            res = res * a % mod;
+        a = a * a % mod;
         n >>= 1;
     }
     return res;
@@ -627,36 +627,100 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<int> a(M), b(M);
-    for (int i = 0; i < M; i++)
+    int N;
+    cin >> N;
+    string X;
+    cin >> X;
+
+    int M = 200000;
+    vector<long long> cnt(M + 1, 0LL);
+    for (int i = 1; i <= M; i++)
     {
-        cin >> a[i] >> b[i];
-        a[i]--;
-        b[i]--;
+        int bit = i;
+        int tmp = 0;
+
+        while (bit != 0)
+        {
+            int p = __builtin_popcount(bit);
+            tmp++;
+            bit %= p;
+        }
+
+        cnt[i] = tmp;
     }
 
-    unordered_multimap<int, int> ump_0, ump_1;
-    for (int i = 0; i < M; i++)
-    {
-        ump_0.insert(make_pair(a[i], i));
-        ump_1.insert(make_pair(b[i], i));
-    }
-
-    int cnt = 0;
-    unordered_map<int, int> mp;
+    long long X_pop = 0;
     for (int i = 0; i < N; i++)
     {
-        if (ump_0.count(i))
+        if (X[i] == '1')
         {
-            auto range = ump_0.equal_range(i);
-        }
-        if (ump_1.count(i))
-        {
-            auto range = ump_1.equal_range(i);
+            X_pop++;
         }
     }
 
-    cout << cnt << endl;
+    long long X_pop_min = X_pop - 1;
+    long long X_pop_max = X_pop + 1;
+
+    if (X_pop_min != 0)
+    {
+        long long bit_min = 0LL;
+        long long bit_max = 0LL;
+        for (int i = 0; i < N; i++)
+        {
+            if (X[N - i - 1] == '1')
+            {
+                bit_min += MOD_pow(2LL, i, X_pop_min);
+                bit_min %= X_pop_min;
+                bit_max += MOD_pow(2LL, i, X_pop_max);
+                bit_max %= X_pop_max;
+            }
+        }
+
+        for (int i = 0; i < N; i++)
+        {
+            long long bit = 0;
+
+            if (X[i] == '1')
+            {
+                bit = bit_min - MOD_pow(2LL, N - i - 1, X_pop_min);
+                bit += 1000000LL * X_pop_min;
+                bit %= X_pop_min;
+            }
+            else if (X[i] == '0')
+            {
+                bit = bit_max + MOD_pow(2LL, N - i - 1, X_pop_max);
+                bit %= X_pop_max;
+            }
+
+            cout << cnt[bit] + 1 << endl;
+        }
+    }
+    else
+    {
+        long long bit_max = 0LL;
+        for (int i = 0; i < N; i++)
+        {
+            if (X[N - i - 1] == '1')
+            {
+                bit_max += MOD_pow(2LL, i, X_pop_max);
+                bit_max %= X_pop_max;
+            }
+        }
+
+        for (int i = 0; i < N; i++)
+        {
+            long long bit = 0;
+
+            if (X[i] == '1')
+            {
+                cout << 0 << endl;
+            }
+            else if (X[i] == '0')
+            {
+                bit = bit_max + MOD_pow(2LL, N - i - 1, X_pop_max);
+                bit %= X_pop_max;
+                cout << cnt[bit] + 1 << endl;
+            }
+        }
+    }
 }

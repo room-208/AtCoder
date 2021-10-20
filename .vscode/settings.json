@@ -33,6 +33,7 @@
         "modint": "cpp",
         "*.tcc": "cpp",
         "memory": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "random": "cpp"
     }
 }
