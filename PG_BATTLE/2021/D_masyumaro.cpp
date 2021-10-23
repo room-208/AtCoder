@@ -282,47 +282,16 @@ void compress(vector<long long> &x)
 }
 
 //セグ木・遅延セグ木
-// segtree<long long, seg::op, seg::e> sgt;
-// lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping, seg::composition, seg::id> sgt;
 namespace seg
 {
-    const long long ID = 0;
-    long long op(long long a, long long b)
+    mint op(mint a, mint b)
     {
-        return min(a, b);
+        return a + b;
     }
-    long long e()
+    mint e()
     {
-        return INF_ll;
+        return mint(0);
     }
-    long long mapping(long long f, long long x)
-    {
-        if (f == ID)
-        {
-            return x;
-        }
-        else
-        {
-            return x + f;
-        }
-    }
-    long long composition(long long f, long long g)
-    {
-        if (f == ID)
-        {
-            return g;
-        }
-        else
-        {
-            return f + g;
-        }
-    }
-    long long id()
-    {
-        return ID;
-    }
-    long long target;
-    bool f(long long v) { return v < target; }
 }
 
 // Union-Find
@@ -622,57 +591,52 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    if (s_1.a < s_2.a)
-    {
-        return true;
-    }
-    else if (s_1.a > s_2.a)
-    {
-        return false;
-    }
-    else
-    {
-        if (s_1.b > s_2.b)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    return s_1.b > s_2.b;
 }
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<my_struct> s(M);
-    for (int i = 0; i < M; i++)
-    {
-        cin >> s[i].a >> s[i].b;
-        s[i].a--;
-        s[i].b--;
-    }
-    sort(s.begin(), s.end());
-
-    vector<int> c(N, INF_int);
-    for (int i = 0; i < M; i++)
-    {
-        int a = s[i].a;
-        int b = s[i].b;
-        c[a] = i;
-    }
-
-    vector<int> q(N + 1, INF_int);
+    int N;
+    cin >> N;
+    vector<int> A(N);
     for (int i = 0; i < N; i++)
     {
-        int n = lower_bound(q.begin(), q.end(), c[i]) - q.begin();
-
-        q[n] = c[i];
+        cin >> A[i];
+    }
+    vector<mint> S(N);
+    for (int i = 0; i < N; i++)
+    {
+        int s;
+        cin >> s;
+        S[i] = s;
     }
 
-    int ans = lower_bound(q.begin(), q.end(), INF_int) - q.begin();
+    segtree<mint, seg::op, seg::e> sgt(S);
+    unordered_multiset<int> st;
+    mint ans = 0;
+    int right = 0;
+    for (int left = 0; left < N; ++left)
+    {
+        while (right < N && !st.count(A[right]))
+        {
+            /* 実際に right を 1 進める */
+            st.insert(A[right]);
+            ++right;
+        }
 
-    cout << ans << endl;
+        /* break した状態で right は条件を満たす最大なので、何かする */
+        ans += sgt.prod(0, right - left);
+
+        /* left をインクリメントする準備 */
+        if (right == left)
+        {
+            ++right;
+        }
+        else
+        {
+            st.erase(st.find(A[left]));
+        }
+    }
+
+    cout << ans.val() << endl;
 }

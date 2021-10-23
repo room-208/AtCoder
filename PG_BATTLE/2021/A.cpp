@@ -622,57 +622,24 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    if (s_1.a < s_2.a)
-    {
-        return true;
-    }
-    else if (s_1.a > s_2.a)
-    {
-        return false;
-    }
-    else
-    {
-        if (s_1.b > s_2.b)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    return s_1.b > s_2.b;
 }
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<my_struct> s(M);
-    for (int i = 0; i < M; i++)
-    {
-        cin >> s[i].a >> s[i].b;
-        s[i].a--;
-        s[i].b--;
-    }
-    sort(s.begin(), s.end());
+    double p;
+    cin >> p;
+    p /= 100.;
+    double q = 1. - p;
 
-    vector<int> c(N, INF_int);
-    for (int i = 0; i < M; i++)
+    COMinit();
+
+    double ans = 0.;
+    for (int i = 4; i <= 7; i++)
     {
-        int a = s[i].a;
-        int b = s[i].b;
-        c[a] = i;
+        double C = COM(7, i);
+        ans += C * pow(p, i) * pow(q, 7 - i);
     }
 
-    vector<int> q(N + 1, INF_int);
-    for (int i = 0; i < N; i++)
-    {
-        int n = lower_bound(q.begin(), q.end(), c[i]) - q.begin();
-
-        q[n] = c[i];
-    }
-
-    int ans = lower_bound(q.begin(), q.end(), INF_int) - q.begin();
-
-    cout << ans << endl;
+    printf("%.10f\n", 100. * ans);
 }

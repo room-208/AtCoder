@@ -622,57 +622,58 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    if (s_1.a < s_2.a)
+    return s_1.b > s_2.b;
+}
+
+long long nibun(long long M)
+{
+    long long left = 0;
+    long long right = INF_int + 10;
+
+    while (right - left > 1)
     {
-        return true;
-    }
-    else if (s_1.a > s_2.a)
-    {
-        return false;
-    }
-    else
-    {
-        if (s_1.b > s_2.b)
+        long long mid = (left + right) / 2;
+
+        long long C;
+
+        if (mid % 2 == 0)
         {
-            return true;
+            C = (mid / 2LL) * (mid - 1);
         }
         else
         {
-            return false;
+            C = ((mid - 1) / 2LL) * mid;
+        }
+
+        if (M <= C)
+        {
+            right = mid;
+        }
+        else
+        {
+            left = mid;
         }
     }
+
+    return right;
 }
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<my_struct> s(M);
-    for (int i = 0; i < M; i++)
+    int T;
+    cin >> T;
+    vector<long long> N(T), M(T);
+    for (int i = 0; i < T; i++)
     {
-        cin >> s[i].a >> s[i].b;
-        s[i].a--;
-        s[i].b--;
-    }
-    sort(s.begin(), s.end());
-
-    vector<int> c(N, INF_int);
-    for (int i = 0; i < M; i++)
-    {
-        int a = s[i].a;
-        int b = s[i].b;
-        c[a] = i;
+        cin >> N[i] >> M[i];
     }
 
-    vector<int> q(N + 1, INF_int);
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < T; i++)
     {
-        int n = lower_bound(q.begin(), q.end(), c[i]) - q.begin();
+        long long ans_min = max(1LL, N[i] - M[i]);
+        long long n = nibun(M[i]);
+        long long ans_max = N[i] - n + 1;
 
-        q[n] = c[i];
+        cout << ans_min << " " << ans_max << endl;
     }
-
-    int ans = lower_bound(q.begin(), q.end(), INF_int) - q.begin();
-
-    cout << ans << endl;
 }

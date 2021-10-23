@@ -622,57 +622,83 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    if (s_1.a < s_2.a)
-    {
-        return true;
-    }
-    else if (s_1.a > s_2.a)
-    {
-        return false;
-    }
-    else
-    {
-        if (s_1.b > s_2.b)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    return s_1.b > s_2.b;
 }
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<my_struct> s(M);
-    for (int i = 0; i < M; i++)
-    {
-        cin >> s[i].a >> s[i].b;
-        s[i].a--;
-        s[i].b--;
-    }
-    sort(s.begin(), s.end());
-
-    vector<int> c(N, INF_int);
-    for (int i = 0; i < M; i++)
-    {
-        int a = s[i].a;
-        int b = s[i].b;
-        c[a] = i;
-    }
-
-    vector<int> q(N + 1, INF_int);
+    int N;
+    cin >> N;
+    vector<vector<int>> a(N, vector<int>(5));
     for (int i = 0; i < N; i++)
     {
-        int n = lower_bound(q.begin(), q.end(), c[i]) - q.begin();
-
-        q[n] = c[i];
+        for (int n = 0; n < 5; n++)
+        {
+            cin >> a[i][n];
+        }
     }
 
-    int ans = lower_bound(q.begin(), q.end(), INF_int) - q.begin();
+    int left = 0;
+    int right = INF_int + 10;
+    while (right - left > 1)
+    {
+        int mid = (right + left) / 2;
 
-    cout << ans << endl;
+        set<tuple<int, int, int, int, int>> st;
+        for (int i = 0; i < N; i++)
+        {
+            vector<int> c(5, 0);
+            for (int n = 0; n < 5; n++)
+            {
+                if (a[i][n] >= mid)
+                {
+                    c[n] = 1;
+                }
+            }
+
+            st.insert(make_tuple(c[0], c[1], c[2], c[3], c[4]));
+        }
+
+        bool flag = false;
+        for (auto x : st)
+        {
+            for (auto y : st)
+            {
+                for (auto z : st)
+                {
+                    vector<int> c(5);
+                    c[0] = get<0>(x) | get<0>(y) | get<0>(z);
+                    c[1] = get<1>(x) | get<1>(y) | get<1>(z);
+                    c[2] = get<2>(x) | get<2>(y) | get<2>(z);
+                    c[3] = get<3>(x) | get<3>(y) | get<3>(z);
+                    c[4] = get<4>(x) | get<4>(y) | get<4>(z);
+
+                    bool ok = true;
+                    for (int n = 0; n < 5; n++)
+                    {
+                        if (c[n] != 1)
+                        {
+                            ok = false;
+                        }
+                    }
+
+                    if (ok)
+                    {
+                        flag = true;
+                    }
+                }
+            }
+        }
+
+        if (flag)
+        {
+            left = mid;
+        }
+        else
+        {
+            right = mid;
+        }
+    }
+
+    cout << left << endl;
 }

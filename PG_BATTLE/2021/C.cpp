@@ -622,57 +622,72 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    if (s_1.a < s_2.a)
-    {
-        return true;
-    }
-    else if (s_1.a > s_2.a)
-    {
-        return false;
-    }
-    else
-    {
-        if (s_1.b > s_2.b)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    return s_1.b > s_2.b;
 }
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<my_struct> s(M);
-    for (int i = 0; i < M; i++)
+    int N;
+    cin >> N;
+    vector<int> a((1 << N));
+    for (int i = 0; i < (1 << N); i++)
     {
-        cin >> s[i].a >> s[i].b;
-        s[i].a--;
-        s[i].b--;
-    }
-    sort(s.begin(), s.end());
-
-    vector<int> c(N, INF_int);
-    for (int i = 0; i < M; i++)
-    {
-        int a = s[i].a;
-        int b = s[i].b;
-        c[a] = i;
+        cin >> a[i];
     }
 
-    vector<int> q(N + 1, INF_int);
-    for (int i = 0; i < N; i++)
+    vector<vector<int>> Class(N + 1);
+    for (int i = 0; i < (1 << N); i++)
     {
-        int n = lower_bound(q.begin(), q.end(), c[i]) - q.begin();
-
-        q[n] = c[i];
+        for (int n = 0; n <= N; n++)
+        {
+            if (a[i] == (1 << n))
+            {
+                Class[n].push_back(i);
+            }
+        }
     }
 
-    int ans = lower_bound(q.begin(), q.end(), INF_int) - q.begin();
+    bool flag = true;
+    if ((int)Class[0].size() != 1)
+    {
+        flag = false;
+    }
+    for (int n = 1; n <= N; n++)
+    {
+        if ((int)Class[n].size() != (1 << (n - 1)))
+        {
+            flag = false;
+        }
+    }
+    if (!flag)
+    {
+        cout << -1 << endl;
+        return 0;
+    }
 
-    cout << ans << endl;
+    set<int> st;
+    for (int i = 0; i < (1 << N); i++)
+    {
+        st.insert(i);
+    }
+
+    vector<int> t((1 << N));
+    for (int n = N; n >= 0; n--)
+    {
+        int i = *st.begin();
+        int delta = pow(2, N - n + 1);
+
+        for (auto k : Class[n])
+        {
+            t[i] = k;
+            st.erase(i);
+            i += delta;
+        }
+    }
+
+    for (int i = 0; i < (1 << N); i++)
+    {
+        cout << t[i] + 1 << " ";
+    }
+    cout << endl;
 }

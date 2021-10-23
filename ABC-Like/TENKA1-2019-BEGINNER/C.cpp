@@ -289,40 +289,12 @@ namespace seg
     const long long ID = 0;
     long long op(long long a, long long b)
     {
-        return min(a, b);
+        return a + b;
     }
     long long e()
     {
-        return INF_ll;
+        return 0;
     }
-    long long mapping(long long f, long long x)
-    {
-        if (f == ID)
-        {
-            return x;
-        }
-        else
-        {
-            return x + f;
-        }
-    }
-    long long composition(long long f, long long g)
-    {
-        if (f == ID)
-        {
-            return g;
-        }
-        else
-        {
-            return f + g;
-        }
-    }
-    long long id()
-    {
-        return ID;
-    }
-    long long target;
-    bool f(long long v) { return v < target; }
 }
 
 // Union-Find
@@ -622,57 +594,48 @@ struct my_struct
 
 bool operator<(const my_struct &s_1, const my_struct &s_2)
 {
-    if (s_1.a < s_2.a)
-    {
-        return true;
-    }
-    else if (s_1.a > s_2.a)
-    {
-        return false;
-    }
-    else
-    {
-        if (s_1.b > s_2.b)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    return s_1.b > s_2.b;
 }
 
 int main()
 {
-    int N, M;
-    cin >> N >> M;
-    vector<my_struct> s(M);
-    for (int i = 0; i < M; i++)
-    {
-        cin >> s[i].a >> s[i].b;
-        s[i].a--;
-        s[i].b--;
-    }
-    sort(s.begin(), s.end());
+    int N;
+    cin >> N;
+    string S;
+    cin >> S;
 
-    vector<int> c(N, INF_int);
-    for (int i = 0; i < M; i++)
-    {
-        int a = s[i].a;
-        int b = s[i].b;
-        c[a] = i;
-    }
-
-    vector<int> q(N + 1, INF_int);
+    vector<long long> a(N), b(N);
     for (int i = 0; i < N; i++)
     {
-        int n = lower_bound(q.begin(), q.end(), c[i]) - q.begin();
-
-        q[n] = c[i];
+        if (S[i] == '.')
+        {
+            a[i] = 1;
+            b[i] = 0;
+        }
+        else
+        {
+            a[i] = 0;
+            b[i] = 1;
+        }
     }
 
-    int ans = lower_bound(q.begin(), q.end(), INF_int) - q.begin();
+    segtree<long long, seg::op, seg::e> sgt_a(a);
+    segtree<long long, seg::op, seg::e> sgt_b(b);
+    long long ans = INF_ll;
+
+    chmin(ans, sgt_b.all_prod());
+    chmin(ans, sgt_a.all_prod());
+
+    for (int i = 0; i < N; i++)
+    {
+        if (S[i] == '#')
+        {
+            long long B = sgt_b.prod(0, i);
+            long long A = sgt_a.prod(i, N);
+
+            chmin(ans, A + B);
+        }
+    }
 
     cout << ans << endl;
 }
