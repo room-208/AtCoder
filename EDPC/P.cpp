@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353; // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -387,22 +387,6 @@ struct Edge
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen)
-{
-    seen[v] = true;
-
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        DFS(G, next_v, seen);
-    }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1)
 {
@@ -660,25 +644,49 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<vector<mint>> &dp, int p = -1)
+{
+    for (auto next_v : G[v])
+    {
+        if (next_v == p)
+        {
+            continue;
+        }
+
+        DFS(G, next_v, dp, v);
+    }
+
+    for (auto next_v : G[v])
+    {
+        if (next_v == p)
+        {
+            continue;
+        }
+
+        dp[1][v] *= dp[0][next_v];
+        dp[0][v] *= (dp[0][next_v] + dp[1][next_v]);
+    }
+}
+
 int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int M = N - 1;
+    Graph_int G(N);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        int x, y;
+        cin >> x >> y;
+        x--;
+        y--;
+        G[x].push_back(y);
+        G[y].push_back(x);
     }
 
-    bool flag = true;
-    if (flag)
-    {
-        cout << "Yes" << endl;
-    }
-    else
-    {
-        cout << "No" << endl;
-    }
+    vector<vector<mint>> dp(2, vector<mint>(N, 1));
+    DFS(G, 0, dp);
+
+    cout << (dp[1][0] + dp[0][0]).val() << endl;
 }

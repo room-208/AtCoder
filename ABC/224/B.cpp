@@ -446,41 +446,6 @@ void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int 
     }
 }
 
-//トポロジカルソートのDFS
-void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order)
-{
-    seen[v] = true;
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, next_v, seen, order);
-    }
-
-    order.push_back(v);
-}
-
-//トポロジカルソート
-void topological_sort(const Graph_int &G, vector<int> &order)
-{
-    int N = (int)G.size();
-    vector<bool> seen(N, false);
-    for (int v = 0; v < N; v++)
-    {
-        if (seen[v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, v, seen, order);
-    }
-
-    reverse(order.begin(), order.end());
-}
-
 //幅優先探索
 void BFS(const Graph_int &G, int s)
 {
@@ -662,17 +627,35 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int H, W;
+    cin >> H >> W;
+    vector<vector<long long>> A(H, vector<long long>(W));
+    for (int i = 0; i < H; i++)
     {
-        cin >> A[i];
+        for (int j = 0; j < W; j++)
+        {
+            cin >> A[i][j];
+        }
     }
 
     bool flag = true;
+    for (int i1 = 0; i1 < H; i1++)
+    {
+        for (int i2 = i1 + 1; i2 < H; i2++)
+        {
+            for (int j1 = 0; j1 < W; j1++)
+            {
+                for (int j2 = j1 + 1; j2 < W; j2++)
+                {
+                    if (A[i1][j1] + A[i2][j2] > A[i2][j1] + A[i1][j2])
+                    {
+                        flag = false;
+                    }
+                }
+            }
+        }
+    }
+
     if (flag)
     {
         cout << "Yes" << endl;

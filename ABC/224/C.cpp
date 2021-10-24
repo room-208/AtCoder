@@ -446,41 +446,6 @@ void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int 
     }
 }
 
-//トポロジカルソートのDFS
-void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order)
-{
-    seen[v] = true;
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, next_v, seen, order);
-    }
-
-    order.push_back(v);
-}
-
-//トポロジカルソート
-void topological_sort(const Graph_int &G, vector<int> &order)
-{
-    int N = (int)G.size();
-    vector<bool> seen(N, false);
-    for (int v = 0; v < N; v++)
-    {
-        if (seen[v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, v, seen, order);
-    }
-
-    reverse(order.begin(), order.end());
-}
-
 //幅優先探索
 void BFS(const Graph_int &G, int s)
 {
@@ -664,21 +629,33 @@ int main()
 {
     int N;
     cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
+    vector<long long> X(N), Y(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> A[i];
+        cin >> X[i] >> Y[i];
     }
 
-    bool flag = true;
-    if (flag)
+    long long ans = 0;
+    for (int i = 0; i < N; i++)
     {
-        cout << "Yes" << endl;
+        for (int j = i + 1; j < N; j++)
+        {
+            for (int k = j + 1; k < N; k++)
+            {
+                if (X[i] == X[j] && X[j] == X[k])
+                {
+                    continue;
+                }
+
+                if ((Y[k] - Y[i]) * (X[j] - X[i]) == (X[k] - X[i]) * (Y[j] - Y[i]))
+                {
+                    continue;
+                }
+
+                ans++;
+            }
+        }
     }
-    else
-    {
-        cout << "No" << endl;
-    }
+
+    cout << ans << endl;
 }

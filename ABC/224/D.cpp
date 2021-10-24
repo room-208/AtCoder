@@ -446,43 +446,8 @@ void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int 
     }
 }
 
-//トポロジカルソートのDFS
-void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order)
-{
-    seen[v] = true;
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, next_v, seen, order);
-    }
-
-    order.push_back(v);
-}
-
-//トポロジカルソート
-void topological_sort(const Graph_int &G, vector<int> &order)
-{
-    int N = (int)G.size();
-    vector<bool> seen(N, false);
-    for (int v = 0; v < N; v++)
-    {
-        if (seen[v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, v, seen, order);
-    }
-
-    reverse(order.begin(), order.end());
-}
-
 //幅優先探索
-void BFS(const Graph_int &G, int s)
+vector<int> BFS(const Graph_int &G, int s)
 {
     int N = (int)G.size();   // 頂点数
     vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
@@ -510,6 +475,8 @@ void BFS(const Graph_int &G, int s)
             que.push(x);
         }
     }
+
+    return dist;
 }
 
 // 01BFS
@@ -660,25 +627,121 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+void func_1(map<string, int> &mp_to_int, map<int, string> &mp_to_string)
+{
+    int cnt = 0;
+    vector<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    do
+    {
+        string S;
+        for (int i = 0; i < 9; i++)
+        {
+            char s = '0' + v[i];
+            S.push_back(s);
+        }
+
+        mp_to_int[S] = cnt;
+        mp_to_string[cnt] = S;
+
+        cnt++;
+    } while (next_permutation(v.begin(), v.end()));
+}
+
+void func_2(map<string, int> &mp_to_int, map<int, string> &mp_to_string, unordered_set<pair<int, int>, HashPair> &st, Graph_int &G)
+{
+    vector<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    do
+    {
+        string S;
+        for (int i = 0; i < 9; i++)
+        {
+            char s = '0' + v[i];
+            S.push_back(s);
+        }
+
+        int n;
+        for (int i = 0; i < 9; i++)
+        {
+            if (S[i] == '8')
+            {
+                n = i;
+            }
+        }
+
+        for (int i = 0; i < 9; i++)
+        {
+            if (st.count(make_pair(i, n)))
+            {
+                string T = S;
+                swap(T[i], T[n]);
+
+                int ns = mp_to_int[S];
+                int nt = mp_to_int[T];
+
+                G[ns].push_back(nt);
+                G[nt].push_back(ns);
+            }
+        }
+
+    } while (next_permutation(v.begin(), v.end()));
+}
+
 int main()
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    int M;
+    cin >> M;
+    vector<int> u(M), v(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> A[i];
+        cin >> u[i] >> v[i];
+        u[i]--;
+        v[i]--;
+    }
+    vector<int> p(8);
+    for (int i = 0; i < 8; i++)
+    {
+        cin >> p[i];
+        p[i]--;
     }
 
-    bool flag = true;
-    if (flag)
+    unordered_set<pair<int, int>, HashPair> st;
+    for (int i = 0; i < M; i++)
     {
-        cout << "Yes" << endl;
+        st.insert(make_pair(u[i], v[i]));
     }
-    else
+
+    map<string, int> mp_to_int;
+    map<int, string> mp_to_string;
+
+    func_1(mp_to_int, mp_to_string);
+
+    int N = 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1;
+    Graph_int G(N);
+    func_2(mp_to_int, mp_to_string, st, G);
+
+    vector<char> A(9, '#');
+    for (int i = 0; i < 8; i++)
     {
-        cout << "No" << endl;
+        A[p[i]] = '0' + i;
     }
+    for (int i = 0; i < 9; i++)
+    {
+        if (A[i] == '#')
+        {
+            A[i] = '8';
+        }
+    }
+
+    string S;
+    for (int i = 0; i < 9; i++)
+    {
+        S.push_back(A[i]);
+    }
+    string T = "012345678";
+
+    int s = mp_to_int[S];
+    int t = mp_to_int[T];
+
+    vector<int> dist = BFS(G, s);
+    cout << dist[t] << endl;
 }

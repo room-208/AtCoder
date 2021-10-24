@@ -446,41 +446,6 @@ void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size, int 
     }
 }
 
-//トポロジカルソートのDFS
-void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order)
-{
-    seen[v] = true;
-    for (auto next_v : G[v])
-    {
-        if (seen[next_v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, next_v, seen, order);
-    }
-
-    order.push_back(v);
-}
-
-//トポロジカルソート
-void topological_sort(const Graph_int &G, vector<int> &order)
-{
-    int N = (int)G.size();
-    vector<bool> seen(N, false);
-    for (int v = 0; v < N; v++)
-    {
-        if (seen[v])
-        {
-            continue;
-        }
-
-        topological_sort_dfs(G, v, seen, order);
-    }
-
-    reverse(order.begin(), order.end());
-}
-
 //幅優先探索
 void BFS(const Graph_int &G, int s)
 {
@@ -660,25 +625,48 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
-int main()
+void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order)
 {
-    int N;
-    cin >> N;
-    string S;
-    cin >> S;
-    vector<int> A(N);
-    for (int i = 0; i < N; i++)
+    seen[v] = true;
+    for (auto next_v : G[v])
     {
-        cin >> A[i];
+        if (seen[next_v])
+        {
+            continue;
+        }
+
+        topological_sort_dfs(G, next_v, seen, order);
     }
 
-    bool flag = true;
-    if (flag)
+    order.push_back(v);
+}
+
+void topological_sort(const Graph_int &G, vector<int> &order)
+{
+    int N = (int)G.size();
+    vector<bool> seen(N, false);
+    for (int v = 0; v < N; v++)
     {
-        cout << "Yes" << endl;
+        if (seen[v])
+        {
+            continue;
+        }
+
+        topological_sort_dfs(G, v, seen, order);
     }
-    else
+
+    reverse(order.begin(), order.end());
+}
+
+int main()
+{
+    int H, W, N;
+    cin >> H >> W >> N;
+    vector<int> r(N), c(N), a(N);
+    for (int i = 0; i < N; i++)
     {
-        cout << "No" << endl;
+        cin >> r[i] >> c[i] >> a[i];
+        r[i]--;
+        c[i]--;
     }
 }
