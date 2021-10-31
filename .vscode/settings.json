@@ -34,6 +34,7 @@
         "*.tcc": "cpp",
         "memory": "cpp",
         "future": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "set": "cpp"
     }
 }
