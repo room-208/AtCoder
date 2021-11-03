@@ -662,73 +662,19 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
 
 int main()
 {
-    int H, W, N;
-    cin >> H >> W >> N;
-    vector<int> r(N), c(N), a(N);
-    for (int i = 0; i < N; i++)
+    int N, M;
+    cin >> N >> M;
+    vector<int> A(M);
+    vector<long long> C(M);
+    for (int i = 0; i < M; i++)
     {
-        cin >> r[i] >> c[i] >> a[i];
-        r[i]--;
-        c[i]--;
+        cin >> A[i] >> C[i];
     }
 
-    vector<tuple<int, int, int, int>> t;
-    unordered_map<int, int> mp;
-    for (int i = 0; i < N; i++)
+    vector<pair<long long, int>> p;
+    for (int i = 0; i < M; i++)
     {
-        t.push_back(make_tuple(a[i], r[i], c[i], i));
+        p.push_back(make_pair(C[i], A[i]));
     }
-    sort(t.begin(), t.end());
-    reverse(t.begin(), t.end());
-    for (int i = 0; i < N; i++)
-    {
-        a[i] = get<0>(t[i]);
-        r[i] = get<1>(t[i]);
-        c[i] = get<2>(t[i]);
-        mp[i] = get<3>(t[i]);
-    }
-
-    vector<int> dp(N, -INF_int);
-    vector<int> row_max(H, -1), col_max(W, -1);
-
-    int key = -1;
-    int i = 0;
-    while (1)
-    {
-        key = a[i];
-
-        vector<int> index;
-        while (key == a[i])
-        {
-            dp[i] = max(row_max[r[i]] + 1, col_max[c[i]] + 1);
-            index.push_back(i);
-            i++;
-
-            if (i == N)
-            {
-                break;
-            }
-        }
-
-        if (i == N)
-        {
-            break;
-        }
-
-        for (int k = 0; k < (int)index.size(); k++)
-        {
-            chmax(row_max[r[index[k]]], dp[index[k]]);
-            chmax(col_max[c[index[k]]], dp[index[k]]);
-        }
-    }
-
-    vector<int> ans(N);
-    for (int i = 0; i < N; i++)
-    {
-        ans[mp[i]] = dp[i];
-    }
-    for (int i = 0; i < N; i++)
-    {
-        cout << ans[i] << endl;
-    }
+    sort(p.begin(), p.end());
 }

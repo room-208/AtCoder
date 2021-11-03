@@ -660,75 +660,134 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+long long f(long long x, long long a, int t)
+{
+    if (t == 1)
+    {
+        return x + a;
+    }
+    else if (t == 2)
+    {
+        return max(x, a);
+    }
+    else if (t == 3)
+    {
+        return min(x, a);
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+long long F(long long x, vector<long long> &a, vector<int> &t)
+{
+    int N = (int)a.size();
+
+    long long y = x;
+
+    for (int i = 0; i < N; i++)
+    {
+        y = f(y, a[i], t[i]);
+    }
+
+    return y;
+}
+
+long long BinarySerach1(vector<long long> &a, vector<int> &t, long long b)
+{
+    long long left = -INF_ll;
+    long long right = INF_ll;
+
+    while (right - left > 1)
+    {
+        long long mid = (right + left) / 2;
+        long long value = F(mid, a, t);
+
+        if (value < mid + b)
+        {
+            right = mid;
+        }
+        else
+        {
+            left = mid;
+        }
+    }
+
+    return left + b;
+}
+
+long long BinarySerach2(vector<long long> &a, vector<int> &t, long long b)
+{
+    long long left = -INF_ll;
+    long long right = INF_ll;
+
+    while (right - left > 1)
+    {
+        long long mid = (right + left) / 2;
+        long long value = F(mid, a, t);
+
+        if (value > mid + b)
+        {
+            left = mid;
+        }
+        else
+        {
+            right = mid;
+        }
+    }
+
+    return right + b;
+}
+
+long long f_ans(long long x, long long h1, long long h2, long long b)
+{
+    if (x + b > h1)
+    {
+        return h1;
+    }
+    else if (x + b < h2)
+    {
+        return h2;
+    }
+    else
+    {
+        return x + b;
+    }
+}
+
 int main()
 {
-    int H, W, N;
-    cin >> H >> W >> N;
-    vector<int> r(N), c(N), a(N);
+    int N;
+    cin >> N;
+    vector<long long> a(N);
+    vector<int> t(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> r[i] >> c[i] >> a[i];
-        r[i]--;
-        c[i]--;
+        cin >> a[i] >> t[i];
+    }
+    int Q;
+    cin >> Q;
+    vector<long long> x(Q);
+    for (int i = 0; i < Q; i++)
+    {
+        cin >> x[i];
     }
 
-    vector<tuple<int, int, int, int>> t;
-    unordered_map<int, int> mp;
+    long long b = 0;
     for (int i = 0; i < N; i++)
     {
-        t.push_back(make_tuple(a[i], r[i], c[i], i));
-    }
-    sort(t.begin(), t.end());
-    reverse(t.begin(), t.end());
-    for (int i = 0; i < N; i++)
-    {
-        a[i] = get<0>(t[i]);
-        r[i] = get<1>(t[i]);
-        c[i] = get<2>(t[i]);
-        mp[i] = get<3>(t[i]);
-    }
-
-    vector<int> dp(N, -INF_int);
-    vector<int> row_max(H, -1), col_max(W, -1);
-
-    int key = -1;
-    int i = 0;
-    while (1)
-    {
-        key = a[i];
-
-        vector<int> index;
-        while (key == a[i])
+        if (t[i] == 1)
         {
-            dp[i] = max(row_max[r[i]] + 1, col_max[c[i]] + 1);
-            index.push_back(i);
-            i++;
-
-            if (i == N)
-            {
-                break;
-            }
-        }
-
-        if (i == N)
-        {
-            break;
-        }
-
-        for (int k = 0; k < (int)index.size(); k++)
-        {
-            chmax(row_max[r[index[k]]], dp[index[k]]);
-            chmax(col_max[c[index[k]]], dp[index[k]]);
+            b += a[i];
         }
     }
 
-    vector<int> ans(N);
-    for (int i = 0; i < N; i++)
+    long long h1 = BinarySerach1(a, t, b);
+    long long h2 = BinarySerach2(a, t, b);
+
+    for (int i = 0; i < Q; i++)
     {
-        ans[mp[i]] = dp[i];
-    }
-    for (int i = 0; i < N; i++)
-    {
-        cout << ans[i] << endl;
+        cout << f_ans(x[i], h1, h2, b) << endl;
     }
 }

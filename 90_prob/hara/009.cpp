@@ -660,75 +660,96 @@ bool operator<(const my_struct &s_1, const my_struct &s_2)
     return s_1.b > s_2.b;
 }
 
+long double GetAngle(long double alpha, long double beta)
+{
+    long double res = fabsl(alpha - beta);
+    while (res > 360.)
+    {
+        res -= 360.;
+    }
+    res = min(res, fabs(360. - res));
+    return res;
+}
+
 int main()
 {
-    int H, W, N;
-    cin >> H >> W >> N;
-    vector<int> r(N), c(N), a(N);
+    int N;
+    cin >> N;
+    vector<long double> x(N), y(N);
     for (int i = 0; i < N; i++)
     {
-        cin >> r[i] >> c[i] >> a[i];
-        r[i]--;
-        c[i]--;
+        cin >> x[i] >> y[i];
     }
 
-    vector<tuple<int, int, int, int>> t;
-    unordered_map<int, int> mp;
-    for (int i = 0; i < N; i++)
+    vector<long double> a(N), b(N);
+    long double ans = 0.;
+    for (int n = 0; n < N; n++)
     {
-        t.push_back(make_tuple(a[i], r[i], c[i], i));
-    }
-    sort(t.begin(), t.end());
-    reverse(t.begin(), t.end());
-    for (int i = 0; i < N; i++)
-    {
-        a[i] = get<0>(t[i]);
-        r[i] = get<1>(t[i]);
-        c[i] = get<2>(t[i]);
-        mp[i] = get<3>(t[i]);
-    }
-
-    vector<int> dp(N, -INF_int);
-    vector<int> row_max(H, -1), col_max(W, -1);
-
-    int key = -1;
-    int i = 0;
-    while (1)
-    {
-        key = a[i];
-
-        vector<int> index;
-        while (key == a[i])
+        // x[n],y[n]を原点に
+        for (int i = 0; i < N; i++)
         {
-            dp[i] = max(row_max[r[i]] + 1, col_max[c[i]] + 1);
-            index.push_back(i);
-            i++;
+            a[i] = x[i] - x[n];
+            b[i] = y[i] - y[n];
+        }
 
-            if (i == N)
+        // thetaの計算
+        vector<long double> theta;
+        for (int i = 0; i < N; i++)
+        {
+            if (i == n)
             {
-                break;
+                continue;
             }
+
+            long double x = b[i] / sqrt(a[i] * a[i] + b[i] * b[i]);
+            long double tmp = asinl(x) * (180. / M_PI);
+
+            if (a[i] >= 0. && b[i] >= 0.)
+            {
+                //何もしない
+            }
+            else if (a[i] >= 0. && b[i] < 0.)
+            {
+                tmp += 360.;
+            }
+            else if (a[i] < 0. && b[i] >= 0.)
+            {
+                tmp = 180. - tmp;
+            }
+            else if (a[i] < 0. && b[i] < 0.)
+            {
+                tmp = 180. - tmp;
+            }
+
+            theta.push_back(tmp);
         }
 
-        if (i == N)
+        // vecの計算
+        vector<long double> vec;
+        for (int i = 0; i < (int)theta.size(); i++)
         {
-            break;
+            vec.push_back(theta[i]);
+            vec.push_back(theta[i] - 360.);
+            vec.push_back(theta[i] + 360.);
         }
 
-        for (int k = 0; k < (int)index.size(); k++)
+        sort(vec.begin(), vec.end());
+
+        //二分探索
+        for (int i = 0; i < (int)theta.size(); i++)
         {
-            chmax(row_max[r[index[k]]], dp[index[k]]);
-            chmax(col_max[c[index[k]]], dp[index[k]]);
+            long double key = theta[i] + 180.;
+
+            if (key > 360.)
+            {
+                key -= 360.;
+            }
+
+            auto itr = lower_bound(vec.begin(), vec.end(), key);
+            chmax(ans, GetAngle(*itr, theta[i]));
+            chmax(ans, GetAngle(*prev(itr), theta[i]));
         }
     }
 
-    vector<int> ans(N);
-    for (int i = 0; i < N; i++)
-    {
-        ans[mp[i]] = dp[i];
-    }
-    for (int i = 0; i < N; i++)
-    {
-        cout << ans[i] << endl;
-    }
+    printf("%.10f\n", (double)ans);
 }
