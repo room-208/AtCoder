@@ -478,39 +478,6 @@ void Bellman_Ford(const Graph_Edge &G, int s) {
   }
 }
 
-//ダイクストラ法
-void Dijkstra(const Graph_Edge &G, int s) {
-  int N = (int)G.size();
-  vector<long long> dist(N, INF_ll);
-  dist[s] = 0;
-
-  // (d[v], v) のペアを要素としたヒープを作る
-  priority_queue<pair<long long, int>, vector<pair<long long, int>>,
-                 greater<pair<long long, int>>>
-      que;
-  que.push(make_pair(dist[s], s));
-
-  // ダイクストラ法の反復を開始
-  while (!que.empty()) {
-    // v: 使用済みでない頂点のうち d[v] が最小の頂点
-    // d: v に対するキー値
-    int v = que.top().second;
-    long long d = que.top().first;
-    que.pop();
-
-    // d > dist[v] は，(d, v) がゴミであることを意味する
-    if (d > dist[v]) continue;
-
-    // 頂点 v を始点とした各辺を緩和
-    for (auto e : G[v]) {
-      if (chmin(dist[e.to], dist[v] + e.w)) {
-        // 更新があるならヒープに新たに挿入
-        que.push(make_pair(dist[e.to], e.to));
-      }
-    }
-  }
-}
-
 //オーバーフロー判定
 //__builtin_add_overflow
 //__builtin_mul_overflow
@@ -546,17 +513,43 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<long long> T(N);
+  vector<int> K(N);
+  vector<vector<int>> A(N);
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    cin >> T[i] >> K[i];
+    for (int j = 0; j < K[i]; j++) {
+      int tmp;
+      cin >> tmp;
+      tmp--;
+      A[i].push_back(tmp);
+    }
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  long long ans = 0;
+  unordered_set<int> st;
+  deque<int> q;
+  ans += T[N - 1];
+  for (int j = 0; j < K[N - 1]; j++) {
+    q.push_back(A[N - 1][j]);
   }
+
+  while (!q.empty()) {
+    int i = q.front();
+    q.pop_front();
+
+    if (st.count(i)) {
+    } else {
+      ans += T[i];
+      st.insert(i);
+    }
+
+    for (int j = 0; j < K[i]; j++) {
+      if (!st.count(A[i][j])) {
+        q.push_back(A[i][j]);
+      }
+    }
+  }
+
+  cout << ans << endl;
 }

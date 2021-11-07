@@ -544,19 +544,59 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N, K;
+  cin >> N >> K;
+
+  COMinit();
+
+  vector<mint> cnt(N + 1, 0);
+  mint permutation = 1;
+  for (int i = 1; i <= N; i++) {
+    permutation *= i;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  vector<int> q = osa_k(10000);
+  vector<int> a(N + 1, 0);
+
+  for (int j = 1; j <= N; j++) {
+    int n = j;
+    while (n != 1) {
+      int r = q[n];
+      a[r]++;
+      n /= r;
+    }
   }
+
+  cnt[1] = 1;
+  for (int i = 2; i <= N; i++) {
+    bool flag = true;
+    vector<int> b(N + 1, 0);
+    int n = i;
+    while (n != 1) {
+      int r = q[n];
+      b[r]++;
+      n /= r;
+    }
+
+    for (int i = 0; i <= N; i++) {
+      if (b[i] > a[i]) {
+        flag = false;
+      }
+    }
+
+    if (flag) {
+      cout << i << endl;
+    }
+
+    if (flag) {
+      cnt[i] = permutation * mint(i).inv();
+    }
+  }
+
+  mint ans = 0;
+  for (int i = 1; i <= N; i++) {
+    ans += cnt[i] * mint(i).pow(K);
+  }
+
+  cout << ans.val() << endl;
 }

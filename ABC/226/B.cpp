@@ -546,17 +546,21 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<int> L(N);
+  vector<vector<int>> a(N);
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    cin >> L[i];
+    for (int j = 0; j < L[i]; j++) {
+      int tmp;
+      cin >> tmp;
+      a[i].push_back(tmp);
+    }
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  set<pair<int, vector<int>>> st;
+  for (int i = 0; i < N; i++) {
+    st.insert(make_pair(L[i], a[i]));
   }
+
+  cout << (int)st.size() << endl;
 }

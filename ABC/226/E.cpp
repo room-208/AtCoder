@@ -314,32 +314,6 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
-//根付き木
-void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
-  for (auto next_v : G[v]) {
-    if (next_v == p) {
-      continue;
-    }
-
-    par_cal(G, next_v, par, v);
-  }
-
-  par[v] = p;
-}
-
 //部分木サイズ
 void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
                       int p = -1) {
@@ -543,20 +517,68 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+void DFS(const Graph_int &G, int v, vector<bool> &seen) {
+  seen[v] = true;
+
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    DFS(G, next_v, seen);
+  }
+}
+
+//根付き木
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+  for (auto next_v : G[v]) {
+    if (next_v == p) {
+      continue;
+    }
+
+    par_cal(G, next_v, par, v);
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  par[v] = p;
+}
+
+int main() {
+  int N, M;
+  cin >> N >> M;
+  vector<int> U(M), V(M);
+  for (int i = 0; i < M; i++) {
+    cin >> U[i] >> V[i];
+    U[i]--;
+    V[i]--;
   }
+
+  Graph_int G(N);
+  for (int i = 0; i < M; i++) {
+    G[U[i]].push_back(V[i]);
+  }
+
+  UnionFind uf(N);
+  for (int i = 0; i < M; i++) {
+    uf.unite(U[i], V[i]);
+  }
+
+  vector<int> cnt(N, 0);
+  for (int i = 0; i < N; i++) {
+    int r = uf.root(i);
+
+    cnt[r] += (int)G[i].size();
+  }
+
+  mint ans = 1;
+  for (int i = 0; i < N; i++) {
+    if (i == uf.root(i)) {
+      if (cnt[i] == uf.size(i)) {
+        ans *= 2;
+      } else {
+        ans = 0;
+      }
+    }
+  }
+
+  cout << ans.val() << endl;
 }
