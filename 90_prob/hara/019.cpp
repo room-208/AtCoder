@@ -546,42 +546,25 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  vector<int> D(N), C(N);
-  vector<long long> S(N);
-  for (int i = 0; i < N; i++) {
-    cin >> D[i] >> C[i] >> S[i];
+  vector<long long> A(2 * N);
+  for (int i = 0; i < 2 * N; i++) {
+    cin >> A[i];
   }
 
-  vector<tuple<int, int, long long>> t;
-  for (int i = 0; i < N; i++) {
-    t.push_back(make_tuple(D[i], C[i], S[i]));
-  }
-  sort(t.begin(), t.end());
-
-  vector<int> d(N + 1, -1), c(N + 1, -1);
-  vector<long long> s(N + 1, -1);
-  for (int i = 0; i < N; i++) {
-    d[i + 1] = get<0>(t[i]);
-    c[i + 1] = get<1>(t[i]);
-    s[i + 1] = get<2>(t[i]);
+  vector<vector<long long>> dp(2 * N, vector<long long>(2 * N, INF_ll));
+  for (int i = 0; i < 2 * N - 1; i++) {
+    dp[i][i + 1] = llabs(A[i] - A[i + 1]);
   }
 
-  vector<long long> dp(50001, 0);
-  vector<long long> dp_new(50001, 0);
-  for (int i = 1; i <= N; i++) {
-    dp_new = dp;
-    for (int t = 0; t <= 5000; t++) {
-      if (t + c[i] <= d[i]) {
-        chmax(dp_new[t + c[i]], dp[t] + s[i]);
+  for (int w = 4; w <= 2 * N; w += 2) {
+    for (int i = 0; i + w - 1 < 2 * N; i++) {
+      for (int j = i + 1; j < i + w - 1; j++) {
+        chmin(dp[i][i + w - 1], dp[i][j] + dp[j + 1][i + w - 1]);
       }
+      chmin(dp[i][i + w - 1],
+            dp[i + 1][i + w - 2] + llabs(A[i] - A[i + w - 1]));
     }
-    dp = dp_new;
   }
 
-  long long ans = -1;
-  for (int t = 0; t <= 5000; t++) {
-    chmax(ans, dp[t]);
-  }
-
-  cout << ans << endl;
+  cout << dp[0][2 * N - 1] << endl;
 }

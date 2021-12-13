@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -543,45 +543,31 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+void Ans(int N, int k) {
+  vector<mint> x(N + 1, 0);
+  for (int i = 1; i <= k; i++) {
+    x[i] = i + 1;
+  }
+  for (int i = k + 1; i <= N; i++) {
+    x[i] = x[i - k] + x[i - 1];
+  }
+
+  mint ans = x[N] - 1;
+
+  cout << ans.val() << endl;
+}
+
 int main() {
   int N;
   cin >> N;
-  vector<int> D(N), C(N);
-  vector<long long> S(N);
-  for (int i = 0; i < N; i++) {
-    cin >> D[i] >> C[i] >> S[i];
-  }
 
-  vector<tuple<int, int, long long>> t;
-  for (int i = 0; i < N; i++) {
-    t.push_back(make_tuple(D[i], C[i], S[i]));
-  }
-  sort(t.begin(), t.end());
+  COMinit();
 
-  vector<int> d(N + 1, -1), c(N + 1, -1);
-  vector<long long> s(N + 1, -1);
-  for (int i = 0; i < N; i++) {
-    d[i + 1] = get<0>(t[i]);
-    c[i + 1] = get<1>(t[i]);
-    s[i + 1] = get<2>(t[i]);
-  }
-
-  vector<long long> dp(50001, 0);
-  vector<long long> dp_new(50001, 0);
-  for (int i = 1; i <= N; i++) {
-    dp_new = dp;
-    for (int t = 0; t <= 5000; t++) {
-      if (t + c[i] <= d[i]) {
-        chmax(dp_new[t + c[i]], dp[t] + s[i]);
-      }
+  for (int k = 1; k <= N; k++) {
+    mint ans = 0;
+    for (int a = 1; a <= (N / k) + 1; a++) {
+      ans += COM(N - (a - 1) * (k - 1), a);
     }
-    dp = dp_new;
+    cout << ans.val() << endl;
   }
-
-  long long ans = -1;
-  for (int t = 0; t <= 5000; t++) {
-    chmax(ans, dp[t]);
-  }
-
-  cout << ans << endl;
 }

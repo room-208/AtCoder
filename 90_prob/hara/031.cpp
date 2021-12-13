@@ -546,42 +546,51 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  vector<int> D(N), C(N);
-  vector<long long> S(N);
+  vector<int> W(N), B(N);
   for (int i = 0; i < N; i++) {
-    cin >> D[i] >> C[i] >> S[i];
+    cin >> W[i] >> B[i];
   }
 
-  vector<tuple<int, int, long long>> t;
-  for (int i = 0; i < N; i++) {
-    t.push_back(make_tuple(D[i], C[i], S[i]));
-  }
-  sort(t.begin(), t.end());
+  vector<vector<vector<long long>>> cnt(
+      51, vector<vector<long long>>(1501, vector<long long>(2, 0)));
+  cnt[0][0][0] = 1;
+  cnt[0][1][0] = 1;
+  for (int w = 0; w <= 50; w++) {
+    for (int b = 0; b <= 1500; b++) {
+      if (w == 0 && b == 1) {
+        continue;
+      }
+      if (w == 0 && b == 0) {
+        continue;
+      }
 
-  vector<int> d(N + 1, -1), c(N + 1, -1);
-  vector<long long> s(N + 1, -1);
-  for (int i = 0; i < N; i++) {
-    d[i + 1] = get<0>(t[i]);
-    c[i + 1] = get<1>(t[i]);
-    s[i + 1] = get<2>(t[i]);
-  }
+      if (w >= 1) {
+        if (b + w <= 1500) {
+          if (cnt[w - 1][b + w][1] > 0) {
+            cnt[w][b][0]++;
+          }
+          if (cnt[w - 1][b + w][0] > 0) {
+            cnt[w][b][1]++;
+          }
+        }
+      }
 
-  vector<long long> dp(50001, 0);
-  vector<long long> dp_new(50001, 0);
-  for (int i = 1; i <= N; i++) {
-    dp_new = dp;
-    for (int t = 0; t <= 5000; t++) {
-      if (t + c[i] <= d[i]) {
-        chmax(dp_new[t + c[i]], dp[t] + s[i]);
+      if (b >= 2) {
+        for (int k = 1; k <= b / 2; k++) {
+          if (cnt[w][b - k][1] > 0) {
+            cnt[w][b][0]++;
+          }
+          if (cnt[w][b - k][0] > 0) {
+            cnt[w][b][1]++;
+          }
+        }
       }
     }
-    dp = dp_new;
   }
 
-  long long ans = -1;
-  for (int t = 0; t <= 5000; t++) {
-    chmax(ans, dp[t]);
+  for (int i = 0; i < N; i++) {
+    int w = W[i];
+    int b = B[i];
+    cout << cnt[w][b][0] << " " << cnt[w][b][1] << endl;
   }
-
-  cout << ans << endl;
 }
