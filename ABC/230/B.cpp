@@ -544,16 +544,21 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
   string S;
   cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
-  }
 
-  bool flag = true;
+  string T;
+  for (int i = 0; i < 100000; i++) {
+    T += "oxx";
+  }
+  bool flag = false;
+  for (int i = 0; i < 100; i++) {
+    string t = T.substr(i, S.size());
+
+    if (t == S) {
+      flag = true;
+    }
+  }
   if (flag) {
     cout << "Yes" << endl;
   } else {

@@ -545,18 +545,43 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 
 int main() {
   int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  long long D;
+  cin >> N >> D;
+  vector<long long> L(N), R(N);
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    cin >> L[i] >> R[i];
+  }
+  vector<pair<long long, long long>> p;
+  for (int i = 0; i < N; i++) {
+    p.push_back(make_pair(R[i], L[i]));
+  }
+  sort(p.begin(), p.end());
+
+  for (int i = 0; i < N; i++) {
+    L[i] = p[i].second;
+    R[i] = p[i].first;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  int cnt = 0;
+  int i = 0;
+  while (1) {
+    if (i >= N) {
+      break;
+    }
+
+    int next = R[i] + D - 1;
+
+    while (L[i + 1] <= next) {
+      i++;
+
+      if (i + 1 >= N) {
+        break;
+      }
+    }
+
+    cnt++;
+    i++;
   }
+
+  cout << cnt << endl;
 }

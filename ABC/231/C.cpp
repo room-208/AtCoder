@@ -544,19 +544,19 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  int N, Q;
+  cin >> N >> Q;
+  vector<int> A(N), x(Q);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
+  for (int i = 0; i < Q; i++) {
+    cin >> x[i];
+  }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  sort(A.begin(), A.end());
+  for (int i = 0; i < Q; i++) {
+    int n = lower_bound(A.begin(), A.end(), x[i]) - A.begin();
+    cout << N - n << endl;
   }
 }

@@ -544,19 +544,7 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
-  }
-
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+  double D;
+  cin >> D;
+  printf("%.10f\n", D / 100.);
 }

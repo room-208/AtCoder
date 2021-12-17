@@ -546,17 +546,18 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+
+  if (N >= 42) {
+    N++;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  string S = to_string(N);
+
+  reverse(S.begin(), S.end());
+  while (S.size() != 3) {
+    S.push_back('0');
   }
+  reverse(S.begin(), S.end());
+
+  cout << "AGC" << S << endl;
 }

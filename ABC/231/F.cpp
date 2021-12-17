@@ -242,26 +242,8 @@ void compress(vector<long long> &x) {
 // lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping,
 // seg::composition, seg::id> sgt;
 namespace seg {
-const long long ID = 0;
-long long op(long long a, long long b) { return min(a, b); }
-long long e() { return INF_ll; }
-long long mapping(long long f, long long x) {
-  if (f == ID) {
-    return x;
-  } else {
-    return x + f;
-  }
-}
-long long composition(long long f, long long g) {
-  if (f == ID) {
-    return g;
-  } else {
-    return f + g;
-  }
-}
-long long id() { return ID; }
-long long target;
-bool f(long long v) { return v < target; }
+long long op(long long a, long long b) { return a + b; }
+long long e() { return 0; }
 }  // namespace seg
 
 // Union-Find
@@ -536,27 +518,52 @@ bool in_out(int i, int j, int H, int W) {
 }
 
 struct my_struct {
-  int a, b;
+  long long a, b;
 };
 
 bool operator<(const my_struct &s_1, const my_struct &s_2) {
-  return s_1.b > s_2.b;
+  if (s_1.a > s_2.a) {
+    return true;
+  } else if (s_1.a < s_2.a) {
+    return false;
+  } else {
+    if (s_1.b < s_2.b) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<long long> A(N), B(N);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
-
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  for (int i = 0; i < N; i++) {
+    cin >> B[i];
   }
+
+  compress(B);
+
+  map<my_struct, long long> mp;
+  for (int i = 0; i < N; i++) {
+    my_struct s;
+    s.a = A[i];
+    s.b = B[i];
+    mp[s]++;
+  }
+
+  long long cnt = 0;
+  segtree<long long, seg::op, seg::e> sgt(500000);
+  for (auto &&p : mp) {
+    long long b = p.first.b;
+    long long v = sgt.get(b);
+    sgt.set(b, v + p.second);
+    cnt += p.second * sgt.prod(0, b + 1);
+  }
+
+  cout << cnt << endl;
 }

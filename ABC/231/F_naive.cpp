@@ -546,17 +546,22 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<long long> A(N), B(N);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
-
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  for (int i = 0; i < N; i++) {
+    cin >> B[i];
   }
+
+  int cnt = 0;
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      if (A[j] <= A[i] && B[i] <= B[j]) {
+        cnt++;
+      }
+    }
+  }
+
+  cout << cnt << endl;
 }

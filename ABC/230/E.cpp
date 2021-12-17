@@ -544,19 +544,24 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
+  long long N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+
+  long long ans = 0;
+  long long n = -1;
+  for (long long k = 1; k * k <= N; k++) {
+    long long r = floor((long double)N / (long double)k);
+    long long l = ceil((long double)N / (long double)(k + 1));
+    if (N % (k + 1) == 0) {
+      l = (N / (k + 1)) + 1;
+    }
+    long long d = r - l + 1;
+    ans += k * d;
+    n = l;
+  }
+  for (long long i = 1; i < n; i++) {
+    ans += (N / i);
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+  cout << ans << endl;
 }

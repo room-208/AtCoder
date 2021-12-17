@@ -314,19 +314,6 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
@@ -543,20 +530,56 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+long long ceil(long long x, long long y) {
+  if (x % y == 0) {
+    return x / y;
+  } else {
+    return (x / y) + 1;
+  }
+}
+
+vector<long long> A;
+unordered_map<long long, long long> memo;
+long long dfs(long long x, int i) {
+  // xの値が存在するなら返す
+  if (memo.find(x) != memo.end()) {
+    return memo[x];
+  }
+  // 端まで来たとき
+  if (i == A.size() - 1) {
+    return x / A.back();
+  }
+  // 0のとき
+  if (x == 0) {
+    return 0;
+  }
+  long long current = A[i];
+  long long next = A[i + 1];
+
+  long long R = x % next;
+  long long r = R / current;
+
+  long long ans = numeric_limits<long long>::max();
+  long long a = dfs(x - R, i + 1) + r;
+  long long b = numeric_limits<long long>::max();
+  if (r != 0) {
+    b = dfs(ceil(x, next) * next, i + 1) + (next - R) / current;
+  }
+
+  chmin(ans, a);
+  chmin(ans, b);
+  memo[x] = ans;
+  return ans;
+}
+
 int main() {
   int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  long long X;
+  cin >> N >> X;
+  A.resize(N);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+  cout << dfs(X, 0) << endl;
 }

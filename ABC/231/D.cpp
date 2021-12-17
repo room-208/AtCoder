@@ -544,16 +544,37 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N, M;
+  cin >> N >> M;
+  vector<int> A(M), B(M);
+  for (int i = 0; i < M; i++) {
+    cin >> A[i] >> B[i];
+    A[i]--;
+    B[i]--;
   }
 
   bool flag = true;
+
+  Graph_int G(N);
+  for (int i = 0; i < M; i++) {
+    G[A[i]].push_back(B[i]);
+    G[B[i]].push_back(A[i]);
+  }
+  for (int i = 0; i < N; i++) {
+    if(G[i].size()>=3){
+      flag = false;
+    }
+  }
+
+  UnionFind uf(N);
+  for (int i = 0; i < M; i++) {
+    if (uf.issame(A[i], B[i])) {
+      flag = false;
+    }
+
+    uf.unite(A[i], B[i]);
+  }
+
   if (flag) {
     cout << "Yes" << endl;
   } else {

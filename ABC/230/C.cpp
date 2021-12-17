@@ -544,19 +544,34 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  long long N, A, B, P, Q, R, S;
+  cin >> N >> A >> B >> P >> Q >> R >> S;
+  vector<vector<char>> C(Q - P + 1, vector<char>(S - R + 1, '.'));
+
+  for (long long i = P; i <= Q; i++) {
+    for (long long j = R; j <= S; j++) {
+      long long k_i = i - A;
+      long long k_j = j - B;
+
+      if (k_i == k_j) {
+        long long k = k_i;
+        if (max(1LL - A, 1LL - B) <= k && k <= min(N - A, N - B)) {
+          C[i - P][j - R] = '#';
+        }
+      }
+      if (k_i == -k_j) {
+        long long k = k_i;
+        if (max(1LL - A, B - N) <= k && k <= min(N - A, B - 1LL)) {
+          C[i - P][j - R] = '#';
+        }
+      }
+    }
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  for (int i = 0; i < Q - P + 1; i++) {
+    for (int j = 0; j < S - R + 1; j++) {
+      cout << C[i][j];
+    }
+    cout << endl;
   }
 }
