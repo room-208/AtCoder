@@ -37,20 +37,20 @@ int main() {
   }
 
   mint ans = 0;
-  for (int i = 0; i <= 60; i++) {
-    long long bit = (1LL << i);
-
+  for (long long i = 0; i <= 60; i++) {
     long long one = 0;
     long long zero = 0;
+
     for (int j = 0; j < N; j++) {
-      if (A[j] & bit) {
+      if (A[j] & (1LL << i)) {
         one++;
       } else {
         zero++;
       }
     }
 
-    ans += bit * zero * one;
+    ans += mint(2).pow(i) * one * zero;
   }
+
   cout << ans.val() << endl;
 }
