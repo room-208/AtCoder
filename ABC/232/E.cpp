@@ -544,19 +544,32 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  long long H, W, K;
+  cin >> H >> W >> K;
+  long long x1, y1, x2, y2;
+  cin >> x1 >> y1 >> x2 >> y2;
+  long long x = llabs(x2 - x1);
+  long long y = llabs(y2 - y1);
+
+  vector<vector<mint>> A(2, vector<mint>(2, 0));
+  vector<vector<mint>> B(2, vector<mint>(2, 0));
+  A[0][0] = 1;
+  for (int k = 0; k < K; k++) {
+    B[0][0] = A[0][1] * (W - 1) + A[1][0] * (H - 1);
+    B[0][1] = A[0][0] + A[0][1] * (W - 2) + A[1][1] * (H - 1);
+    B[1][0] = A[0][0] + A[1][0] * (H - 2) + A[1][1] * (W - 1);
+    B[1][1] = A[0][1] + A[1][0] + A[1][1] * (H + W - 4);
+
+    A = B;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
+  if (x == 0 && y == 0) {
+    cout << A[0][0].val() << endl;
+  } else if (x == 0) {
+    cout << A[0][1].val() << endl;
+  } else if (y == 0) {
+    cout << A[1][0].val() << endl;
   } else {
-    cout << "No" << endl;
+    cout << A[1][1].val() << endl;
   }
 }

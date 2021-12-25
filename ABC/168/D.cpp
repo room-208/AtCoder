@@ -394,7 +394,7 @@ void topological_sort(const Graph_int &G, vector<int> &order) {
 }
 
 //幅優先探索
-void BFS(const Graph_int &G, int s) {
+void BFS(const Graph_int &G, int s, vector<int> &par) {
   int N = (int)G.size();    // 頂点数
   vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
   queue<int> que;
@@ -414,6 +414,7 @@ void BFS(const Graph_int &G, int s) {
       if (dist[x] != -1) continue;
 
       // 新たな白色頂点 x について距離情報を更新してキューに挿入
+      par[x] = v;
       dist[x] = dist[v] + 1;
       que.push(x);
     }
@@ -543,29 +544,32 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
-  }
-}
-
 int main() {
-  string S, T;
-  cin >> S >> T;
-
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
-    }
+  int N, M;
+  cin >> N >> M;
+  Graph_int G(N);
+  UnionFind uf(N);
+  for (int i = 0; i < M; i++) {
+    int a, b;
+    cin >> a >> b;
+    a--;
+    b--;
+    G[a].push_back(b);
+    G[b].push_back(a);
+    uf.unite(a, b);
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
+
+  if (uf.size(0) != N) {
     cout << "No" << endl;
+    return 0;
+  }
+
+  cout << "Yes" << endl;
+
+  vector<int> par(N, -1);
+  BFS(G, 0, par);
+
+  for (int i = 1; i < N; i++) {
+    cout << par[i] + 1 << endl;
   }
 }

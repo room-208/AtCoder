@@ -543,29 +543,23 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
-  }
-}
-
 int main() {
-  string S, T;
-  cin >> S >> T;
-
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  int N;
+  cin >> N;
+  vector<long long> A(N + 1);
+  for (int i = 1; i <= N; i++) {
+    if (i % 3 == 0) {
+      A[i] = 0;
+    } else if (i % 5 == 0) {
+      A[i] = 0;
+    } else {
+      A[i] = i;
     }
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+
+  long long ans = 0;
+  for (int i = 1; i <= N; i++) {
+    ans += A[i];
   }
+  cout << ans << endl;
 }

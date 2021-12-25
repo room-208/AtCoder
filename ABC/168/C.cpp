@@ -543,29 +543,19 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
-  }
-}
-
 int main() {
-  string S, T;
-  cin >> S >> T;
+  double A, B, H, M;
+  cin >> A >> B >> H >> M;
+  double a = ((H + (M / 60.)) / 12.) * 2. * M_PI;
+  double b = (M / 60.) * 2. * M_PI;
 
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
-    }
-  }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+  double xa = A * cos(a);
+  double ya = A * sin(a);
+  double xb = B * cos(b);
+  double yb = B * sin(b);
+
+  double x = xa - xb;
+  double y = ya - yb;
+  double ans = sqrt(x * x + y * y);
+  printf("%.10f\n", ans);
 }

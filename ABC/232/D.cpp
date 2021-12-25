@@ -544,19 +544,42 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int H, W;
+  cin >> H >> W;
+  vector<vector<char>> C(H, vector<char>(W));
+  for (int i = 0; i < H; i++) {
+    string S;
+    cin >> S;
+    for (int j = 0; j < W; j++) {
+      C[i][j] = S[j];
+    }
+  }
+  vector<vector<int>> a(H, vector<int>(W, -1));
+  a[0][0] = 1;
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W - 1; j++) {
+      if (a[i][j] != -1) {
+        if (C[i][j + 1] == '.') {
+          chmax(a[i][j + 1], a[i][j] + 1);
+        }
+      }
+    }
+    if (i < H - 1) {
+      for (int j = 0; j < W; j++) {
+        if (a[i][j] != -1) {
+          if (C[i + 1][j] == '.') {
+            chmax(a[i + 1][j], a[i][j] + 1);
+          }
+        }
+      }
+    }
+  }
+  int ans = 0;
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      chmax(ans, a[i][j]);
+    }
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+  cout << ans << endl;
 }

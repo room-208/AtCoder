@@ -314,19 +314,6 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
@@ -543,29 +530,90 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
+// 深さ優先探索
+void DFS_order(const Graph_int &G, int v, vector<int> &order,
+               vector<bool> &seen) {
+  seen[v] = true;
+  order.push_back(v);
+
+  for (auto &&next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+    DFS_order(G, next_v, order, seen);
+  }
+}
+
+void DFS(int k, long long &cnt, vector<int> &order, vector<int> &c,
+         vector<pair<int, int>> &p) {
+  // 最後まで来たときに判定する。
+  if (k == (int)order.size()) {
+    bool ok = true;
+    for (int i = 0; i < (int)p.size(); i++) {
+      int a = p[i].first;
+      int b = p[i].second;
+      if (c[a] == 0 && c[b] == 0) {
+        ok = false;
+        break;
+      }
+      if (c[a] == 1 && c[b] == 1) {
+        ok = false;
+        break;
+      }
+      if (c[a] == 2 && c[b] == 2) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) {
+      cnt++;
+    }
+    return;
+  }
+
+  // 色を塗る
+  for (int color = 0; color <= 2; color++) {
+    if (k != 0) {
+      if (color == c[order[k - 1]]) {
+        continue;
+      }
+    }
+    auto d = c;
+    d[order[k]] = color;
+    DFS(k + 1, cnt, order, d, p);
   }
 }
 
 int main() {
-  string S, T;
-  cin >> S >> T;
+  int N, M;
+  cin >> N >> M;
+  vector<pair<int, int>> p;
+  Graph_int G(N);
+  UnionFind uf(N);
+  for (int i = 0; i < M; i++) {
+    int a, b;
+    cin >> a >> b;
+    a--;
+    b--;
+    p.push_back(make_pair(a, b));
+    G[a].push_back(b);
+    G[b].push_back(a);
+    uf.unite(a, b);
+  }
 
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  long long ans = 1;
+  for (int v = 0; v < N; v++) {
+    if (v == uf.root(v)) {
+      vector<int> order;
+      vector<bool> seen(N, false);
+      DFS_order(G, v, order, seen);
+
+      long long cnt = 0;
+      vector<int> c(N, -1);
+      DFS(0, cnt, order, c, p);
+      ans *= cnt;
     }
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+
+  cout << ans << endl;
 }

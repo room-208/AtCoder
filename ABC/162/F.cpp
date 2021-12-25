@@ -242,26 +242,8 @@ void compress(vector<long long> &x) {
 // lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping,
 // seg::composition, seg::id> sgt;
 namespace seg {
-const long long ID = 0;
-long long op(long long a, long long b) { return min(a, b); }
-long long e() { return INF_ll; }
-long long mapping(long long f, long long x) {
-  if (f == ID) {
-    return x;
-  } else {
-    return x + f;
-  }
-}
-long long composition(long long f, long long g) {
-  if (f == ID) {
-    return g;
-  } else {
-    return f + g;
-  }
-}
-long long id() { return ID; }
-long long target;
-bool f(long long v) { return v < target; }
+long long op(long long a, long long b) { return a + b; }
+long long e() { return 0; }
 }  // namespace seg
 
 // Union-Find
@@ -543,29 +525,116 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
-  }
-}
-
 int main() {
-  string S, T;
-  cin >> S >> T;
+  int N;
+  cin >> N;
+  vector<long long> A(N);
+  for (int i = 0; i < N; i++) {
+    cin >> A[i];
+  }
 
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  long long ans = -INF_ll;
+  long long tmp;
+  if (N % 2 == 0) {
+    tmp = 0;
+    for (int i = 0; i < N; i += 2) {
+      tmp += A[i];
     }
+    chmax(ans, tmp);
+    tmp = 0;
+    for (int i = 1; i < N; i += 2) {
+      tmp += A[i];
+    }
+    chmax(ans, tmp);
+    cout << ans << endl;
+    return 0;
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+
+  int K = N / 2;
+  segtree<long long, seg::op, seg::e> sgt_even(N);
+  segtree<long long, seg::op, seg::e> sgt_odd(N);
+  segtree<long long, seg::op, seg::e> sgt_even_re(N);
+  segtree<long long, seg::op, seg::e> sgt_odd_re(N);
+
+  for (int i = 0; i < N; i += 2) {
+    sgt_even.set(i, A[i]);
   }
+  for (int i = 1; i < N; i += 2) {
+    sgt_odd.set(i, A[i]);
+  }
+  reverse(A.begin(), A.end());
+  for (int i = 0; i < N; i += 2) {
+    sgt_even_re.set(i, A[i]);
+  }
+  for (int i = 1; i < N; i += 2) {
+    sgt_odd_re.set(i, A[i]);
+  }
+  reverse(A.begin(), A.end());
+
+  // 真ん中
+  tmp = sgt_odd.all_prod();
+  chmax(ans, tmp);
+
+  // 左寄せ2
+  for (int k = 0; k < K; k++) {
+    int next = 2 * k + 3;
+    if (next >= N) {
+      tmp = sgt_even.prod(0, next - 2);
+    } else {
+      tmp = sgt_even.prod(0, next - 2) + sgt_odd.prod(next, N);
+    }
+    chmax(ans, tmp);
+  }
+
+  // 右寄せ2
+  for (int k = 0; k < K; k++) {
+    int next = 2 * k + 3;
+    if (next >= N) {
+      tmp = sgt_even_re.prod(0, next - 2);
+    } else {
+      tmp = sgt_even_re.prod(0, next - 2) + sgt_odd_re.prod(next, N);
+    }
+    chmax(ans, tmp);
+  }
+
+  // 左寄せ3
+  for (int k = 0; k < K; k++) {
+    int next = 2 * k + 4;
+    if (next >= N) {
+      tmp = sgt_even.prod(0, next - 3);
+    } else {
+      tmp = sgt_even.prod(0, next - 3) + sgt_even.prod(next, N);
+    }
+    chmax(ans, tmp);
+  }
+
+  // 右寄せ3
+  for (int k = 0; k < K; k++) {
+    int next = 2 * k + 4;
+    if (next >= N) {
+      tmp = sgt_even_re.prod(0, next - 3);
+    } else {
+      tmp = sgt_even_re.prod(0, next - 3) + sgt_even_re.prod(next, N);
+    }
+    chmax(ans, tmp);
+  }
+
+  // 22
+  /*
+  for (int k = 0; k < K - 1; k++) {
+    int back = 2 * k;
+    int next = 2 * k + 6;
+    int mid = 2 * k + 1;
+    if (next >= N) {
+      tmp = sgt_even.prod(0, back + 1) + A[mid];
+    }
+    if (mid >= N) {
+      continue;
+    }
+    tmp = sgt_even.prod(0, back + 1) + sgt_even.prod(next, N) + A[mid];
+    chmax(ans, tmp);
+  }
+  */
+
+  cout << ans << endl;
 }

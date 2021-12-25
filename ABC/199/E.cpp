@@ -543,29 +543,54 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
-  }
-}
-
 int main() {
-  string S, T;
-  cin >> S >> T;
+  int N, M;
+  cin >> N >> M;
+  vector<int> x(M), y(M), z(M);
+  for (int i = 0; i < M; i++) {
+    cin >> x[i] >> y[i] >> z[i];
+    y[i]--;
+  }
 
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  vector<vector<pair<int, int>>> p(N + 1);
+  for (int i = 0; i < M; i++) {
+    p[x[i]].push_back(make_pair(y[i], z[i]));
+  }
+
+  vector<long long> dp((1 << N), 0);
+  dp[0] = 1;
+  for (int S = 0; S < (1 << N); S++) {
+    vector<int> vec;
+    for (int i = 0; i < N; i++) {
+      if (S & (1 << i)) {
+        vec.push_back(i);
+      }
+    }
+
+    bool flag = true;
+    for (auto &&q : p[vec.size()]) {
+      int cnt = 0;
+      int Y = q.first;
+      int Z = q.second;
+      for (auto &&v : vec) {
+        if (v <= Y) {
+          cnt++;
+        }
+      }
+
+      if (cnt > Z) {
+        flag = false;
+      }
+    }
+
+    if (!flag) {
+      continue;
+    }
+
+    for (auto &&v : vec) {
+      dp[S] += dp[S & ~(1 << v)];
     }
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+
+  cout << dp[(1 << N) - 1] << endl;
 }

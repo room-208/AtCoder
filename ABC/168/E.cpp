@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -543,29 +543,75 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
+pair<long long, long long> orthogonal(pair<long long, long long> p) {
+  swap(p.first, p.second);
+  if (p.first < 0) {
+    p.first *= -1;
+    p.second *= -1;
   }
+  p.second *= -1;
+  return p;
 }
 
 int main() {
-  string S, T;
-  cin >> S >> T;
+  int N;
+  cin >> N;
+  vector<long long> A(N), B(N);
+  for (int i = 0; i < N; i++) {
+    cin >> A[i] >> B[i];
+  }
 
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  for (int i = 0; i < N; i++) {
+    if (A[i] != 0 || B[i] != 0) {
+      long long S = GCD(A[i], B[i]);
+      A[i] /= S;
+      B[i] /= S;
+    }
+    if (A[i] < 0) {
+      A[i] *= -1;
+      B[i] *= -1;
     }
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+
+  map<pair<long long, long long>, long long> mp;
+  for (int i = 0; i < N; i++) {
+    mp[make_pair(A[i], B[i])]++;
   }
+
+  mint ans_zero = 0;
+  if (mp.count(make_pair(0, 0))) {
+    ans_zero += mp[make_pair(0, 0)];
+    mp.erase(make_pair(0, 0));
+  }
+
+  vector<mint> cnt;
+  set<pair<long long, long long>> st;
+  for (auto &&p : mp) {
+    if (st.count(p.first)) {
+      continue;
+    }
+
+    auto key = orthogonal(p.first);
+
+    if (mp.count(key)) {
+      long long a = p.second;
+      long long b = mp[key];
+      st.insert(p.first);
+      st.insert(key);
+      cnt.push_back(mint(2).pow(a) + mint(2).pow(b) - mint(1));
+    } else {
+      long long a = p.second;
+      st.insert(p.first);
+      cnt.push_back(mint(2).pow(a));
+    }
+  }
+
+  mint ans = 1;
+  for (int i = 0; i < (int)cnt.size(); i++) {
+    ans *= cnt[i];
+  }
+  ans += ans_zero;
+  ans -= 1;
+
+  cout << ans.val() << endl;
 }

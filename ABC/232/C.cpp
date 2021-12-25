@@ -394,7 +394,7 @@ void topological_sort(const Graph_int &G, vector<int> &order) {
 }
 
 //幅優先探索
-void BFS(const Graph_int &G, int s) {
+vector<int> BFS(const Graph_int &G, int s) {
   int N = (int)G.size();    // 頂点数
   vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
   queue<int> que;
@@ -418,6 +418,7 @@ void BFS(const Graph_int &G, int s) {
       que.push(x);
     }
   }
+  return dist;
 }
 
 // 01BFS
@@ -544,17 +545,46 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N, M;
+  cin >> N >> M;
+  vector<int> A(M), B(M);
+  vector<int> C(M), D(M);
+  for (int i = 0; i < M; i++) {
+    cin >> A[i] >> B[i];
+    A[i]--;
+    B[i]--;
+  }
+  for (int i = 0; i < M; i++) {
+    cin >> C[i] >> D[i];
+    C[i]--;
+    D[i]--;
   }
 
-  bool flag = true;
-  if (flag) {
+  Graph_int G_t(N), G_a(N);
+  for (int i = 0; i < M; i++) {
+    G_t[A[i]].push_back(B[i]);
+    G_t[B[i]].push_back(A[i]);
+  }
+  for (int i = 0; i < M; i++) {
+    G_a[C[i]].push_back(D[i]);
+    G_a[D[i]].push_back(C[i]);
+  }
+
+  vector<vector<int>> vec_t, vec_a;
+  for (int i = 0; i < N; i++) {
+    auto v = BFS(G_t, i);
+    sort(v.begin(), v.end());
+    vec_t.push_back(v);
+  }
+  for (int i = 0; i < N; i++) {
+    auto v = BFS(G_a, i);
+    sort(v.begin(), v.end());
+    vec_a.push_back(v);
+  }
+  sort(vec_t.begin(), vec_t.end());
+  sort(vec_a.begin(), vec_a.end());
+
+  if (vec_t == vec_a) {
     cout << "Yes" << endl;
   } else {
     cout << "No" << endl;

@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -543,29 +543,32 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
-  }
-}
-
 int main() {
-  string S, T;
-  cin >> S >> T;
-
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  long long N, K;
+  cin >> N >> K;
+  Graph_int G(K + 1);
+  vector<int> p(K + 1, 0);
+  for (int k = 1; k <= K; k++) {
+    p[k]++;
+    for (int n = 2 * k; n <= K; n += k) {
+      p[k]++;
+      G[n].push_back(k);
     }
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+
+  vector<mint> cnt(K + 1, 0);
+  vector<mint> delta(K + 1, 0);
+  for (int k = K; k >= 1; k--) {
+    cnt[k] = mint(p[k]).pow(N) - delta[k];
+    for (auto &&v : G[k]) {
+      delta[v] += cnt[k];
+    }
   }
+
+  mint ans = 0;
+  for (int k = 1; k <= K; k++) {
+    ans += cnt[k] * k;
+  }
+
+  cout << ans.val() << endl;
 }

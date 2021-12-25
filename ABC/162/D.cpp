@@ -543,29 +543,54 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
-  } else {
-    return a;
-  }
-}
-
 int main() {
-  string S, T;
-  cin >> S >> T;
+  int N;
+  cin >> N;
+  string S;
+  cin >> S;
+  unordered_map<char, vector<int>> mp;
+  mp['R'].push_back(-100);
+  mp['G'].push_back(-100);
+  mp['B'].push_back(-100);
+  for (int i = 0; i < N; i++) {
+    mp[S[i]].push_back(i);
+  }
+  sort(mp['R'].begin(), mp['R'].end());
+  sort(mp['G'].begin(), mp['G'].end());
+  sort(mp['B'].begin(), mp['B'].end());
 
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  map<pair<char, char>, char> mp_char;
+  mp_char[make_pair('R', 'G')] = 'B';
+  mp_char[make_pair('G', 'R')] = 'B';
+  mp_char[make_pair('G', 'B')] = 'R';
+  mp_char[make_pair('B', 'G')] = 'R';
+  mp_char[make_pair('B', 'R')] = 'G';
+  mp_char[make_pair('R', 'B')] = 'G';
+
+  long long ans = 0;
+  for (int i = 0; i < N; i++) {
+    for (int j = i + 1; j < N; j++) {
+      if (S[i] == S[j]) {
+        continue;
+      }
+      auto s = mp_char[make_pair(S[i], S[j])];
+      auto itr = upper_bound(mp[s].begin(), mp[s].end(), j);
+      if (itr == mp[s].end()) {
+        continue;
+      }
+      long long tmp = mp[s].end() - itr;
+      int k = 2 * j - i;
+      if (0 <= k && k < N && k > j) {
+        if (S[k] == s) {
+          tmp--;
+        }
+      }
+      if (tmp < 0) {
+        continue;
+      }
+      ans += tmp;
     }
   }
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+
+  cout << ans << endl;
 }

@@ -543,29 +543,62 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int d(char s, char t) {
-  int a = t - s;
-  if (a < 0) {
-    return a + 26;
+int num(int i, int N) {
+  if (i < N) {
+    return i;
   } else {
-    return a;
+    return i - N;
   }
 }
 
 int main() {
-  string S, T;
-  cin >> S >> T;
+  int N;
+  cin >> N;
+  string S;
+  cin >> S;
+  int Q;
+  cin >> Q;
+  vector<int> T(Q), A(Q), B(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> T[i] >> A[i] >> B[i];
+    A[i]--;
+    B[i]--;
+  }
 
-  int a = d(S[0], T[0]);
-  bool flag = true;
-  for (int i = 0; i < (int)S.size(); i++) {
-    if (a != d(S[i], T[i])) {
-      flag = false;
+  string a = S.substr(0, N);
+  string b = S.substr(N, 2 * N);
+  int cnt = 0;
+  for (int i = 0; i < Q; i++) {
+    if (T[i] == 1) {
+      if (cnt == 0) {
+        if (A[i] < N && B[i] < N) {
+          swap(a[A[i]], a[B[i]]);
+        } else if (A[i] < N) {
+          swap(a[A[i]], b[B[i] - N]);
+        } else if (B[i] < N) {
+          swap(b[A[i] - N], a[B[i]]);
+        } else {
+          swap(b[A[i] - N], b[B[i] - N]);
+        }
+      } else {
+        if (A[i] < N && B[i] < N) {
+          swap(b[A[i]], b[B[i]]);
+        } else if (A[i] < N) {
+          swap(b[A[i]], a[B[i] - N]);
+        } else if (B[i] < N) {
+          swap(a[A[i] - N], b[B[i]]);
+        } else {
+          swap(a[A[i] - N], a[B[i] - N]);
+        }
+      }
+    } else {
+      cnt = 1 - cnt;
     }
   }
-  if (flag) {
-    cout << "Yes" << endl;
+
+  if (cnt == 0) {
+    cout << a + b << endl;
   } else {
-    cout << "No" << endl;
+    cout << b + a << endl;
   }
 }

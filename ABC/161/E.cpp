@@ -645,7 +645,11 @@ int main() {
 
   unordered_map<int, int> mp;
   for (auto &&v : vec) {
-    mp[dist[v]]++;
+    if (!mp.count(dist[v])) {
+      mp[dist[v]] = 1;
+    } else {
+      mp[dist[v]]++;
+    }
   }
 
   vector<int> ans;
