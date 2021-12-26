@@ -545,18 +545,26 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 
 int main() {
   int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  long long K;
+  cin >> N >> K;
+  vector<long long> A(N);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
-
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  vector<long long> S(N + 1);
+  S[0] = 0;
+  for (int i = 0; i < N; i++) {
+    S[i + 1] = S[i] + A[i];
   }
+
+  long long ans = 0;
+  map<long long, long long> mp;
+  mp[S[0]] = 1;
+  for (int i = 1; i <= N; i++) {
+    long long key = S[i] - K;
+    ans += mp[key];
+    mp[S[i]]++;
+  }
+
+  cout << ans << endl;
 }

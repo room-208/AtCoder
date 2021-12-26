@@ -314,19 +314,6 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
@@ -391,33 +378,6 @@ void topological_sort(const Graph_int &G, vector<int> &order) {
   }
 
   reverse(order.begin(), order.end());
-}
-
-//幅優先探索
-void BFS(const Graph_int &G, int s) {
-  int N = (int)G.size();    // 頂点数
-  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
-  queue<int> que;
-
-  // 初期条件 (頂点 s を初期頂点とする)
-  dist[s] = 0;
-  que.push(s);  // s を橙色頂点にする
-
-  // BFS 開始 (キューが空になるまで探索を行う)
-  while (!que.empty()) {
-    int v = que.front();  // キューから先頭頂点を取り出す
-    que.pop();
-
-    // v からたどれる頂点をすべて調べる
-    for (int x : G[v]) {
-      // すでに発見済みの頂点は探索しない
-      if (dist[x] != -1) continue;
-
-      // 新たな白色頂点 x について距離情報を更新してキューに挿入
-      dist[x] = dist[v] + 1;
-      que.push(x);
-    }
-  }
 }
 
 // 01BFS
@@ -543,20 +503,95 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+// 深さ優先探索
+void DFS(const Graph_Edge &G, int v, vector<int> &vec, vector<int> &P,
+         vector<bool> &seen, const int i, bool &flag) {
+  seen[v] = true;
+  if (flag) {
+    return;
+  }
+  if (P[v] == i) {
+    flag = true;
+    return;
+  }
+
+  for (auto next_v : G[v]) {
+    if (flag) {
+      return;
+    }
+    if (seen[next_v.to]) {
+      continue;
+    }
+
+    vec.push_back(next_v.w);
+    DFS(G, next_v.to, vec, P, seen, i, flag);
+    if (!flag) {
+      vec.pop_back();
+    }
+  }
+}
+
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<int> P(N);
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    cin >> P[i];
+    P[i]--;
+  }
+  int M;
+  cin >> M;
+  vector<int> a(M), b(M);
+  for (int i = 0; i < M; i++) {
+    cin >> a[i] >> b[i];
+    a[i]--;
+    b[i]--;
+  }
+
+  UnionFind uf(N);
+  for (int i = 0; i < M; i++) {
+    uf.unite(a[i], b[i]);
   }
 
   bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  for (int i = 0; i < N; i++) {
+    if (!uf.issame(i, P[i])) {
+      flag = false;
+    }
   }
+
+  if (!flag) {
+    cout << -1 << endl;
+    return 0;
+  }
+
+  Graph_Edge G(N);
+  for (int i = 0; i < M; i++) {
+    G[a[i]].push_back(Edge(b[i], i));
+    G[b[i]].push_back(Edge(a[i], i));
+  }
+
+  vector<int> ans;
+  vector<bool> seen(N);
+  for (int i = 0; i < N; i++) {
+    if (P[i] != i) {
+      seen.assign(N, false);
+      for (int j = 0; j < i; j++) {
+        seen[j] = true;
+      }
+      vector<int> vec;
+      bool ok = false;
+      DFS(G, i, vec, P, seen, i, ok);
+      for (int j = (int)vec.size() - 1; j >= 0; j--) {
+        swap(P[a[vec[j]]], P[b[vec[j]]]);
+        ans.push_back(vec[j]);
+      }
+    }
+  }
+
+  cout << (int)ans.size() << endl;
+  for (int i = 0; i < (int)ans.size(); i++) {
+    cout << ans[i] + 1 << " ";
+  }
+  cout << endl;
 }

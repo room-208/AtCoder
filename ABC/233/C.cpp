@@ -313,20 +313,6 @@ struct Edge {
 
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
-
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
@@ -543,20 +529,66 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+void DFS(int d, vector<int> &n, vector<int> &L) {
+  if (d == (int)n.size()) {
+    return;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
+  if (n[d] < L[d] - 1) {
+    n[d]++;
+    return;
   } else {
-    cout << "No" << endl;
+    n[d] = 0;
+    DFS(d + 1, n, L);
   }
+}
+
+int main() {
+  int N;
+  long long X;
+  cin >> N >> X;
+  vector<int> L(N);
+  vector<vector<long long>> a(N);
+  for (int i = 0; i < N; i++) {
+    cin >> L[i];
+    for (int j = 0; j < L[i]; j++) {
+      long long A;
+      cin >> A;
+      a[i].push_back(A);
+    }
+  }
+
+  int ans = 0;
+  vector<int> n(N, 0);
+  while (1) {
+    bool ok = true;
+    long long B = 1;
+    for (int i = 0; i < N; i++) {
+      long long z;
+      if (__builtin_mul_overflow(B, a[i][n[i]], &z)) {
+        ok = false;
+      } else {
+        B *= a[i][n[i]];
+      }
+    }
+
+    if (ok) {
+      if (B == X) {
+        ans++;
+      }
+    }
+    bool flag = true;
+    for (int i = 0; i < N; i++) {
+      if (n[i] != L[i] - 1) {
+        flag = false;
+      }
+    }
+    if (flag) {
+      break;
+    }
+
+    DFS(0, n, L);
+  }
+
+  cout << ans << endl;
 }

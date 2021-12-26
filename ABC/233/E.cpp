@@ -544,19 +544,26 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  string X;
+  cin >> X;
+  int N = X.size();
+  vector<long long> S(N, 0);
+  S[0] = X[0] - '0';
+  for (int i = 0; i < N - 1; i++) {
+    int a = (X[i + 1] - '0');
+    S[i + 1] = S[i] + a;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  string ans;
+  for (int i = N - 1; i >= 1; i--) {
+    int r = S[i] % 10;
+    int p = S[i] - r;
+    S[i - 1] += p / 10;
+    ans.push_back('0' + r);
   }
+  reverse(ans.begin(), ans.end());
+  string s = to_string(S[0]);
+  ans = s + ans;
+
+  cout << ans << endl;
 }
