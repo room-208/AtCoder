@@ -341,25 +341,25 @@ void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
 }
 
 //部分木サイズ
-void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
+void subtree_size_cal(const Graph_Edge &G, int v, vector<int> &subtree_size,
                       int p = -1) {
   for (auto c : G[v]) {
-    if (c == p) {
+    if (c.to == p) {
       continue;
     }
 
-    subtree_size_cal(G, c, subtree_size, v);
+    subtree_size_cal(G, c.to, subtree_size, v);
   }
 
   // 帰りがけ時に、部分木サイズを求める
   subtree_size[v] = 1;  // 自分自身
   for (auto c : G[v]) {
-    if (c == p) {
+    if (c.to == p) {
       continue;
     }
 
     // 子頂点を根とする部分きのサイズを加算する
-    subtree_size[v] += subtree_size[c];
+    subtree_size[v] += subtree_size[c.to];
   }
 }
 
@@ -632,17 +632,18 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  Rerooting reroot(N);
+  for (int i = 0; i < N - 1; i++) {
+    int u, v;
+    cin >> u >> v;
+    u--;
+    v--;
+    reroot.add_edge(u, v, 1);
+    reroot.add_edge(v, u, 1);
   }
+  reroot.build();
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  for (int i = 0; i < N; i++) {
+    cout << reroot.res[i].dp << endl;
   }
 }
