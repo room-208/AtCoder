@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = static_modint<7>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -313,6 +313,19 @@ struct Edge {
 
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
+
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen) {
+  seen[v] = true;
+
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    DFS(G, next_v, seen);
+  }
+}
 
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
@@ -616,68 +629,45 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int N, K;
-set<vector<pair<int, int>>> st;
-int dx[4] = {1, -1, 0, 0};
-int dy[4] = {0, 0, 1, -1};
-
-// 深さ優先探索
-void DFS(const vector<string> &S, int i, int j, long long &cnt,
-         vector<pair<int, int>> road = vector<pair<int, int>>()) {
-  road.push_back(make_pair(i, j));
-  sort(road.begin(), road.end());
-
-  if ((int)road.size() == K) {
-    if (!st.count(road)) {
-      cnt++;
-      st.insert(road);
-    }
-    return;
-  }
-
-  for (auto &&vec : road) {
-    for (int k = 0; k < 4; k++) {
-      int next_i = vec.first + dx[k];
-      int next_j = vec.second + dy[k];
-
-      if (next_i < 0 || next_i >= N) {
-        continue;
-      }
-      if (next_j < 0 || next_j >= N) {
-        continue;
-      }
-      if (S[next_i][next_j] == '#') {
-        continue;
-      }
-      if (binary_search(road.begin(), road.end(), make_pair(next_i, next_j))) {
-        continue;
-      }
-
-      auto road_new = road;
-      DFS(S, next_i, next_j, cnt, road_new);
-    }
-  }
-}
-
 int main() {
-  cin >> N >> K;
-  vector<string> S(N);
+  int N;
+  cin >> N;
+  string S, X;
+  cin >> S >> X;
+
+  vector<mint> ten(N);
   for (int i = 0; i < N; i++) {
-    cin >> S[i];
+    ten[i] = mint(10).pow(N - 1 - i);
   }
 
-  long long cnt = 0;
+  vector<int> A(N);
   for (int i = 0; i < N; i++) {
-    for (int j = 0; j < N; j++) {
-      if (S[i][j] == '#') {
-        continue;
-      }
+    A[i] = mint(ten[i] * (S[i] - '0')).val();
+  }
 
-      st.clear();
-      DFS(S, i, j, cnt);
-      S[i][j] = '#';
+  vector<vector<bool>> dp(7, vector<bool>(N + 1, false));
+  dp[0][N] = true;
+  for (int j = N - 1; j >= 0; j--) {
+    if (X[j] == 'A') {
+      for (int i = 0; i < 7; i++) {
+        int next = (i + A[j]) % 7;
+        if (dp[i][j + 1] && dp[next][j + 1]) {
+          dp[i][j] = true;
+        }
+      }
+    } else if (X[j] == 'T') {
+      for (int i = 0; i < 7; i++) {
+        int next = (i + A[j]) % 7;
+        if (dp[i][j + 1] || dp[next][j + 1]) {
+          dp[i][j] = true;
+        }
+      }
     }
   }
 
-  cout << cnt << endl;
+  if (dp[0][0]) {
+    cout << "Takahashi" << endl;
+  } else {
+    cout << "Aoki" << endl;
+  }
 }

@@ -314,6 +314,19 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen) {
+  seen[v] = true;
+
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    DFS(G, next_v, seen);
+  }
+}
+
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
@@ -616,68 +629,37 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int N, K;
-set<vector<pair<int, int>>> st;
-int dx[4] = {1, -1, 0, 0};
-int dy[4] = {0, 0, 1, -1};
-
-// 深さ優先探索
-void DFS(const vector<string> &S, int i, int j, long long &cnt,
-         vector<pair<int, int>> road = vector<pair<int, int>>()) {
-  road.push_back(make_pair(i, j));
-  sort(road.begin(), road.end());
-
-  if ((int)road.size() == K) {
-    if (!st.count(road)) {
-      cnt++;
-      st.insert(road);
-    }
-    return;
-  }
-
-  for (auto &&vec : road) {
-    for (int k = 0; k < 4; k++) {
-      int next_i = vec.first + dx[k];
-      int next_j = vec.second + dy[k];
-
-      if (next_i < 0 || next_i >= N) {
-        continue;
-      }
-      if (next_j < 0 || next_j >= N) {
-        continue;
-      }
-      if (S[next_i][next_j] == '#') {
-        continue;
-      }
-      if (binary_search(road.begin(), road.end(), make_pair(next_i, next_j))) {
-        continue;
-      }
-
-      auto road_new = road;
-      DFS(S, next_i, next_j, cnt, road_new);
-    }
-  }
-}
-
 int main() {
-  cin >> N >> K;
-  vector<string> S(N);
-  for (int i = 0; i < N; i++) {
-    cin >> S[i];
+  int N, M, Q;
+  cin >> N >> M >> Q;
+  vector<int> L(M), R(M);
+  for (int i = 0; i < M; i++) {
+    cin >> L[i] >> R[i];
+    L[i]--;
+    R[i]--;
+  }
+  vector<int> p(Q), q(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> p[i] >> q[i];
+    p[i]--;
+    q[i]--;
   }
 
-  long long cnt = 0;
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < N; j++) {
-      if (S[i][j] == '#') {
-        continue;
-      }
+  vector<vector<long long>> cnt(N, vector<long long>(N, 0));
+  for (int i = 0; i < M; i++) {
+    cnt[L[i]][R[i]]++;
+  }
 
-      st.clear();
-      DFS(S, i, j, cnt);
-      S[i][j] = '#';
+  for (int i = 0; i < N; i++) {
+    for (int j = i + 1; j < N; j++) {
+      cnt[i][j] += cnt[i][j - 1];
+      for (int k = i + 1; k <= j; k++) {
+        cnt[i][j] += cnt[k][j];
+      }
     }
   }
 
-  cout << cnt << endl;
+  for (int i = 0; i < Q; i++) {
+    cout << cnt[p[i]][q[i]] << endl;
+  }
 }
