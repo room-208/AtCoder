@@ -630,28 +630,41 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
+  int N, M;
+  cin >> N >> M;
+  vector<long long> C(M);
+  vector<int> L(M), R(M);
   for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
-    }
+    cin >> C[i] >> L[i] >> R[i];
+    L[i];
+    R[i];
+  }
+
+  vector<tuple<long long, int, int>> p;
+  for (int i = 0; i < M; i++) {
+    p.push_back(make_tuple(C[i], L[i], R[i]));
+  }
+  sort(p.begin(), p.end());
+  for (int i = 0; i < M; i++) {
+    C[i] = get<0>(p[i]);
+    L[i] = get<1>(p[i]);
+    R[i] = get<2>(p[i]);
   }
 
   long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
-  }
+  UnionFind uf(N + 1);
   for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
+    if (uf.issame(L[i] - 1, R[i])) {
+      continue;
+    }
+
+    uf.unite(L[i] - 1, R[i]);
+    ans += C[i];
   }
 
-  cout << ans << endl;
+  if (uf.size(0) == N + 1) {
+    cout << ans << endl;
+  } else {
+    cout << -1 << endl;
+  }
 }

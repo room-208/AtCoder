@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -630,28 +630,50 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
-  for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
+  int N, Q;
+  cin >> N >> Q;
+  vector<int> x(Q), y(Q), z(Q);
+  vector<long long> w(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> x[i] >> y[i] >> z[i] >> w[i];
+    x[i]--;
+    y[i]--;
+    z[i]--;
+  }
+
+  vector<mint> p(60, 0);
+  vector<int> a(N);
+  for (int i = 0; i < 60; i++) {
+    for (int bit = 0; bit < (1 << N); bit++) {
+      for (int k = 0; k < N; k++) {
+        if (bit & (1 << k)) {
+          a[k] = 1;
+        } else {
+          a[k] = 0;
+        }
+      }
+      bool flag = true;
+      for (int j = 0; j < Q; j++) {
+        if (w[j] & (1LL << i)) {
+          if (a[x[j]] == 0 && a[y[j]] == 0 && a[z[j]] == 0) {
+            flag = false;
+          }
+        } else {
+          if (a[x[j]] == 1 || a[y[j]] == 1 || a[z[j]] == 1) {
+            flag = false;
+          }
+        }
+      }
+
+      if (flag) {
+        p[i]++;
+      }
     }
   }
 
-  long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
+  mint ans = 1;
+  for (int i = 0; i < 60; i++) {
+    ans *= p[i];
   }
-  for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
-  }
-
-  cout << ans << endl;
+  cout << ans.val() << endl;
 }

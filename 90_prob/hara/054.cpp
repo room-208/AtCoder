@@ -630,28 +630,59 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
+  int N, M;
+  cin >> N >> M;
+  vector<int> K(M);
+  vector<vector<int>> R(M);
   for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
+    cin >> K[i];
+    for (int j = 0; j < K[i]; j++) {
+      int r;
+      cin >> r;
+      r--;
+      R[i].push_back(r);
     }
   }
 
-  long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
-  }
+  vector<vector<int>> par(N);
   for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
+    for (int j = 0; j < K[i]; j++) {
+      par[R[i][j]].push_back(i);
+    }
   }
 
-  cout << ans << endl;
+  vector<int> ans(N, -1);
+  vector<bool> seen(M, false);
+  vector<int> vec;
+  int cnt = 0;
+  ans[0] = 0;
+  vec.push_back(0);
+  while (!vec.empty()) {
+    cnt++;
+    unordered_set<int> st;
+    for (int i = 0; i < (int)vec.size(); i++) {
+      int v = vec[i];
+      for (auto &&p : par[v]) {
+        if (seen[p]) {
+          continue;
+        }
+        seen[p] = true;
+        for (auto &&r : R[p]) {
+          if (ans[r] == -1) {
+            ans[r] = cnt;
+            st.insert(r);
+          }
+        }
+      }
+    }
+
+    vec.clear();
+    for (auto &&v : st) {
+      vec.push_back(v);
+    }
+  }
+
+  for (int i = 0; i < N; i++) {
+    cout << ans[i] << endl;
+  }
 }

@@ -632,25 +632,35 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
-  for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
-    }
+  long long X;
+  cin >> X;
+  vector<long long> A(N + 1);
+  for (int i = 1; i <= N; i++) {
+    cin >> A[i];
   }
 
-  long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
-  }
-  for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
+  long long ans = INF_ll;
+  for (int s = 1; s <= N; s++) {
+    vector<vector<vector<long long>>> dp(
+        N + 1, vector<vector<long long>>(s, vector<long long>(s + 1, -1)));
+    dp[0][0][0] = 0;
+    for (int i = 1; i <= N; i++) {
+      dp[i] = dp[i - 1];
+      for (int r = 0; r < s; r++) {
+        for (int k = 0; k < s; k++) {
+          if (dp[i - 1][r][k] != -1) {
+            int next_r = (r + A[i]) % s;
+            chmax(dp[i][next_r][k + 1], dp[i - 1][r][k] + A[i]);
+          }
+        }
+      }
+    }
+
+    int r = X % s;
+    if (dp[N][r][s] != -1) {
+      long long tmp = (X - dp[N][r][s]) / s;
+      chmin(ans, tmp);
+    }
   }
 
   cout << ans << endl;

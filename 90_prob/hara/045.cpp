@@ -30,7 +30,7 @@ using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
-const long long INF_ll = 1000000000000000000LL;
+const long long INF_ll = 2000000000000000000LL;
 const int COM_MAX = 510000;
 
 long long fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
@@ -629,29 +629,54 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+long long dist(int i, int j, vector<long long> &x, vector<long long> &y) {
+  return (x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]);
+}
+
 int main() {
-  int N;
-  cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
-  for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
+  int N, K;
+  cin >> N >> K;
+  vector<long long> x(N), y(N);
+  for (int i = 0; i < N; i++) {
+    cin >> x[i] >> y[i];
+  }
+
+  vector<vector<long long>> b(N, vector<long long>(N));
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      b[i][j] = dist(i, j, x, y);
     }
   }
 
-  long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
-  }
-  for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
+  vector<long long> d((1 << N), -1);
+  d[0] = 0;
+  for (int S = 0; S < (1 << N); S++) {
+    vector<int> vec;
+    for (int i = 0; i < N; i++) {
+      if (S & (1 << i)) {
+        vec.push_back(i);
+      }
+    }
+    for (auto &&v1 : vec) {
+      for (auto &&v2 : vec) {
+        chmax(d[S], b[v1][v2]);
+      }
+    }
   }
 
-  cout << ans << endl;
+  vector<long long> dp((1 << N), INF_ll), dp_new((1 << N), INF_ll);
+  for (int S = 0; S < (1 << N); S++) {
+    dp[S] = d[S];
+  }
+  for (int k = 2; k <= K; k++) {
+    dp_new.assign((1 << N), INF_ll);
+    for (int S = 0; S < (1 << N); S++) {
+      for (int SubS = S; SubS > 0; SubS = (SubS - 1) & S) {
+        chmin(dp_new[S], max(dp[SubS], d[S & (~SubS)]));
+      }
+    }
+    dp = dp_new;
+  }
+
+  cout << dp[(1 << N) - 1] << endl;
 }

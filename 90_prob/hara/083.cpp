@@ -630,28 +630,75 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
+  int N, M;
+  cin >> N >> M;
+  vector<int> a(M), b(M);
   for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
+    cin >> a[i] >> b[i];
+    a[i]--;
+    b[i]--;
+  }
+  int Q;
+  cin >> Q;
+  vector<int> x(Q), y(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> x[i] >> y[i];
+    x[i]--;
+  }
+
+  Graph_int G(N);
+  for (int i = 0; i < M; i++) {
+    G[a[i]].push_back(b[i]);
+    G[b[i]].push_back(a[i]);
+  }
+
+  int B = sqrt(2. * M);
+  vector<bool> ok(N, false);
+  for (int v = 0; v < N; v++) {
+    if ((int)G[v].size() >= B) {
+      ok[v] = true;
     }
   }
 
-  long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
-  }
+  Graph_int g(N);
   for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
+    if (ok[a[i]] && ok[b[i]]) {
+      g[a[i]].push_back(b[i]);
+      g[b[i]].push_back(a[i]);
+    }
   }
 
-  cout << ans << endl;
+  vector<int> e(N, -1);
+  vector<int> c(N, 1);
+  vector<int> ans(Q);
+  for (int i = 0; i < Q; i++) {
+    int v = x[i];
+    if (ok[v]) {
+      ans[i] = c[v];
+      e[v] = i;
+      c[v] = y[i];
+      for (auto &&u : g[v]) {
+        c[u] = y[i];
+      }
+    } else {
+      int q = e[v];
+      for (auto &&u : G[v]) {
+        chmax(q, e[u]);
+      }
+      if (q == -1) {
+        ans[i] = 1;
+      } else {
+        ans[i] = y[q];
+      }
+      e[v] = i;
+      c[v] = y[i];
+      for (auto &&u : G[v]) {
+        c[u] = y[i];
+      }
+    }
+  }
+
+  for (int i = 0; i < Q; i++) {
+    cout << ans[i] << endl;
+  }
 }

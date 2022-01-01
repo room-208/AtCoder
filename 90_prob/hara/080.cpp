@@ -630,28 +630,30 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
-  for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
+  int N, D;
+  cin >> N >> D;
+  vector<long long> A(N);
+  for (int i = 0; i < N; i++) {
+    cin >> A[i];
+  }
+
+  vector<long long> P(D + 1, 0);
+  for (int i = 0; i < D; i++) {
+    for (int j = 0; j < N; j++) {
+      if (A[j] & (1LL << i)) {
+        P[i + 1] |= (1 << j);
+      }
     }
   }
 
-  long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
-  }
-  for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
+  vector<vector<long long>> dp(D + 1, vector<long long>((1 << N), 0));
+  dp[0][0] = 1;
+  for (int i = 1; i <= D; i++) {
+    dp[i] = dp[i - 1];
+    for (int bit = 0; bit < (1 << N); bit++) {
+      dp[i][bit | P[i]] += dp[i - 1][bit];
+    }
   }
 
-  cout << ans << endl;
+  cout << dp[D][(1 << N) - 1] << endl;
 }

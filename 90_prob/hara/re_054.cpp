@@ -421,7 +421,7 @@ void BFS(const Graph_int &G, int s) {
 }
 
 // 01BFS
-void BFS_01(const Graph_Edge &G, int s) {
+vector<long long> BFS_01(const Graph_Edge &G, int s) {
   int N = (int)G.size();              // 頂点数
   vector<long long> dist(N, INF_ll);  // 全頂点を「未訪問」に初期化
   deque<int> que;
@@ -447,6 +447,8 @@ void BFS_01(const Graph_Edge &G, int s) {
       }
     }
   }
+
+  return dist;
 }
 
 class Rerooting {
@@ -630,28 +632,36 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  int M = N - 1;
-  vector<int> u(M), v(M);
+  int N, M;
+  cin >> N >> M;
+  vector<int> K(M);
+  vector<vector<int>> R(M);
   for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
-    if (u[i] > v[i]) {
-      swap(u[i], v[i]);
+    cin >> K[i];
+    for (int j = 0; j < K[i]; j++) {
+      int r;
+      cin >> r;
+      r--;
+      R[i].push_back(r);
     }
   }
 
-  long long ans = 0;
-  for (int L = 0; L < N; L++) {
-    ans += tousa_sum(1, 1, N - L);
-  }
+  Graph_Edge G(N + M);
   for (int i = 0; i < M; i++) {
-    long long U = u[i] + 1;
-    long long V = N - v[i];
-    ans -= U * V;
+    int p = N + i;
+    for (int j = 0; j < K[i]; j++) {
+      int v = R[i][j];
+      G[v].push_back(Edge(p, 1));
+      G[p].push_back(Edge(v, 0));
+    }
   }
 
-  cout << ans << endl;
+  vector<long long> ans = BFS_01(G, 0);
+  for (int i = 0; i < N; i++) {
+    if (ans[i] == INF_ll) {
+      cout << -1 << endl;
+    } else {
+      cout << ans[i] << endl;
+    }
+  }
 }
