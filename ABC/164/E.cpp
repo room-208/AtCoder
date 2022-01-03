@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -565,7 +565,7 @@ void Bellman_Ford(const Graph_Edge &G, int s) {
 }
 
 //ダイクストラ法
-void Dijkstra(const Graph_Edge &G, int s) {
+vector<long long> Dijkstra(const Graph_Edge &G, int s) {
   int N = (int)G.size();
   vector<long long> dist(N, INF_ll);
   dist[s] = 0;
@@ -595,58 +595,65 @@ void Dijkstra(const Graph_Edge &G, int s) {
       }
     }
   }
-}
 
-//オーバーフロー判定
-//__builtin_add_overflow
-//__builtin_mul_overflow
-
-//ノード変換
-int to_node(int i, int j, int W) { return W * i + j; }
-
-// ij変換
-pair<int, int> to_ij(int v, int W) {
-  int i = v / W;
-  int j = v - W * i;
-
-  return make_pair(i, j);
-}
-
-// in_out判定
-bool in_out(int i, int j, int H, int W) {
-  if (0 <= i && i < H && 0 <= j && j < W) {
-    return true;
-  }
-
-  return false;
-}
-
-struct my_struct {
-  int a, b;
-};
-
-bool operator<(const my_struct &s_1, const my_struct &s_2) {
-  return s_1.b > s_2.b;
+  return dist;
 }
 
 int main() {
-  string S;
-  cin >> S;
-
-  reverse(S.begin(), S.end());
-  int N = (int)S.size();
-
-  vector<mint> A(N + 1, 0);
+  int N, M;
+  long long S;
+  cin >> N >> M >> S;
+  vector<int> U(M), V(M);
+  vector<long long> A(M), B(M);
+  for (int i = 0; i < M; i++) {
+    cin >> U[i] >> V[i] >> A[i] >> B[i];
+    U[i]--;
+    V[i]--;
+  }
+  vector<long long> C(N), D(N);
   for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+    cin >> C[i] >> D[i];
   }
 
-  long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
+  long long K = 5001;
+  Graph_Edge G(K * N);
+  for (int v = 0; v < N; v++) {
+    for (long long k = 0; k < K; k++) {
+      long long next_k = min(K - 1LL, k + C[v]);
+      int now_v = v + k * N;
+      int next_v = v + next_k * N;
+      if (now_v != next_v) {
+        G[now_v].push_back(Edge(next_v, D[v]));
+      }
+    }
+  }
+  for (int i = 0; i < M; i++) {
+    for (long long k = 0; k < K; k++) {
+      if (k < A[i]) {
+        continue;
+      }
+      long long next_k = k - A[i];
+      int now_v = U[i] + k * N;
+      int next_v = V[i] + next_k * N;
+      G[now_v].push_back(Edge(next_v, B[i]));
+
+      now_v = V[i] + k * N;
+      next_v = U[i] + next_k * N;
+      G[now_v].push_back(Edge(next_v, B[i]));
+    }
   }
 
-  cout << ans << endl;
+  S = min(S, K - 1LL);
+  auto dist = Dijkstra(G, S * N);
+
+  vector<long long> ans(N, INF_ll);
+  for (int v = 0; v < N; v++) {
+    for (int k = 0; k < K; k++) {
+      chmin(ans[v], dist[v + k * N]);
+    }
+  }
+
+  for (int i = 1; i < N; i++) {
+    cout << ans[i] << endl;
+  }
 }

@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -630,23 +630,80 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  string S;
-  cin >> S;
-
-  reverse(S.begin(), S.end());
-  int N = (int)S.size();
-
-  vector<mint> A(N + 1, 0);
+  int N, M;
+  cin >> N >> M;
+  vector<int> T(N);
+  vector<vector<int>> A(N);
   for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+    cin >> T[i];
+    A[i].resize(T[i]);
+    for (int j = 0; j < T[i]; j++) {
+      cin >> A[i][j];
+      A[i][j]--;
+    }
+  }
+  vector<int> S(M);
+  for (int i = 0; i < M; i++) {
+    cin >> S[i];
   }
 
-  long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
+  vector<vector<int>> P(N, vector<int>(M, 0));
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < T[i]; j++) {
+      P[i][A[i][j]] = 1;
+    }
   }
 
-  cout << ans << endl;
+  for (int i = 0; i < N; i++) {
+    int p = -1;
+    for (int j = 0; j < M; j++) {
+      if (P[i][j] == 1) {
+        p = j;
+        break;
+      }
+    }
+
+    if (p == -1) {
+      continue;
+    }
+
+    for (int k = i + 1; k < N; k++) {
+      if (P[k][p] == 1) {
+        for (int j = 0; j < M; j++) {
+          P[k][j] += P[i][j];
+          P[k][j] %= 2;
+        }
+      }
+    }
+  }
+
+  int cnt = 0;
+  vector<int> R(M, 0);
+  for (int i = 0; i < N; i++) {
+    int p = -1;
+    for (int j = 0; j < M; j++) {
+      if (P[i][j] == 1) {
+        p = j;
+        break;
+      }
+    }
+
+    if (p == -1) {
+      cnt++;
+      continue;
+    }
+
+    if (S[p] != R[p]) {
+      for (int j = 0; j < M; j++) {
+        R[j] += P[i][j];
+        R[j] %= 2;
+      }
+    }
+  }
+
+  if (S == R) {
+    cout << (mint(2).pow(cnt)).val() << endl;
+  } else {
+    cout << 0 << endl;
+  }
 }

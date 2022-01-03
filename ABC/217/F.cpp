@@ -641,38 +641,43 @@ int main() {
 
   COMinit();
 
-  set<pair<int, int>> st;
+  vector<vector<mint>> c(2 * N, vector<mint>(2 * N, 0));
   for (int i = 0; i < M; i++) {
-    st.insert(make_pair(A[i], B[i]));
+    c[A[i]][B[i]] = 1;
+    c[B[i]][A[i]] = 1;
   }
 
   vector<vector<mint>> dp(2 * N, vector<mint>(2 * N, 0));
-  for (int i = 0; i < M; i++) {
-    if (B[i] - A[i] == 1) {
-      dp[A[i]][B[i]] = 1;
-    }
-  }
-  for (int d = 3; d <= 2 * N - 1; d += 2) {
-    for (int i = 0; i < 2 * N; i++) {
-      int next = i + d;
-      if (next < 2 * N) {
-        if (d == 3) {
-          if (st.count(make_pair(i, next))) {
-            dp[i][next] += dp[i + 1][next - 1];
-          }
-
-          dp[i][next] += dp[i][i + 1] * dp[i + 2][next] * COM(((d + 1) / 2), 1);
-        } else {
-          if (st.count(make_pair(i, next))) {
-            dp[i][next] += dp[i + 1][next - 1];
-          }
-
-          dp[i][next] += dp[i][i + 1] * dp[i + 2][next] * COM(((d + 1) / 2), 1);
-          dp[i][next] +=
-              dp[i][next - 2] * dp[next - 1][next] * COM(((d + 1) / 2), 1);
-          dp[i][next] -= dp[i][i + 1] * dp[i + 2][next - 2] *
-                         dp[next - 1][next] * COM(((d + 1) / 2), 1) *
-                         COM(((d - 1) / 2), 1);
+  for (int d = 1; d <= 2 * N - 1; d += 2) {
+    if (d == 1) {
+      for (int l = 0; l < 2 * N; l++) {
+        int r = l + d;
+        if (r >= 2 * N) {
+          continue;
+        }
+        dp[l][r] += c[l][r];
+      }
+    } else if (d == 3) {
+      for (int l = 0; l < 2 * N; l++) {
+        int r = l + d;
+        if (r >= 2 * N) {
+          continue;
+        }
+        dp[l][r] += c[l][l + 1] * dp[r - 1][r] * 2;
+        dp[l][r] += c[l][r] * dp[l + 1][r - 1];
+      }
+    } else {
+      for (int l = 0; l < 2 * N; l++) {
+        int r = l + d;
+        if (r >= 2 * N) {
+          continue;
+        }
+        dp[l][r] += c[l][l + 1] * dp[l + 2][r] * COM((d + 1) / 2, 1);
+        dp[l][r] += c[l][r] * dp[l + 1][r - 1];
+        for (int k = 3; k < d; k += 2) {
+          int mid = l + k;
+          dp[l][r] += c[l][mid] * dp[l + 1][mid - 1] * dp[mid + 1][r] *
+                      COM((d + 1) / 2, (k + 1) / 2);
         }
       }
     }

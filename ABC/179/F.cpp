@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -621,31 +621,36 @@ bool in_out(int i, int j, int H, int W) {
   return false;
 }
 
-struct my_struct {
-  int a, b;
-};
-
-bool operator<(const my_struct &s_1, const my_struct &s_2) {
-  return s_1.b > s_2.b;
-}
-
 int main() {
-  string S;
-  cin >> S;
-
-  reverse(S.begin(), S.end());
-  int N = (int)S.size();
-
-  vector<mint> A(N + 1, 0);
-  for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+  int N, Q;
+  cin >> N >> Q;
+  vector<int> t(Q), x(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> t[i] >> x[i];
+    x[i]--;
   }
 
-  long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
+  set<pair<int, int>> tate, yoko;
+  tate.insert(make_pair(N - 1, N - 1));
+  yoko.insert(make_pair(N - 1, N - 1));
+  long long ans = 1LL * (N - 2) * (N - 2);
+  for (int q = 0; q < Q; q++) {
+    // 縦に突っ込む
+    if (t[q] == 1) {
+      auto key = make_pair(x[q], 0);
+      auto itr = yoko.lower_bound(key);
+      int i = itr->second - 1;
+      ans -= i;
+      tate.insert(make_pair(i, x[q]));
+    }
+    // 横に突っ込む
+    if (t[q] == 2) {
+      auto key = make_pair(x[q], 0);
+      auto itr = tate.lower_bound(key);
+      int j = itr->second - 1;
+      ans -= j;
+      yoko.insert(make_pair(j, x[q]));
+    }
   }
 
   cout << ans << endl;

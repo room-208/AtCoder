@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -313,19 +313,6 @@ struct Edge {
 
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
-
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
 
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
@@ -629,24 +616,82 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+// 深さ優先探索
+vector<set<vector<int>>> st(10000);
+int cnt = 0;
+void DFS(const vector<int> &A, const Graph_int G, int i = -1, int sum = 0,
+         vector<int> select = vector<int>()) {
+  st[sum].insert(select);
+
+  if (cnt >= 5000) {
+    return;
+  }
+  if (i == (int)A.size() - 1) {
+    return;
+  }
+
+  int next = i + 1;
+  bool flag = true;
+  for (auto &&v : G[next]) {
+    if (binary_search(select.begin(), select.end(), v)) {
+      flag = false;
+      break;
+    }
+  }
+
+  // 選択するとき
+  if (flag) {
+    cnt++;
+    auto select_new = select;
+    select_new.push_back(next);
+    DFS(A, G, next, sum + A[next], select_new);
+  }
+
+  // しないとき
+  DFS(A, G, next, sum, select);
+}
+
 int main() {
-  string S;
-  cin >> S;
-
-  reverse(S.begin(), S.end());
-  int N = (int)S.size();
-
-  vector<mint> A(N + 1, 0);
+  int N, Q;
+  cin >> N >> Q;
+  vector<int> A(N);
   for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+    cin >> A[i];
+  }
+  vector<int> x(Q), y(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> x[i] >> y[i];
+    x[i]--;
+    y[i]--;
   }
 
-  long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
+  Graph_int G(N);
+  for (int i = 0; i < Q; i++) {
+    G[x[i]].push_back(y[i]);
+    G[y[i]].push_back(x[i]);
   }
 
-  cout << ans << endl;
+  DFS(A, G);
+
+  vector<int> ans1, ans2;
+  for (int i = 0; i < 10000; i++) {
+    if ((int)st[i].size() >= 2) {
+      auto itr = st[i].begin();
+      ans1 = *itr;
+      itr++;
+      ans2 = *itr;
+      break;
+    }
+  }
+
+  cout << (int)ans1.size() << endl;
+  for (int i = 0; i < (int)ans1.size(); i++) {
+    cout << ans1[i] + 1 << " ";
+  }
+  cout << endl;
+  cout << (int)ans2.size() << endl;
+  for (int i = 0; i < (int)ans2.size(); i++) {
+    cout << ans2[i] + 1 << " ";
+  }
+  cout << endl;
 }

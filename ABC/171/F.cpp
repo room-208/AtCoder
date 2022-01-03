@@ -26,12 +26,12 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint1000000007;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
-const int COM_MAX = 510000;
+const int COM_MAX = 4000000;
 
 long long fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
 
@@ -630,23 +630,19 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
+  int K;
+  cin >> K;
   string S;
   cin >> S;
-
-  reverse(S.begin(), S.end());
   int N = (int)S.size();
 
-  vector<mint> A(N + 1, 0);
-  for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+  COMinit();
+
+  mint ans = 0;
+  for (int k = 0; k <= K; k++) {
+    int M = K - k;
+    ans += (mint(26).pow(k)) * (mint(25).pow(K - k)) * COM(M + N - 1, M);
   }
 
-  long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
-  }
-
-  cout << ans << endl;
+  cout << ans.val() << endl;
 }

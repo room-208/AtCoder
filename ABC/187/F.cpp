@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -629,24 +629,53 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+bool IsCompleteGraph(vector<int> &v, vector<pair<int, int>> p) {
+  for (int i = 0; i < (int)v.size(); i++) {
+    for (int j = i + 1; j < (int)v.size(); j++) {
+      if (!binary_search(p.begin(), p.end(), make_pair(v[i], v[j]))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 int main() {
-  string S;
-  cin >> S;
-
-  reverse(S.begin(), S.end());
-  int N = (int)S.size();
-
-  vector<mint> A(N + 1, 0);
-  for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+  int N, M;
+  cin >> N >> M;
+  vector<int> a(M), b(M);
+  for (int i = 0; i < M; i++) {
+    cin >> a[i] >> b[i];
+    a[i]--;
+    b[i]--;
   }
 
-  long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
+  vector<pair<int, int>> p;
+  for (int i = 0; i < M; i++) {
+    p.push_back(make_pair(a[i], b[i]));
+    p.push_back(make_pair(b[i], a[i]));
+  }
+  sort(p.begin(), p.end());
+
+  int ans = 0;
+  vector<int> dp((1 << N), INF_int);
+  dp[0] = 0;
+  for (int S = 1; S < (1 << N); S++) {
+    vector<int> v;
+    for (int i = 0; i < N; i++) {
+      if (S & (1 << i)) {
+        v.push_back(i);
+      }
+    }
+
+    if (IsCompleteGraph(v, p)) {
+      dp[S] = 1;
+    } else {
+      for (int SubS = S - 1; SubS != 0; SubS = (SubS - 1) & S) {
+        chmin(dp[S], dp[SubS] + dp[S & (~SubS)]);
+      }
+    }
   }
 
-  cout << ans << endl;
+  cout << dp[(1 << N) - 1] << endl;
 }

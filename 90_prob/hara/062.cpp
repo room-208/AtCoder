@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -393,33 +393,6 @@ void topological_sort(const Graph_int &G, vector<int> &order) {
   reverse(order.begin(), order.end());
 }
 
-//幅優先探索
-void BFS(const Graph_int &G, int s) {
-  int N = (int)G.size();    // 頂点数
-  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
-  queue<int> que;
-
-  // 初期条件 (頂点 s を初期頂点とする)
-  dist[s] = 0;
-  que.push(s);  // s を橙色頂点にする
-
-  // BFS 開始 (キューが空になるまで探索を行う)
-  while (!que.empty()) {
-    int v = que.front();  // キューから先頭頂点を取り出す
-    que.pop();
-
-    // v からたどれる頂点をすべて調べる
-    for (int x : G[v]) {
-      // すでに発見済みの頂点は探索しない
-      if (dist[x] != -1) continue;
-
-      // 新たな白色頂点 x について距離情報を更新してキューに挿入
-      dist[x] = dist[v] + 1;
-      que.push(x);
-    }
-  }
-}
-
 // 01BFS
 void BFS_01(const Graph_Edge &G, int s) {
   int N = (int)G.size();              // 頂点数
@@ -629,24 +602,88 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+//幅優先探索
+void BFS(const Graph_int &G, vector<int> &ans, vector<bool> &seen, int s) {
+  int N = (int)G.size();    // 頂点数
+  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
+  queue<int> que;
+
+  if (seen[s]) {
+    return;
+  }
+
+  // 初期条件 (頂点 s を初期頂点とする)
+  dist[s] = 0;
+  ans.push_back(s);
+  seen[s] = true;
+  que.push(s);  // s を橙色頂点にする
+
+  // BFS 開始 (キューが空になるまで探索を行う)
+  while (!que.empty()) {
+    int v = que.front();  // キューから先頭頂点を取り出す
+    que.pop();
+
+    // v からたどれる頂点をすべて調べる
+    for (int x : G[v]) {
+      // すでに発見済みの頂点は探索しない
+      if (dist[x] != -1) continue;
+
+      if (seen[x]) continue;
+
+      // 新たな白色頂点 x について距離情報を更新してキューに挿入
+      dist[x] = dist[v] + 1;
+      ans.push_back(x);
+      seen[x] = true;
+      que.push(x);
+    }
+  }
+}
+
 int main() {
-  string S;
-  cin >> S;
-
-  reverse(S.begin(), S.end());
-  int N = (int)S.size();
-
-  vector<mint> A(N + 1, 0);
+  int N;
+  cin >> N;
+  vector<int> A(N), B(N);
   for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+    cin >> A[i] >> B[i];
+    A[i]--;
+    B[i]--;
   }
 
-  long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
+  Graph_int G(N);
+  for (int i = 0; i < N; i++) {
+    G[A[i]].push_back(i);
+    G[B[i]].push_back(i);
+  }
+  for (int i = 0; i < N; i++) {
+    sort(G[i].begin(), G[i].end());
   }
 
-  cout << ans << endl;
+  vector<int> start;
+  for (int i = 0; i < N; i++) {
+    if (binary_search(G[i].begin(), G[i].end(), i)) {
+      start.push_back(i);
+    }
+  }
+
+  vector<bool> seen(N, false);
+  vector<int> ans;
+  for (auto &&s : start) {
+    BFS(G, ans, seen, s);
+  }
+  reverse(ans.begin(), ans.end());
+
+  bool flag = true;
+  for (int i = 0; i < N; i++) {
+    if (!seen[i]) {
+      flag = false;
+    }
+  }
+
+  if (flag) {
+    for (int i = 0; i < N; i++) {
+      cout << ans[i] + 1 << endl;
+    }
+  } else {
+    cout << -1 << endl;
+  }
 }

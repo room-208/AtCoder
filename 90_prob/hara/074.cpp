@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = static_modint<2019>;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -313,19 +313,6 @@ struct Edge {
 
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
-
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
 
 //根付き木
 void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
@@ -630,22 +617,19 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
+  int N;
+  cin >> N;
   string S;
   cin >> S;
 
-  reverse(S.begin(), S.end());
-  int N = (int)S.size();
-
-  vector<mint> A(N + 1, 0);
+  vector<long long> d(N);
   for (int i = 0; i < N; i++) {
-    A[i + 1] = A[i] + (S[i] - '0') * mint(10).pow(i);
+    d[i] = S[i] - 'a';
   }
 
   long long ans = 0;
-  map<int, long long> mp;
-  for (int i = 0; i <= N; i++) {
-    ans += mp[A[i].val()];
-    mp[A[i].val()]++;
+  for (int i = 0; i < N; i++) {
+    ans += d[i] * (1LL << i);
   }
 
   cout << ans << endl;
