@@ -629,52 +629,64 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-long long CoprimeCount(int l, int r, vector<int> &osak) {
-  if (l == 1) {
-    l = 2;
+int Left(int g, int L) {
+  if (L % g == 0) {
+    return L / g;
   }
-  if (l >= r) {
+  return (L / g) + 1;
+}
+
+int Right(int g, int R) { return (R / g); }
+
+long long Counter(int L, int R, const vector<int> &p) {
+  if (L <= 1) {
+    L = 2;
+  }
+  if (L >= R) {
     return 0;
   }
-  long long d = r - l + 1;
-  long long res = d * (d - 1);
-  for (long long i = 2; i <= r; i++) {
-    unordered_set<int> st;
-    long long m = i;
-    while (m != 1) {
-      st.insert(osak[m]);
-      m /= osak[m];
-    }
 
-    long long cnt = 0;
-    int n = 0;
-    while (n < l) {
-      n += i;
+  long long res = 0;
+  for (int x = L; x <= R; x++) {
+    int z = x;
+    vector<int> vec;
+    while (z != 1) {
+      vec.push_back(p[z]);
+      z /= p[z];
     }
-    while (n <= r) {
-      n += i;
-      cnt++;
-    }
+    sort(vec.begin(), vec.end());
+    vec.erase(unique(vec.begin(), vec.end()), vec.end());
 
-    if (st.size() % 2 == 0) {
-      res += (cnt * (cnt - 1));
-    } else {
-      res -= (cnt * (cnt - 1));
+    for (int S = 0; S < (1 << (int)vec.size()); S++) {
+      int pop_count = __builtin_popcount(S);
+      int q = 1;
+      for (int i = 0; i < (int)vec.size(); i++) {
+        if (S & (1 << i)) {
+          q *= vec[i];
+        }
+      }
+      if (pop_count % 2 == 0) {
+        res += Right(q, R) - Left(q, L) + 1;
+      } else {
+        res -= Right(q, R) - Left(q, L) + 1;
+      }
     }
   }
+
   return res;
 }
 
 int main() {
   int L, R;
   cin >> L >> R;
-  vector<int> osak = osa_k(2000000);
+
+  vector<int> p = osa_k(2000000);
 
   long long ans = 0;
-  for (int g = 2; g <= 1000000; g++) {
-    int l = ceil(((double)L) / ((double)g));
-    int r = floor(((double)R) / ((double)g));
-    ans += CoprimeCount(l, r, osak);
+  for (int g = 2; g <= R; g++) {
+    int l = Left(g, L);
+    int r = Right(g, R);
+    ans += Counter(l, r, p);
   }
 
   cout << ans << endl;

@@ -54,6 +54,12 @@ long long COM(int n, int k) {
   return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
 
+long long P(int n, int k) {
+  if (n < k) return 0;
+  if (n < 0 || k < 0) return 0;
+  return fac[n] * (finv[n - k]) % MOD;
+}
+
 //繰り返し二乗法
 long long MOD_pow(long long a, long long n) {
   long long res = 1;
@@ -644,29 +650,17 @@ mint P(long long n, long long r) {
 int main() {
   int N, M;
   cin >> N >> M;
-
-  vector<int> p;
-  for (int i = 0; i < N; i++) {
-    p.push_back(i + 1);
+  COMinit();
+  mint ans = 0;
+  for (int k = 0; k <= N; k++) {
+    mint c = COM(N, k);
+    mint p = P(M - k, N - k);
+    if (k % 2 == 0) {
+      ans += c * p;
+    } else {
+      ans -= c * p;
+    }
   }
-
-  vector<int> array = p;
-  do {
-    bool flag = true;
-    for (int i = 0; i < N; i++) {
-      if (array[i] == p[i]) {
-        flag = false;
-      }
-    }
-
-    if (flag) {
-      for (int i = 0; i < N; i++) {
-        cout << array[i] << " ";
-      }
-      cout << endl;
-    }
-  } while (next_permutation(array.begin(), array.end()));
-
-  cout << P(5, 6).val() << endl;
-  cin >> N;
+  ans *= P(M, N);
+  cout << ans.val() << endl;
 }

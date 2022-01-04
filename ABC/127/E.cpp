@@ -26,12 +26,12 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
-const int COM_MAX = 510000;
+const int COM_MAX = 1000000;
 
 long long fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
 
@@ -629,58 +629,21 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-long long Number(string S) {
-  long long res = 0;
-  int n = 0;
-  int N = (int)S.size();
-  vector<long long> a;
-  for (int i = 0; i < N; i++) {
-    if (S[i] != '.') {
-      a.push_back((S[i] - '0'));
-    } else {
-      n = N - i - 1;
-    }
+mint solve(int N, int M, long long K) {
+  mint res = 0;
+  for (int x = 1; x <= N - 1; x++) {
+    res += mint(1) * x * M * M * (N - x) * COM(N * M - 2, K - 2);
   }
-  reverse(a.begin(), a.end());
-  vector<long long> ten(a.size());
-  ten[0] = pow(10, 4 - n);
-  for (int i = 1; i < (int)a.size(); i++) {
-    ten[i] = ten[i - 1] * 10LL;
-  }
-  for (int i = 0; i < (int)a.size(); i++) {
-    res += ten[i] * a[i];
-  }
-
   return res;
 }
 
 int main() {
-  long long X, Y, R;
-  string S;
-  cin >> S;
-  X = Number(S);
-  cin >> S;
-  Y = Number(S);
-  cin >> S;
-  R = Number(S);
+  int N, M;
+  long long K;
+  cin >> N >> M >> K;
 
-  long long l = X - R;
-  long long r = X + R;
-  long long x_l, x_r;
-  if (l % 10000 == 0) {
-    x_l = l;
-  } else {
-    x_l = ((l / 10000) + 1) * 10000;
-  }
-  if (r % 10000 == 0) {
-    x_r = r;
-  } else {
-    x_r = (r / 10000) * 10000;
-  }
-  long long ans = 0;
-  for (long long x = l; x <= r; x++) {
-  }
+  COMinit();
 
-  cout << ans << endl;
-  cin >> ans;
+  mint ans = solve(N, M, K) + solve(M, N, K);
+  cout << ans.val() << endl;
 }

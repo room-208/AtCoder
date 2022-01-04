@@ -238,109 +238,79 @@ void compress(vector<long long> &x) {
 }
 
 //セグ木・遅延セグ木
-// segtree<long long, seg::op, seg::e> sgt;
-// lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping,
-// seg::composition, seg::id> sgt;
 namespace seg {
-const long long ID = 0;
-long long op(long long a, long long b) { return min(a, b); }
-long long e() { return INF_ll; }
-long long mapping(long long f, long long x) {
-  if (f == ID) {
-    return x;
+struct F {
+  int index;
+  int value;
+  F(int index, int value) : index(index), value(value){};
+};
+
+F op(F a, F b) {
+  if (a.value < b.value) {
+    return b;
   } else {
-    return x + f;
+    return a;
   }
 }
-long long composition(long long f, long long g) {
-  if (f == ID) {
-    return g;
-  } else {
-    return f + g;
-  }
-}
-long long id() { return ID; }
-long long target;
-bool f(long long v) { return v < target; }
+F e() { return F(-1, -INF_int); }
 }  // namespace seg
 
-// Union-Find
-struct UnionFind {
-  vector<int> par, siz;
-
-  // 初期化
-  UnionFind(int n) : par(n, -1), siz(n, 1) {}
-
-  // 根を求める
-  int root(int x) {
-    if (par[x] == -1)
-      return x;  // x が根の場合は x を返す
-    else
-      return par[x] = root(par[x]);
-  }
-
-  // x と y が同じグループに属するかどうか (根が一致するかどうか)
-  bool issame(int x, int y) { return root(x) == root(y); }
-
-  // x を含むグループと y を含むグループとを併合する
-  bool unite(int x, int y) {
-    // x, y をそれぞれ根まで移動する
-    x = root(x);
-    y = root(y);
-
-    // すでに同じグループのときは何もしない
-    if (x == y) return false;
-
-    // union by size (y 側のサイズが小さくなるようにする)
-    if (siz[x] < siz[y]) swap(x, y);
-
-    // y を x の子とする
-    par[y] = x;
-    siz[x] += siz[y];
-    return true;
-  }
-
-  // x を含むグループのサイズ
-  int size(int x) { return siz[root(x)]; }
-};
-
-//エッジ集合
-struct Edge {
-  int to;
-  long long w;
-  Edge(int to, long long w) : to(to), w(w) {}
-};
-
-using Graph_int = vector<vector<int>>;
-using Graph_Edge = vector<vector<Edge>>;
-
-unordered_map<long long, long long> mp;
-long long solve(long long y, const long long X) {
-  if (mp.count(y)) {
-    return mp[y];
-  }
-
-  if (y <= X) {
-    return llabs(X - y);
-  } else if (y % 2 == 0) {
-    long long res = INF_ll;
-    chmin(res, solve(y / 2, X) + 1);
-    chmin(res, llabs(X - y));
-    mp[y] = res;
-    return res;
-  } else {
-    long long res = INF_ll;
-    chmin(res, solve((y + 1) / 2, X) + 2);
-    chmin(res, solve((y - 1) / 2, X) + 2);
-    chmin(res, llabs(X - y));
-    mp[y] = res;
-    return res;
-  }
-}
-
 int main() {
-  long long X, Y;
-  cin >> X >> Y;
+  int N;
+  cin >> N;
+  vector<string> S(N);
+  for (int i = 0; i < N; i++) {
+    cin >> S[i];
+  }
 
-  cout << solve(Y, X) << endl;
+  vector<pair<int, int>> p;
+  vector<tuple<int, int, int>> m;
+  for (int i = 0; i < N; i++) {
+    int min_val = 0;
+    int val = 0;
+    for (int j = 0; j < (int)S[i].size(); j++) {
+      if (S[i][j] == '(') {
+        val++;
+      } else {
+        val--;
+      }
+      chmin(min_val, val);
+    }
+    if (val >= 0) {
+      p.push_back(make_pair(min_val, val));
+    } else {
+      m.push_back(make_tuple(val - min_val, min_val, val));
+    }
+  }
+  sort(p.begin(), p.end());
+  sort(m.begin(), m.end());
+  reverse(p.begin(), p.end());
+  reverse(m.begin(), m.end());
+
+  bool flag = true;
+  int val = 0;
+  for (int i = 0; i < (int)p.size(); i++) {
+    if (val + p[i].first < 0) {
+      flag = false;
+      break;
+    }
+    val += p[i].second;
+  }
+  for (int i = 0; i < (int)m.size(); i++) {
+    if (val + get<1>(m[i]) < 0) {
+      flag = false;
+      break;
+    }
+    val += get<2>(m[i]);
+  }
+
+  if (val != 0) {
+    flag = false;
+  }
+
+  if (flag) {
+    cout << "Yes" << endl;
+  } else {
+    cout << "No" << endl;
+  }
 }

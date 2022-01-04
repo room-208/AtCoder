@@ -314,33 +314,86 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-unordered_map<long long, long long> mp;
-long long solve(long long y, const long long X) {
-  if (mp.count(y)) {
-    return mp[y];
-  }
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen) {
+  seen[v] = true;
 
-  if (y <= X) {
-    return llabs(X - y);
-  } else if (y % 2 == 0) {
-    long long res = INF_ll;
-    chmin(res, solve(y / 2, X) + 1);
-    chmin(res, llabs(X - y));
-    mp[y] = res;
-    return res;
-  } else {
-    long long res = INF_ll;
-    chmin(res, solve((y + 1) / 2, X) + 2);
-    chmin(res, solve((y - 1) / 2, X) + 2);
-    chmin(res, llabs(X - y));
-    mp[y] = res;
-    return res;
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    DFS(G, next_v, seen);
   }
 }
 
-int main() {
-  long long X, Y;
-  cin >> X >> Y;
+//根付き木
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+  for (auto next_v : G[v]) {
+    if (next_v == p) {
+      continue;
+    }
 
-  cout << solve(Y, X) << endl;
+    par_cal(G, next_v, par, v);
+  }
+
+  par[v] = p;
+}
+
+int main() {
+  int N;
+  cin >> N;
+  Graph_int G(N);
+  for (int i = 0; i < N - 1; i++) {
+    int a, b;
+    cin >> a >> b;
+    a--;
+    b--;
+    G[a].push_back(b);
+    G[b].push_back(a);
+  }
+  int M;
+  cin >> M;
+  vector<int> u(M), v(M);
+  for (int i = 0; i < M; i++) {
+    cin >> u[i] >> v[i];
+    u[i]--;
+    v[i]--;
+  }
+
+  vector<vector<pair<int, int>>> p(M);
+  for (int i = 0; i < M; i++) {
+    vector<int> par(N, -1);
+    par_cal(G, u[i], par);
+    int x = v[i];
+    while (par[x] != -1) {
+      if (x <= par[x]) {
+        p[i].push_back(make_pair(x, par[x]));
+      } else {
+        p[i].push_back(make_pair(par[x], x));
+      }
+      x = par[x];
+    }
+  }
+
+  long long ans = (1LL << (N - 1));
+  for (int S = 1; S < (1 << M); S++) {
+    int a = __builtin_popcount(S);
+    set<pair<int, int>> st;
+    for (int i = 0; i < M; i++) {
+      if (S & (1 << i)) {
+        for (auto &&q : p[i]) {
+          st.insert(q);
+        }
+      }
+    }
+    int siz = st.size();
+    if (a % 2 == 0) {
+      ans += (1LL << (N - 1 - siz));
+    } else {
+      ans -= (1LL << (N - 1 - siz));
+    }
+  }
+
+  cout << ans << endl;
 }

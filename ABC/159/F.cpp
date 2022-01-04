@@ -26,7 +26,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint998244353;
 
 const int MOD = 1000000007;
 const int INF_int = 1000000000;
@@ -629,58 +629,31 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-long long Number(string S) {
-  long long res = 0;
-  int n = 0;
-  int N = (int)S.size();
-  vector<long long> a;
-  for (int i = 0; i < N; i++) {
-    if (S[i] != '.') {
-      a.push_back((S[i] - '0'));
-    } else {
-      n = N - i - 1;
+int main() {
+  int N, S;
+  cin >> N >> S;
+  vector<int> A(N + 1, 0);
+  for (int i = 1; i <= N; i++) {
+    cin >> A[i];
+  }
+
+  vector<vector<mint>> dp(S + 1, vector<mint>(N + 1, 0));
+  for (int j = 0; j <= N; j++) {
+    dp[0][j] = j + 1;
+  }
+  for (int j = 1; j <= N; j++) {
+    for (int i = 1; i <= S; i++) {
+      dp[i][j] += dp[i][j - 1];
+    }
+    for (int i = 0; i <= S; i++) {
+      if (dp[i][j - 1] != 0) {
+        if (i + A[j] < S) {
+          dp[i + A[j]][j] += dp[i][j - 1];
+        } else if (i + A[j] == S) {
+          dp[i + A[j]][j] += dp[i][j - 1] * (N - j + 1);
+        }
+      }
     }
   }
-  reverse(a.begin(), a.end());
-  vector<long long> ten(a.size());
-  ten[0] = pow(10, 4 - n);
-  for (int i = 1; i < (int)a.size(); i++) {
-    ten[i] = ten[i - 1] * 10LL;
-  }
-  for (int i = 0; i < (int)a.size(); i++) {
-    res += ten[i] * a[i];
-  }
-
-  return res;
-}
-
-int main() {
-  long long X, Y, R;
-  string S;
-  cin >> S;
-  X = Number(S);
-  cin >> S;
-  Y = Number(S);
-  cin >> S;
-  R = Number(S);
-
-  long long l = X - R;
-  long long r = X + R;
-  long long x_l, x_r;
-  if (l % 10000 == 0) {
-    x_l = l;
-  } else {
-    x_l = ((l / 10000) + 1) * 10000;
-  }
-  if (r % 10000 == 0) {
-    x_r = r;
-  } else {
-    x_r = (r / 10000) * 10000;
-  }
-  long long ans = 0;
-  for (long long x = l; x <= r; x++) {
-  }
-
-  cout << ans << endl;
-  cin >> ans;
+  cout << dp[S][N].val() << endl;
 }

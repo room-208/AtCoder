@@ -629,58 +629,17 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-long long Number(string S) {
-  long long res = 0;
-  int n = 0;
-  int N = (int)S.size();
-  vector<long long> a;
-  for (int i = 0; i < N; i++) {
-    if (S[i] != '.') {
-      a.push_back((S[i] - '0'));
-    } else {
-      n = N - i - 1;
-    }
-  }
-  reverse(a.begin(), a.end());
-  vector<long long> ten(a.size());
-  ten[0] = pow(10, 4 - n);
-  for (int i = 1; i < (int)a.size(); i++) {
-    ten[i] = ten[i - 1] * 10LL;
-  }
-  for (int i = 0; i < (int)a.size(); i++) {
-    res += ten[i] * a[i];
-  }
-
-  return res;
-}
-
 int main() {
-  long long X, Y, R;
-  string S;
-  cin >> S;
-  X = Number(S);
-  cin >> S;
-  Y = Number(S);
-  cin >> S;
-  R = Number(S);
+  int M;
+  cin >> M;
+  long long K;
+  cin >> K;
 
-  long long l = X - R;
-  long long r = X + R;
-  long long x_l, x_r;
-  if (l % 10000 == 0) {
-    x_l = l;
-  } else {
-    x_l = ((l / 10000) + 1) * 10000;
-  }
-  if (r % 10000 == 0) {
-    x_r = r;
-  } else {
-    x_r = (r / 10000) * 10000;
-  }
-  long long ans = 0;
-  for (long long x = l; x <= r; x++) {
-  }
+  int a = 6456;
+  int b = 543;
+  b = b ^ a;
+  b = a ^ b;
+  cout << b << endl;
 
-  cout << ans << endl;
-  cin >> ans;
+  cout << endl;
 }
