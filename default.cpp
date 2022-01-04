@@ -70,6 +70,51 @@ long long tousa_sum(long long a, long long d, long long n) {
   return (a * 2 + d * (n - 1)) * n / 2;
 }
 
+// 床関数
+long long my_floor(long long a, long long b) {
+  assert(b > 0);
+  if (a > 0) {
+    return (a / b);
+  } else if (a < 0) {
+    if (a % b == 0) {
+      return (a / b);
+    } else {
+      return (a / b) - 1;
+    }
+  }
+  return 0;
+}
+
+// 天井関数
+long long my_ceil(long long a, long long b) {
+  assert(b > 0);
+  if (a > 0) {
+    if (a % b == 0) {
+      return (a / b);
+    } else {
+      return (a / b) + 1;
+    }
+  } else if (a < 0) {
+    return (a / b);
+  }
+  return 0;
+}
+
+// 平方関数
+long long my_sqrt(long long x) {
+  long long left = 0;
+  long long right = numeric_limits<int>::max();
+  while (right - left > 1) {
+    long long mid = (right + left) / 2;
+    if (mid * mid <= x) {
+      left = mid;
+    } else {
+      right = mid;
+    }
+  }
+  return left;
+}
+
 //転倒数
 long long inv_count(const vector<int> &a) {
   int n = (int)a.size();

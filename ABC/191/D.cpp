@@ -654,31 +654,77 @@ long long Number(string S) {
   return res;
 }
 
+long long my_floor(long long a, long long b) {
+  assert(b > 0);
+  if (a > 0) {
+    return (a / b);
+  } else if (a < 0) {
+    if (a % b == 0) {
+      return (a / b);
+    } else {
+      return (a / b) - 1;
+    }
+  }
+  return 0;
+}
+
+long long my_ceil(long long a, long long b) {
+  assert(b > 0);
+  if (a > 0) {
+    if (a % b == 0) {
+      return (a / b);
+    } else {
+      return (a / b) + 1;
+    }
+  } else if (a < 0) {
+    return (a / b);
+  }
+  return 0;
+}
+
+long long my_sqrt(long long x) {
+  long long left = 0;
+  long long right = numeric_limits<int>::max();
+  while (right - left > 1) {
+    long long mid = (right + left) / 2;
+    if (mid * mid <= x) {
+      left = mid;
+    } else {
+      right = mid;
+    }
+  }
+  return left;
+}
+
+long long Max_height(long long Y, long long A) {
+  long long a = my_sqrt(A);
+  long long res = my_floor(Y + a, 10000);
+  return res;
+}
+
+long long Min_height(long long Y, long long A) {
+  long long a = my_sqrt(A);
+  long long res = my_ceil(Y - a, 10000);
+  return res;
+}
+
 int main() {
-  long long X, Y, R;
+  long long X, Y, Radius;
   string S;
   cin >> S;
   X = Number(S);
   cin >> S;
   Y = Number(S);
   cin >> S;
-  R = Number(S);
+  Radius = Number(S);
 
-  long long l = X - R;
-  long long r = X + R;
-  long long x_l, x_r;
-  if (l % 10000 == 0) {
-    x_l = l;
-  } else {
-    x_l = ((l / 10000) + 1) * 10000;
-  }
-  if (r % 10000 == 0) {
-    x_r = r;
-  } else {
-    x_r = (r / 10000) * 10000;
-  }
+  long long L = my_ceil(X - Radius, 10000) * 10000LL;
+  long long R = my_floor(X + Radius, 10000) * 10000LL;
+
   long long ans = 0;
-  for (long long x = l; x <= r; x++) {
+  for (long long x = L; x <= R; x += 10000LL) {
+    long long A = Radius * Radius - (x - X) * (x - X);
+    ans += (Max_height(Y, A) - Min_height(Y, A) + 1LL);
   }
 
   cout << ans << endl;
