@@ -97,7 +97,7 @@ long long my_ceil(long long a, long long b) {
   } else if (a < 0) {
     return (a / b);
   }
-  return 1;
+  return 0;
 }
 
 // 平方関数
