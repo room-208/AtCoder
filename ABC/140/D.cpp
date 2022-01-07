@@ -72,11 +72,7 @@ long long tousa_sum(long long a, long long d, long long n) {
 
 // 床関数
 long long my_floor(long long a, long long b) {
-  assert(b != 0);
-  if (b < 0) {
-    a *= -1;
-    b *= -1;
-  }
+  assert(b > 0);
   if (a > 0) {
     return (a / b);
   } else if (a < 0) {
@@ -91,11 +87,7 @@ long long my_floor(long long a, long long b) {
 
 // 天井関数
 long long my_ceil(long long a, long long b) {
-  assert(b != 0);
-  if (b < 0) {
-    a *= -1;
-    b *= -1;
-  }
+  assert(b > 0);
   if (a > 0) {
     if (a % b == 0) {
       return (a / b);
@@ -682,20 +674,86 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+int getval(string s) {
+  int N = s.size();
+  int res = 0;
+  for (int i = 0; i < N; i++) {
+    if (i > 0) {
+      if (s[i - 1] == 'L' && s[i] == 'L') {
+        res++;
+      }
+    }
+    if (i < N - 1) {
+      if (s[i] == 'R' && s[i + 1] == 'R') {
+        res++;
+      }
+    }
+  }
+  return res;
+}
+
 int main() {
-  int N;
-  cin >> N;
+  int N, K;
+  cin >> N >> K;
   string S;
   cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  auto vec = runLengthEncoding(S);
+
+  if (vec.size() == 1) {
+    cout << N - 1 << endl;
+    return 0;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  int ans = -1;
+  int tmp;
+
+  // Lの場合
+  vector<int> l;
+  for (int i = 0; i < vec.size(); i++) {
+    if (vec[i].first == 'R') {
+      if (i == 0) {
+        l.push_back(1);
+      } else if (i == vec.size() - 1) {
+        l.push_back(1);
+      } else {
+        l.push_back(2);
+      }
+    }
   }
+  sort(l.begin(), l.end());
+  reverse(l.begin(), l.end());
+  tmp = getval(S);
+  for (int i = 0; i < min(K, (int)l.size()); i++) {
+    if (l[i] < 0) {
+      break;
+    }
+    tmp += l[i];
+  }
+  chmax(ans, tmp);
+
+  // Rの場合
+  vector<int> r;
+  for (int i = 0; i < vec.size(); i++) {
+    if (vec[i].first == 'L') {
+      if (i == 0) {
+        r.push_back(1);
+      } else if (i == vec.size() - 1) {
+        r.push_back(1);
+      } else {
+        r.push_back(2);
+      }
+    }
+  }
+  sort(r.begin(), r.end());
+  reverse(r.begin(), r.end());
+  tmp = getval(S);
+  for (int i = 0; i < min(K, (int)r.size()); i++) {
+    if (r[i] < 0) {
+      break;
+    }
+    tmp += r[i];
+  }
+  chmax(ans, tmp);
+
+  cout << ans << endl;
 }

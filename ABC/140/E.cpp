@@ -72,11 +72,7 @@ long long tousa_sum(long long a, long long d, long long n) {
 
 // 床関数
 long long my_floor(long long a, long long b) {
-  assert(b != 0);
-  if (b < 0) {
-    a *= -1;
-    b *= -1;
-  }
+  assert(b > 0);
   if (a > 0) {
     return (a / b);
   } else if (a < 0) {
@@ -91,11 +87,7 @@ long long my_floor(long long a, long long b) {
 
 // 天井関数
 long long my_ceil(long long a, long long b) {
-  assert(b != 0);
-  if (b < 0) {
-    a *= -1;
-    b *= -1;
-  }
+  assert(b > 0);
   if (a > 0) {
     if (a % b == 0) {
       return (a / b);
@@ -289,33 +281,6 @@ void compress(vector<long long> &x) {
     x[i] = mp[x[i]];
   }
 }
-
-//セグ木・遅延セグ木
-// segtree<long long, seg::op, seg::e> sgt;
-// lazy_segtree<long long, seg::op, seg::e, long long, seg::mapping,
-// seg::composition, seg::id> sgt;
-namespace seg {
-const long long ID = 0;
-long long op(long long a, long long b) { return min(a, b); }
-long long e() { return INF_ll; }
-long long mapping(long long f, long long x) {
-  if (f == ID) {
-    return x;
-  } else {
-    return x + f;
-  }
-}
-long long composition(long long f, long long g) {
-  if (f == ID) {
-    return g;
-  } else {
-    return f + g;
-  }
-}
-long long id() { return ID; }
-long long target;
-bool f(long long v) { return v < target; }
-}  // namespace seg
 
 // Union-Find
 struct UnionFind {
@@ -682,20 +647,50 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+//セグ木・遅延セグ木
+// segtree<long long, seg::op, seg::e> sgt;
+namespace seg {
+const long long ID = 0;
+long long op(long long a, long long b) { return max(a, b); }
+long long e() { return -INF_ll; }
+long long target;
+bool f(long long v) { return v <= target; }
+}  // namespace seg
+
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<long long> P(N);
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    cin >> P[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  segtree<long long, seg::op, seg::e> sgt(P);
+  long long ans = 0;
+  for (int i = 0; i < N; i++) {
+    if (P[i] == N) {
+      continue;
+    }
+
+    seg::target = P[i];
+    int r1 = sgt.max_right(i, seg::f);
+    int l1 = sgt.min_left(i, seg::f);
+
+    if (l1 == 0 && r1 == N) {
+      continue;
+    } else if (l1 == 0) {
+      int r2 = sgt.max_right(r1 + 1, seg::f);
+      ans += 1LL * P[i] * (r2 - r1) * (i - l1 + 1);
+    } else if (r1 == N) {
+      int l2 = sgt.min_left(l1 - 1, seg::f);
+      ans += 1LL * P[i] * (l1 - l2) * (r1 - i);
+    } else {
+      int r2 = sgt.max_right(r1 + 1, seg::f);
+      int l2 = sgt.min_left(l1 - 1, seg::f);
+      ans += 1LL * P[i] * (l1 - l2) * (r1 - i);
+      ans += 1LL * P[i] * (r2 - r1) * (i - l1 + 1);
+    }
   }
+
+  cout << ans << endl;
 }

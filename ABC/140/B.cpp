@@ -72,11 +72,7 @@ long long tousa_sum(long long a, long long d, long long n) {
 
 // 床関数
 long long my_floor(long long a, long long b) {
-  assert(b != 0);
-  if (b < 0) {
-    a *= -1;
-    b *= -1;
-  }
+  assert(b > 0);
   if (a > 0) {
     return (a / b);
   } else if (a < 0) {
@@ -91,11 +87,7 @@ long long my_floor(long long a, long long b) {
 
 // 天井関数
 long long my_ceil(long long a, long long b) {
-  assert(b != 0);
-  if (b < 0) {
-    a *= -1;
-    b *= -1;
-  }
+  assert(b > 0);
   if (a > 0) {
     if (a % b == 0) {
       return (a / b);
@@ -685,17 +677,27 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<int> A(N), B(N), C(N - 1);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
+    A[i]--;
+  }
+  for (int i = 0; i < N; i++) {
+    cin >> B[i];
+  }
+  for (int i = 0; i < N - 1; i++) {
+    cin >> C[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  int before = -1;
+  int ans = 0;
+  for (int i = 0; i < N; i++) {
+    ans += B[A[i]];
+    if (before + 1 == A[i]) {
+      ans += C[before];
+    }
+    before = A[i];
   }
+
+  cout << ans << endl;
 }
