@@ -672,28 +672,24 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int N;
 
 // 深さ優先探索
-void DFS(int i, vector<vector<long long>> &A, long long x, vector<int> st,
-         long long &ans, int &cnt) {
-  if (st.size() == 2 * N) {
-    cnt++;
+void DFS(int i, vector<vector<long long>> &A, long long x, vector<bool> used,
+         long long &ans, int group = 0) {
+  if (group == 2 * N) {
     chmax(ans, x);
     return;
   }
 
-  if (binary_search(st.begin(), st.end(), i)) {
-    DFS(i + 1, A, x, st, ans, cnt);
+  if (used[i]) {
+    DFS(i + 1, A, x, used, ans, group);
     return;
   }
 
-  st.push_back(i);
-  sort(st.begin(), st.end());
+  used[i] = true;
   for (int j = i + 1; j < 2 * N; j++) {
-    if (!binary_search(st.begin(), st.end(), j)) {
-      auto st_new = st;
-      st_new.push_back(j);
-      sort(st_new.begin(), st_new.end());
-      long long a = x ^ A[i][j];
-      DFS(i + 1, A, a, st_new, ans, cnt);
+    if (!used[j]) {
+      auto used_new = used;
+      used_new[j] = true;
+      DFS(i + 1, A, (x ^ A[i][j]), used_new, ans, group + 2);
     }
   }
 }
@@ -709,9 +705,8 @@ int main() {
 
   long long ans = 0;
   long long x = 0;
-  int cnt = 0;
-  vector<int> st;
-  DFS(0, A, x, st, ans, cnt);
+  vector<bool> used(2 * N, false);
+  DFS(0, A, x, used, ans);
 
   cout << ans << endl;
 }
