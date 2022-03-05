@@ -367,6 +367,256 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen) {
+  seen[v] = true;
+
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    DFS(G, next_v, seen);
+  }
+}
+
+//根付き木
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+  for (auto next_v : G[v]) {
+    if (next_v == p) {
+      continue;
+    }
+
+    par_cal(G, next_v, par, v);
+  }
+
+  par[v] = p;
+}
+
+//部分木サイズ
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
+                      int p = -1) {
+  for (auto c : G[v]) {
+    if (c == p) {
+      continue;
+    }
+
+    subtree_size_cal(G, c, subtree_size, v);
+  }
+
+  // 帰りがけ時に、部分木サイズを求める
+  subtree_size[v] = 1;  // 自分自身
+  for (auto c : G[v]) {
+    if (c == p) {
+      continue;
+    }
+
+    // 子頂点を根とする部分きのサイズを加算する
+    subtree_size[v] += subtree_size[c];
+  }
+}
+
+//トポロジカルソートのDFS
+void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen,
+                          vector<int> &order) {
+  seen[v] = true;
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    topological_sort_dfs(G, next_v, seen, order);
+  }
+
+  order.push_back(v);
+}
+
+//トポロジカルソート
+void topological_sort(const Graph_int &G, vector<int> &order) {
+  int N = (int)G.size();
+  vector<bool> seen(N, false);
+  for (int v = 0; v < N; v++) {
+    if (seen[v]) {
+      continue;
+    }
+
+    topological_sort_dfs(G, v, seen, order);
+  }
+
+  reverse(order.begin(), order.end());
+}
+
+//幅優先探索
+void BFS(const Graph_int &G, int s) {
+  int N = (int)G.size();    // 頂点数
+  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
+  queue<int> que;
+
+  // 初期条件 (頂点 s を初期頂点とする)
+  dist[s] = 0;
+  que.push(s);  // s を橙色頂点にする
+
+  // BFS 開始 (キューが空になるまで探索を行う)
+  while (!que.empty()) {
+    int v = que.front();  // キューから先頭頂点を取り出す
+    que.pop();
+
+    // v からたどれる頂点をすべて調べる
+    for (int x : G[v]) {
+      // すでに発見済みの頂点は探索しない
+      if (dist[x] != -1) continue;
+
+      // 新たな白色頂点 x について距離情報を更新してキューに挿入
+      dist[x] = dist[v] + 1;
+      que.push(x);
+    }
+  }
+}
+
+// 01BFS
+void BFS_01(const Graph_Edge &G, int s) {
+  int N = (int)G.size();              // 頂点数
+  vector<long long> dist(N, INF_ll);  // 全頂点を「未訪問」に初期化
+  deque<int> que;
+
+  // 初期条件 (頂点 s を初期頂点とする)
+  dist[s] = 0;
+  que.push_front(s);
+
+  // BFS 開始 (キューが空になるまで探索を行う)
+  while (!que.empty()) {
+    int v = que.front();  // キューから先頭頂点を取り出す
+    que.pop_front();
+
+    // v からたどれる頂点をすべて調べる
+    for (auto x : G[v]) {
+      if (chmin(dist[x.to], dist[v] + x.w)) {
+        if (x.w == 0) {
+          que.push_front(x.to);
+        }
+        if (x.w == 1) {
+          que.push_back(x.to);
+        }
+      }
+    }
+  }
+}
+
+class Rerooting {
+ private:
+  struct DP {
+    long long dp;
+    long long subtree;
+    DP() {}
+    DP(long long dp, long long subtree) : dp(dp), subtree(subtree) {}
+  };
+
+ public:
+  vector<DP> res;
+
+ private:
+  vector<vector<DP>> dp;
+  Graph_Edge G;
+
+ public:
+  Rerooting(int N) {
+    dp.resize(N);
+    res.resize(N, e());
+    G.resize(N);
+  }
+  void build() {
+    dfs_init(0);
+    dfs_reroot(0, e());
+  }
+  void add_edge(int a, int b, long long c) { G[a].push_back(Edge(b, c)); }
+
+ private:
+  // mergeの単位元
+  DP e() { return DP({0, 0}); }
+  // マージ
+  DP merge(DP dp_cum, DP dp) {
+    return DP({dp_cum.dp + dp.dp, dp_cum.subtree + dp.subtree});
+  }
+  // 頂点に関する計算
+  DP add_root(int v, long long w, DP dp) {
+    return DP({dp.dp + dp.subtree + 1, dp.subtree + 1});
+  }
+  // 初期解
+  DP dfs_init(int v, long long w = 0, int p = -1) {
+    DP dp_cum = e();
+    int degree = G[v].size();
+    dp[v].resize(degree);
+    for (int i = 0; i < degree; i++) {
+      auto next_v = G[v][i];
+      if (next_v.to == p) {
+        continue;
+      }
+      dp[v][i] = dfs_init(next_v.to, next_v.w, v);
+      dp_cum = merge(dp_cum, dp[v][i]);
+    }
+    return add_root(v, w, dp_cum);
+  }
+  // 全方位
+  void dfs_reroot(int v, DP dp_p, int p = -1) {
+    int degree = G[v].size();
+    // 親方向を計算
+    for (int i = 0; i < degree; i++) {
+      auto next_v = G[v][i];
+      if (next_v.to == p) {
+        dp[v][i] = dp_p;
+      }
+    }
+    // 累積マージ
+    vector<DP> S_l(degree + 1, e()), S_r(degree + 1, e());
+    for (int i = 0; i < degree; i++) {
+      S_l[i + 1] = merge(S_l[i], dp[v][i]);
+    }
+    for (int i = degree - 1; i >= 0; i--) {
+      S_r[i] = merge(S_r[i + 1], dp[v][i]);
+    }
+    // resを計算
+    res[v] = S_l[degree];
+    // 下の階層に潜る
+    for (int i = 0; i < degree; i++) {
+      auto next_v = G[v][i];
+      if (next_v.to == p) {
+        continue;
+      }
+      dfs_reroot(next_v.to, add_root(v, next_v.w, merge(S_l[i], S_r[i + 1])),
+                 v);
+    }
+  }
+};
+
+//ベルマン・フォード法
+void Bellman_Ford(const Graph_Edge &G, int s) {
+  int N = (int)G.size();
+  bool exist_negative_cycle = false;  // 負閉路をもつかどうか
+  vector<long long> dist(N, INF_ll);
+  dist[s] = 0;
+
+  for (int iter = 0; iter < N; ++iter) {
+    bool update = false;  // 更新が発生したかどうかを表すフラグ
+    for (int v = 0; v < N; ++v) {
+      // dist[v] = INF のときは頂点 v からの緩和を行わない
+      if (dist[v] == INF_ll) continue;
+
+      for (auto e : G[v]) {
+        // 緩和処理を行い，更新されたら update を true にする
+        if (chmin(dist[e.to], dist[v] + e.w)) {
+          update = true;
+        }
+      }
+    }
+
+    // 更新が行われなかったら，すでに最短路が求められている
+    if (!update) break;
+
+    // N 回目の反復で更新が行われたならば，負閉路をもつ
+    if (iter == N - 1 && update) exist_negative_cycle = true;
+  }
+}
+
 //ダイクストラ法
 vector<long long> Dijkstra(const Graph_Edge &G, int s) {
   int N = (int)G.size();
@@ -402,34 +652,36 @@ vector<long long> Dijkstra(const Graph_Edge &G, int s) {
   return dist;
 }
 
-//トポロジカルソートのDFS
-void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen,
-                          vector<int> &order) {
-  seen[v] = true;
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
+//オーバーフロー判定
+//__builtin_add_overflow
+//__builtin_mul_overflow
 
-    topological_sort_dfs(G, next_v, seen, order);
-  }
+//ノード変換
+int to_node(int i, int j, int W) { return W * i + j; }
 
-  order.push_back(v);
+// ij変換
+pair<int, int> to_ij(int v, int W) {
+  int i = v / W;
+  int j = v - W * i;
+
+  return make_pair(i, j);
 }
 
-//トポロジカルソート
-void topological_sort(const Graph_int &G, vector<int> &order) {
-  int N = (int)G.size();
-  vector<bool> seen(N, false);
-  for (int v = 0; v < N; v++) {
-    if (seen[v]) {
-      continue;
-    }
-
-    topological_sort_dfs(G, v, seen, order);
+// in_out判定
+bool in_out(int i, int j, int H, int W) {
+  if (0 <= i && i < H && 0 <= j && j < W) {
+    return true;
   }
 
-  reverse(order.begin(), order.end());
+  return false;
+}
+
+struct my_struct {
+  int a, b;
+};
+
+bool operator<(const my_struct &s_1, const my_struct &s_2) {
+  return s_1.b > s_2.b;
 }
 
 int main() {
@@ -439,58 +691,32 @@ int main() {
   for (int i = 0; i < N; i++) {
     cin >> H[i];
   }
-  vector<int> u(M), v(M);
+  vector<int> U(M), V(M);
   for (int i = 0; i < M; i++) {
-    cin >> u[i] >> v[i];
-    u[i]--;
-    v[i]--;
+    cin >> U[i] >> V[i];
+    U[i]--;
+    V[i]--;
   }
 
-  UnionFind uf(N);
+  vector<long long> k(N);
+  for (int i = 0; i < N; i++) {
+    k[i] = H[i] - H[0];
+  }
+
+  Graph_Edge G(N);
   for (int i = 0; i < M; i++) {
-    if (H[u[i]] == H[v[i]]) {
-      uf.unite(u[i], v[i]);
-    }
+    G[U[i]].push_back(Edge(V[i], llabs(H[U[i]] - H[V[i]])));
+    G[V[i]].push_back(Edge(U[i], llabs(H[U[i]] - H[V[i]])));
   }
 
-  Graph_int G_sort(N);
-  Graph_Edge G_p(N), G_n(N);
-  for (int i = 0; i < M; i++) {
-    int a = uf.root(u[i]);
-    int b = uf.root(v[i]);
-    long long d = H[a] - H[b];
-    if (d == 0) {
-      continue;
-    } else if (d > 0) {
-      G_sort[b].push_back(a);
-      G_p[a].push_back(Edge(b, d));
-      G_n[b].push_back(Edge(a, 2LL * d));
-    } else {
-      G_sort[a].push_back(b);
-      G_p[b].push_back(Edge(a, -d));
-      G_n[a].push_back(Edge(b, -2LL * d));
-    }
+  auto d = Dijkstra(G, 0);
+
+  long long ans = 2LL * INF_ll;
+  for (int i = 0; i < N; i++) {
+    long long tmp = d[i] + 3LL * k[i];
+    tmp /= 2;
+    chmin(ans, tmp);
   }
 
-  vector<long long> d_n = Dijkstra(G_n, 0);
-  vector<int> order;
-  topological_sort(G_sort, order);
-
-  vector<long long> d_p(N, 0);
-  for (auto &&v : order) {
-    for (auto &&u : G_p[v]) {
-      chmax(d_p[v], d_p[u.to] + u.w);
-    }
-  }
-
-  long long ans = -INF_ll;
-  for (int v = 0; v < N; v++) {
-    if (d_n[v] == INF_ll) {
-      continue;
-    }
-
-    chmax(ans, -d_n[v] + d_p[v]);
-  }
-
-  cout << ans << endl;
+  cout << -ans << endl;
 }

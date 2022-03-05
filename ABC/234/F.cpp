@@ -26,9 +26,9 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint998244353;
 
-const int MOD = 1000000007;
+const int MOD = 998244353;
 const int INF_int = 1000000000;
 const long long INF_ll = 1000000000000000000LL;
 const int COM_MAX = 510000;
@@ -48,10 +48,11 @@ void COMinit() {
 }
 
 // 二項係数計算
-long long COM(int n, int k) {
+mint COM(int n, int k) {
   if (n < k) return 0;
   if (n < 0 || k < 0) return 0;
-  return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
+  mint res = fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
+  return res;
 }
 
 //繰り返し二乗法
@@ -685,31 +686,40 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   string S;
   cin >> S;
-  int N = S.size();
+  int N = (int)S.size();
 
   COMinit();
 
-  vector<int> cnt(26, 0);
-  for (int i = 0; i < N; i++) {
-    int n = S[i] - 'a';
-    cnt[n]++;
+  unordered_map<char, int> freq;
+  for (int i = 0; i < 26; i++) {
+    char s = 'a' + i;
+    freq[s] = 0;
+  }
+  for (int j = 0; j < N; j++) {
+    freq[S[j]]++;
   }
 
-  vector<mint> perm(N + 1, 0);
-  perm[1] = N;
-  for (int i = N - 1; i >= 0; i--) {
-    perm[i] = perm[i + 1] * i;
+  vector<vector<mint>> dp(26, vector<mint>(N + 1, 0));
+  for (int i = 0; i < 26; i++) {
+    char s = 'a' + i;
+    if (i == 0) {
+      for (int k = 0; k <= freq[s]; k++) {
+        dp[i][k] = 1;
+      }
+    } else {
+      for (int j = 0; j <= N; j++) {
+        for (int k = 0; k <= freq[s]; k++) {
+          if (j - k >= 0) {
+            dp[i][j] += dp[i - 1][j - k] * COM(j, k);
+          }
+        }
+      }
+    }
   }
 
   mint ans = 0;
-  for (int len = 1; len <= N; len++) {
-    mint res = perm[len];
-    for (int n = 0; n < 26; n++) {
-      for (int k = 2; k <= cnt[n]; k++) {
-        res -= (perm[k] - 1);
-      }
-    }
-    ans += res;
+  for (int j = 1; j <= N; j++) {
+    ans += dp[25][j];
   }
 
   cout << ans.val() << endl;
