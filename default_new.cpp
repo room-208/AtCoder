@@ -388,35 +388,38 @@ void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
   }
 }
 
-//トポロジカルソートのDFS
-void topological_sort_dfs(const Graph_int &G, int v, vector<bool> &seen,
-                          vector<int> &order) {
-  seen[v] = true;
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
+class TopologicalSort {
+ private:
+  // DFS
+  void dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order) {
+    seen[v] = true;
+    for (auto next_v : G[v]) {
+      if (seen[next_v]) {
+        continue;
+      }
+
+      dfs(G, next_v, seen, order);
     }
 
-    topological_sort_dfs(G, next_v, seen, order);
+    order.push_back(v);
   }
 
-  order.push_back(v);
-}
+ public:
+  //トポロジカルソート
+  void sort(const Graph_int &G, vector<int> &order) {
+    int N = (int)G.size();
+    vector<bool> seen(N, false);
+    for (int v = 0; v < N; v++) {
+      if (seen[v]) {
+        continue;
+      }
 
-//トポロジカルソート
-void topological_sort(const Graph_int &G, vector<int> &order) {
-  int N = (int)G.size();
-  vector<bool> seen(N, false);
-  for (int v = 0; v < N; v++) {
-    if (seen[v]) {
-      continue;
+      dfs(G, v, seen, order);
     }
 
-    topological_sort_dfs(G, v, seen, order);
+    reverse(order.begin(), order.end());
   }
-
-  reverse(order.begin(), order.end());
-}
+};
 
 //幅優先探索
 vector<int> BFS(const Graph_int &G, int s) {
