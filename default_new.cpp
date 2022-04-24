@@ -53,7 +53,7 @@ mint COM(int n, int k) {
 }
 
 //等差数列の和
-ll tousa_sum(ll a, ll d, ll n) { return (a * 2 + d * (n - 1)) * n / 2; }
+ll tousa_sum(ll a, ll d, ll n) { return (a * 2 + d * (n - 1)) * n / 2LL; }
 
 // 床関数
 ll my_floor(ll a, ll b) {
@@ -339,146 +339,6 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
-//根付き木
-void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
-  for (auto next_v : G[v]) {
-    if (next_v == p) {
-      continue;
-    }
-
-    par_cal(G, next_v, par, v);
-  }
-
-  par[v] = p;
-}
-
-//部分木サイズ
-void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
-                      int p = -1) {
-  for (auto c : G[v]) {
-    if (c == p) {
-      continue;
-    }
-
-    subtree_size_cal(G, c, subtree_size, v);
-  }
-
-  // 帰りがけ時に、部分木サイズを求める
-  subtree_size[v] = 1;  // 自分自身
-  for (auto c : G[v]) {
-    if (c == p) {
-      continue;
-    }
-
-    // 子頂点を根とする部分きのサイズを加算する
-    subtree_size[v] += subtree_size[c];
-  }
-}
-
-class TopologicalSort {
- private:
-  // DFS
-  void dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order) {
-    seen[v] = true;
-    for (auto next_v : G[v]) {
-      if (seen[next_v]) {
-        continue;
-      }
-
-      dfs(G, next_v, seen, order);
-    }
-
-    order.push_back(v);
-  }
-
- public:
-  //トポロジカルソート
-  void sort(const Graph_int &G, vector<int> &order) {
-    int N = (int)G.size();
-    vector<bool> seen(N, false);
-    for (int v = 0; v < N; v++) {
-      if (seen[v]) {
-        continue;
-      }
-
-      dfs(G, v, seen, order);
-    }
-
-    reverse(order.begin(), order.end());
-  }
-};
-
-//幅優先探索
-vector<int> BFS(const Graph_int &G, int s) {
-  int N = (int)G.size();    // 頂点数
-  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
-  queue<int> que;
-
-  // 初期条件 (頂点 s を初期頂点とする)
-  dist[s] = 0;
-  que.push(s);  // s を橙色頂点にする
-
-  // BFS 開始 (キューが空になるまで探索を行う)
-  while (!que.empty()) {
-    int v = que.front();  // キューから先頭頂点を取り出す
-    que.pop();
-
-    // v からたどれる頂点をすべて調べる
-    for (int x : G[v]) {
-      // すでに発見済みの頂点は探索しない
-      if (dist[x] != -1) continue;
-
-      // 新たな白色頂点 x について距離情報を更新してキューに挿入
-      dist[x] = dist[v] + 1;
-      que.push(x);
-    }
-  }
-  return dist;
-}
-
-// 01BFS
-vector<ll> BFS_01(const Graph_Edge &G, int s) {
-  int N = (int)G.size();       // 頂点数
-  vector<ll> dist(N, INF_ll);  // 全頂点を「未訪問」に初期化
-  deque<int> que;
-
-  // 初期条件 (頂点 s を初期頂点とする)
-  dist[s] = 0;
-  que.push_front(s);
-
-  // BFS 開始 (キューが空になるまで探索を行う)
-  while (!que.empty()) {
-    int v = que.front();  // キューから先頭頂点を取り出す
-    que.pop_front();
-
-    // v からたどれる頂点をすべて調べる
-    for (auto x : G[v]) {
-      if (chmin(dist[x.to], dist[v] + x.w)) {
-        if (x.w == 0) {
-          que.push_front(x.to);
-        }
-        if (x.w == 1) {
-          que.push_back(x.to);
-        }
-      }
-    }
-  }
-  return dist;
-}
-
 class Rerooting {
  private:
   struct DP {
@@ -564,6 +424,147 @@ class Rerooting {
     }
   }
 };
+
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen) {
+  seen[v] = true;
+
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    DFS(G, next_v, seen);
+  }
+}
+
+//根付き木
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+  for (auto next_v : G[v]) {
+    if (next_v == p) {
+      continue;
+    }
+
+    par_cal(G, next_v, par, v);
+  }
+
+  par[v] = p;
+}
+
+//部分木サイズ
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
+                      int p = -1) {
+  for (auto c : G[v]) {
+    if (c == p) {
+      continue;
+    }
+
+    subtree_size_cal(G, c, subtree_size, v);
+  }
+
+  // 帰りがけ時に、部分木サイズを求める
+  subtree_size[v] = 1;  // 自分自身
+  for (auto c : G[v]) {
+    if (c == p) {
+      continue;
+    }
+
+    // 子頂点を根とする部分きのサイズを加算する
+    subtree_size[v] += subtree_size[c];
+  }
+}
+
+//トポロジカルソート
+class TopologicalSort {
+ private:
+  void dfs(const Graph_int &G, int v, vector<bool> &seen, vector<int> &order) {
+    seen[v] = true;
+    for (auto next_v : G[v]) {
+      if (seen[next_v]) {
+        continue;
+      }
+
+      dfs(G, next_v, seen, order);
+    }
+
+    order.push_back(v);
+  }
+
+ public:
+  vector<int> sort(const Graph_int &G) {
+    int N = (int)G.size();
+    vector<int> order;
+    vector<bool> seen(N, false);
+    for (int v = 0; v < N; v++) {
+      if (seen[v]) {
+        continue;
+      }
+
+      dfs(G, v, seen, order);
+    }
+
+    reverse(order.begin(), order.end());
+    return order;
+  }
+};
+
+//幅優先探索
+vector<int> BFS(const Graph_int &G, int s) {
+  int N = (int)G.size();    // 頂点数
+  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
+  queue<int> que;
+
+  // 初期条件 (頂点 s を初期頂点とする)
+  dist[s] = 0;
+  que.push(s);  // s を橙色頂点にする
+
+  // BFS 開始 (キューが空になるまで探索を行う)
+  while (!que.empty()) {
+    int v = que.front();  // キューから先頭頂点を取り出す
+    que.pop();
+
+    // v からたどれる頂点をすべて調べる
+    for (int x : G[v]) {
+      // すでに発見済みの頂点は探索しない
+      if (dist[x] != -1) continue;
+
+      // 新たな白色頂点 x について距離情報を更新してキューに挿入
+      dist[x] = dist[v] + 1;
+      que.push(x);
+    }
+  }
+  return dist;
+}
+
+// 01BFS
+vector<ll> BFS_01(const Graph_Edge &G, int s) {
+  int N = (int)G.size();       // 頂点数
+  vector<ll> dist(N, INF_ll);  // 全頂点を「未訪問」に初期化
+  deque<int> que;
+
+  // 初期条件 (頂点 s を初期頂点とする)
+  dist[s] = 0;
+  que.push_front(s);
+
+  // BFS 開始 (キューが空になるまで探索を行う)
+  while (!que.empty()) {
+    int v = que.front();  // キューから先頭頂点を取り出す
+    que.pop_front();
+
+    // v からたどれる頂点をすべて調べる
+    for (auto x : G[v]) {
+      if (chmin(dist[x.to], dist[v] + x.w)) {
+        if (x.w == 0) {
+          que.push_front(x.to);
+        }
+        if (x.w == 1) {
+          que.push_back(x.to);
+        }
+      }
+    }
+  }
+  return dist;
+}
 
 //ベルマン・フォード法
 vector<ll> Bellman_Ford(const Graph_Edge &G, int s) {
