@@ -645,13 +645,16 @@ pair<int, int> to_ij(int v, int W) {
 }
 
 // in_out判定
-bool in_out(int i, int j, int H, int W) {
+bool Is_in(int i, int j, int H, int W) {
   if (0 <= i && i < H && 0 <= j && j < W) {
     return true;
   }
 
   return false;
 }
+
+int dx[4] = {1, 0, -1, 0};
+int dy[4] = {0, 1, 0, -1};
 
 struct my_struct {
   int a, b;
