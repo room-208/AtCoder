@@ -262,24 +262,6 @@ vector<ll> compress(vector<ll> &x) {
   return y;
 }
 
-// 最長増加部分列
-vector<int> LIS(const vector<int> &A) {
-  int N = A.size();
-  vector<int> x;
-  vector<int> P(N);
-  for (int i = 0; i < N; i++) {
-    int key = A[i];
-    auto itr = lower_bound(x.begin(), x.end(), key);
-    if (itr == x.end()) {
-      x.push_back(key);
-    } else {
-      *itr = key;
-    }
-    P[i] = x.size();
-  }
-  return P;
-}
-
 //セグ木・遅延セグ木
 // segtree<ll, seg::op, seg::e> sgt;
 // lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
@@ -443,53 +425,17 @@ class Rerooting {
   }
 };
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
 //根付き木
-void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
     if (next_v == p) {
       continue;
     }
 
-    cal_par(G, next_v, par, v);
+    par_cal(G, next_v, par, v);
   }
 
   par[v] = p;
-}
-
-//部分木サイズ
-void cal_subtree_size(const Graph_int &G, int v, vector<int> &subtree_size,
-                      int p = -1) {
-  for (auto c : G[v]) {
-    if (c == p) {
-      continue;
-    }
-
-    cal_subtree_size(G, c, subtree_size, v);
-  }
-
-  // 帰りがけ時に、部分木サイズを求める
-  subtree_size[v] = 1;  // 自分自身
-  for (auto c : G[v]) {
-    if (c == p) {
-      continue;
-    }
-
-    // 子頂点を根とする部分きのサイズを加算する
-    subtree_size[v] += subtree_size[c];
-  }
 }
 
 //トポロジカルソート
@@ -682,20 +628,48 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+//部分木サイズ
+void subtree_size_cal(const Graph_int &G, int v, vector<ll> &subtree_size,
+                      int p = -1) {
+  for (auto c : G[v]) {
+    if (c == p) {
+      continue;
+    }
+
+    subtree_size_cal(G, c, subtree_size, v);
+  }
+
+  // 帰りがけ時に、部分木サイズを求める
+  subtree_size[v] = 1;  // 自分自身
+  for (auto c : G[v]) {
+    if (c == p) {
+      continue;
+    }
+
+    // 子頂点を根とする部分きのサイズを加算する
+    subtree_size[v] += subtree_size[c];
+  }
+}
+
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  Graph_int G(N);
+  for (int i = 0; i < N - 1; i++) {
+    int a, b;
+    cin >> a >> b;
+    a--;
+    b--;
+    G[a].push_back(b);
+    G[b].push_back(a);
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  vector<ll> subtree_size(N);
+  subtree_size_cal(G, 0, subtree_size);
+
+  ll ans = 0;
+  for (int i = 0; i < N; i++) {
+    ans += subtree_size[i] * (N - subtree_size[i]);
   }
+  cout << ans << endl;
 }

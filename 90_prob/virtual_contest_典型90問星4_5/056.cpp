@@ -262,24 +262,6 @@ vector<ll> compress(vector<ll> &x) {
   return y;
 }
 
-// 最長増加部分列
-vector<int> LIS(const vector<int> &A) {
-  int N = A.size();
-  vector<int> x;
-  vector<int> P(N);
-  for (int i = 0; i < N; i++) {
-    int key = A[i];
-    auto itr = lower_bound(x.begin(), x.end(), key);
-    if (itr == x.end()) {
-      x.push_back(key);
-    } else {
-      *itr = key;
-    }
-    P[i] = x.size();
-  }
-  return P;
-}
-
 //セグ木・遅延セグ木
 // segtree<ll, seg::op, seg::e> sgt;
 // lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
@@ -457,27 +439,27 @@ void DFS(const Graph_int &G, int v, vector<bool> &seen) {
 }
 
 //根付き木
-void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
     if (next_v == p) {
       continue;
     }
 
-    cal_par(G, next_v, par, v);
+    par_cal(G, next_v, par, v);
   }
 
   par[v] = p;
 }
 
 //部分木サイズ
-void cal_subtree_size(const Graph_int &G, int v, vector<int> &subtree_size,
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
                       int p = -1) {
   for (auto c : G[v]) {
     if (c == p) {
       continue;
     }
 
-    cal_subtree_size(G, c, subtree_size, v);
+    subtree_size_cal(G, c, subtree_size, v);
   }
 
   // 帰りがけ時に、部分木サイズを求める
@@ -685,17 +667,58 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
+  int S;
   cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  vector<int> A(N + 1), B(N + 1);
+  for (int i = 1; i <= N; i++) {
+    cin >> A[i] >> B[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
+  vector<vector<bool>> dp(S + 1, vector<bool>(N + 1, false));
+  vector<vector<tuple<int, int, char>>> his(
+      S + 1, vector<tuple<int, int, char>>(N + 1, {-1, -1, '*'}));
+
+  dp[0][0] = true;
+  for (int j = 1; j <= N; j++) {
+    for (int s = 0; s <= S; s++) {
+      int a = s - A[j];
+      int b = s - B[j];
+
+      if (a >= 0) {
+        if (dp[a][j - 1]) {
+          dp[s][j] = true;
+          his[s][j] = {a, j - 1, 'A'};
+        }
+      }
+      if (b >= 0) {
+        if (dp[b][j - 1]) {
+          dp[s][j] = true;
+          his[s][j] = {b, j - 1, 'B'};
+        }
+      }
+    }
+  }
+
+  if (dp[S][N]) {
+    vector<char> ans(N + 1);
+    int n = N;
+    int s = S;
+    while (n > 0) {
+      char c;
+      int t;
+      int m;
+      tie(t, m, c) = his[s][n];
+      ans[n] = c;
+      s = t;
+      n = m;
+    }
+
+    for (size_t i = 1; i <= N; i++) {
+      cout << ans[i];
+    }
+    cout << endl;
+
   } else {
-    cout << "No" << endl;
+    cout << "Impossible" << endl;
   }
 }

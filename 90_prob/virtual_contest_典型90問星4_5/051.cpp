@@ -262,24 +262,6 @@ vector<ll> compress(vector<ll> &x) {
   return y;
 }
 
-// 最長増加部分列
-vector<int> LIS(const vector<int> &A) {
-  int N = A.size();
-  vector<int> x;
-  vector<int> P(N);
-  for (int i = 0; i < N; i++) {
-    int key = A[i];
-    auto itr = lower_bound(x.begin(), x.end(), key);
-    if (itr == x.end()) {
-      x.push_back(key);
-    } else {
-      *itr = key;
-    }
-    P[i] = x.size();
-  }
-  return P;
-}
-
 //セグ木・遅延セグ木
 // segtree<ll, seg::op, seg::e> sgt;
 // lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
@@ -457,27 +439,27 @@ void DFS(const Graph_int &G, int v, vector<bool> &seen) {
 }
 
 //根付き木
-void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
     if (next_v == p) {
       continue;
     }
 
-    cal_par(G, next_v, par, v);
+    par_cal(G, next_v, par, v);
   }
 
   par[v] = p;
 }
 
 //部分木サイズ
-void cal_subtree_size(const Graph_int &G, int v, vector<int> &subtree_size,
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
                       int p = -1) {
   for (auto c : G[v]) {
     if (c == p) {
       continue;
     }
 
-    cal_subtree_size(G, c, subtree_size, v);
+    subtree_size_cal(G, c, subtree_size, v);
   }
 
   // 帰りがけ時に、部分木サイズを求める
@@ -683,19 +665,71 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  int N, K;
+  ll P;
+  cin >> N >> K >> P;
+  vector<ll> A(N);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  int N1 = N / 2;
+  int N2 = N - N1;
+  vector<ll> A1(N1), A2(N2);
+  for (int i = 0; i < N1; i++) {
+    A1[i] = A[i];
   }
+  for (int i = N1; i < N; i++) {
+    A2[i - N1] = A[i];
+  }
+
+  vector<vector<ll>> B1(N1 + 1), B2(N2 + 1);
+  for (int S = 0; S < (1 << N1); S++) {
+    int siz = 0;
+    ll b = 0;
+    for (int i = 0; i < N1; i++) {
+      if (S & (1 << i)) {
+        siz++;
+        b += A1[i];
+      }
+    }
+    B1[siz].push_back(b);
+  }
+  for (int S = 0; S < (1 << N2); S++) {
+    int siz = 0;
+    ll b = 0;
+    for (int i = 0; i < N2; i++) {
+      if (S & (1 << i)) {
+        siz++;
+        b += A2[i];
+      }
+    }
+    B2[siz].push_back(b);
+  }
+
+  for (int i = 0; i <= N1; i++) {
+    sort(B1[i].begin(), B1[i].end());
+  }
+  for (int i = 0; i <= N2; i++) {
+    sort(B2[i].begin(), B2[i].end());
+  }
+
+  ll cnt = 0;
+  for (int i = 0; i <= N1; i++) {
+    int siz = K - i;
+    if (0 <= siz && siz <= N2) {
+      for (auto &&b : B1[i]) {
+        ll key = P - b;
+        int n =
+            upper_bound(B2[siz].begin(), B2[siz].end(), key) - B2[siz].begin();
+        if (n == 0) {
+          continue;
+        }
+        n--;
+        cnt += (n + 1);
+      }
+    }
+  }
+
+  cout << cnt << endl;
 }

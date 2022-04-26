@@ -457,27 +457,27 @@ void DFS(const Graph_int &G, int v, vector<bool> &seen) {
 }
 
 //根付き木
-void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
     if (next_v == p) {
       continue;
     }
 
-    cal_par(G, next_v, par, v);
+    par_cal(G, next_v, par, v);
   }
 
   par[v] = p;
 }
 
 //部分木サイズ
-void cal_subtree_size(const Graph_int &G, int v, vector<int> &subtree_size,
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
                       int p = -1) {
   for (auto c : G[v]) {
     if (c == p) {
       continue;
     }
 
-    cal_subtree_size(G, c, subtree_size, v);
+    subtree_size_cal(G, c, subtree_size, v);
   }
 
   // 帰りがけ時に、部分木サイズを求める
@@ -685,17 +685,20 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
   vector<int> A(N);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  vector<int> P = LIS(A);
+
+  reverse(A.begin(), A.end());
+  vector<int> Q = LIS(A);
+
+  int ans = 0;
+  for (int i = 0; i < N; i++) {
+    chmax(ans, P[i] + Q[N - i - 1] - 1);
   }
+
+  cout << ans << endl;
 }

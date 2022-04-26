@@ -262,51 +262,6 @@ vector<ll> compress(vector<ll> &x) {
   return y;
 }
 
-// 最長増加部分列
-vector<int> LIS(const vector<int> &A) {
-  int N = A.size();
-  vector<int> x;
-  vector<int> P(N);
-  for (int i = 0; i < N; i++) {
-    int key = A[i];
-    auto itr = lower_bound(x.begin(), x.end(), key);
-    if (itr == x.end()) {
-      x.push_back(key);
-    } else {
-      *itr = key;
-    }
-    P[i] = x.size();
-  }
-  return P;
-}
-
-//セグ木・遅延セグ木
-// segtree<ll, seg::op, seg::e> sgt;
-// lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
-// seg::composition, seg::id> sgt;
-namespace seg {
-const ll ID = 0;
-ll op(ll a, ll b) { return min(a, b); }
-ll e() { return INF_ll; }
-ll mapping(ll f, ll x) {
-  if (f == ID) {
-    return x;
-  } else {
-    return x + f;
-  }
-}
-ll composition(ll f, ll g) {
-  if (f == ID) {
-    return g;
-  } else {
-    return f + g;
-  }
-}
-ll id() { return ID; }
-ll target;
-bool f(ll v) { return v < target; }
-}  // namespace seg
-
 // Union-Find
 struct UnionFind {
   vector<int> par, siz;
@@ -457,27 +412,27 @@ void DFS(const Graph_int &G, int v, vector<bool> &seen) {
 }
 
 //根付き木
-void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
+void par_cal(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
     if (next_v == p) {
       continue;
     }
 
-    cal_par(G, next_v, par, v);
+    par_cal(G, next_v, par, v);
   }
 
   par[v] = p;
 }
 
 //部分木サイズ
-void cal_subtree_size(const Graph_int &G, int v, vector<int> &subtree_size,
+void subtree_size_cal(const Graph_int &G, int v, vector<int> &subtree_size,
                       int p = -1) {
   for (auto c : G[v]) {
     if (c == p) {
       continue;
     }
 
-    cal_subtree_size(G, c, subtree_size, v);
+    subtree_size_cal(G, c, subtree_size, v);
   }
 
   // 帰りがけ時に、部分木サイズを求める
@@ -682,20 +637,49 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+//セグ木・遅延セグ木
+// segtree<ll, seg::op, seg::e> sgt;
+// lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
+// seg::composition, seg::id> sgt;
+namespace seg {
+const ll ID = 0;
+ll op(ll a, ll b) { return max(a, b); }
+ll e() { return -INF_ll; }
+}  // namespace seg
+
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int W, N;
+  cin >> W >> N;
+  vector<int> L(N + 1), R(N + 1);
+  vector<ll> V(N + 1);
+  for (int i = 1; i <= N; i++) {
+    cin >> L[i] >> R[i] >> V[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  vector<segtree<ll, seg::op, seg::e>> dp(
+      N + 1, segtree<ll, seg::op, seg::e>(vector<ll>(W + 1, -1)));
+  dp[0].set(0, 0);
+  for (int i = 1; i <= N; i++) {
+    dp[i] = dp[i - 1];
+    for (int x = 0; x <= W; x++) {
+      if (x - L[i] < 0) {
+        continue;
+      }
+      int l = max(0, x - R[i]);
+      int r = x - L[i];
+
+      ll val = dp[i - 1].prod(l, r + 1);
+
+      if (val == -1) {
+        continue;
+      }
+
+      ll val_now = dp[i].get(x);
+      if (val + V[i] > val_now) {
+        dp[i].set(x, val + V[i]);
+      }
+    }
   }
+
+  cout << dp[N].get(W) << endl;
 }
