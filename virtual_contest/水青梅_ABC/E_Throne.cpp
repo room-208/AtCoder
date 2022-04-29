@@ -682,20 +682,35 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+ll Ans(ll N, ll S, ll K) {
+  ll x, y;
+  ll gcd = EXTGCD(N, -K, x, y);
+  if (S % gcd != 0) {
+    return -1;
+  }
+  x *= (S / gcd);
+  y *= (S / gcd);
+  N /= gcd;
+  K /= gcd;
+
+  if (y == 0) {
+    return N;
+  } else if (y > 0) {
+    return y % N;
+  } else {
+    return y % N + N;
+  }
+}
+
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int T;
+  cin >> T;
+  vector<ll> N(T), S(T), K(T);
+  for (int i = 0; i < T; i++) {
+    cin >> N[i] >> S[i] >> K[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  for (int i = 0; i < T; i++) {
+    cout << Ans(N[i], S[i], K[i]) << endl;
   }
 }
