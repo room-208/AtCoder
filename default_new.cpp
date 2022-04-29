@@ -285,22 +285,24 @@ vector<int> LIS(const vector<int> &A) {
 // lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
 // seg::composition, seg::id> sgt;
 namespace seg {
-const ll ID = 0;
-ll op(ll a, ll b) { return min(a, b); }
-ll e() { return INF_ll; }
+const ll ID = -1;
+ll op(ll a, ll b) { return max(a, b); }
+ll e() { return -INF_ll; }
 ll mapping(ll f, ll x) {
   if (f == ID) {
     return x;
   } else {
-    return x + f;
+    return f;
   }
+  // return f + x;
 }
 ll composition(ll f, ll g) {
   if (f == ID) {
     return g;
   } else {
-    return f + g;
+    return f;
   }
+  // return f + g;
 }
 ll id() { return ID; }
 ll target;
