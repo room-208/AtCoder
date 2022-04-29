@@ -24,11 +24,11 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 using ll = long long;
 
-constexpr int INF_int = 1e9;
-constexpr ll INF_ll = 1e18;
+constexpr int INF_int = numeric_limits<int>::max();
+constexpr ll INF_ll = numeric_limits<ll>::max();
 
 constexpr int COM_MAX = 510000;
 mint fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
@@ -683,19 +683,52 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N, Q;
+  cin >> N >> Q;
+  vector<int> x(Q), y(Q), z(Q);
+  vector<ll> w(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> x[i] >> y[i] >> z[i] >> w[i];
+    x[i]--;
+    y[i]--;
+    z[i]--;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  vector<mint> cnt(60, 0);
+  for (int i = 0; i < 60; i++) {
+    for (int bit = 0; bit < (1 << N); bit++) {
+      vector<int> A(N, 0);
+      for (int j = 0; j < N; j++) {
+        if (bit & (1 << j)) {
+          A[j] = 1;
+        }
+      }
+
+      bool flag = true;
+
+      for (int j = 0; j < Q; j++) {
+        int a = A[x[j]] | A[y[j]] | A[z[j]];
+        if (w[j] & (1LL << i)) {
+          if (a == 0) {
+            flag = false;
+          }
+        } else {
+          if (a == 1) {
+            flag = false;
+          }
+        }
+      }
+
+      if (flag) {
+        cnt[i]++;
+      }
+    }
   }
+
+  mint ans = 1;
+  for (int i = 0; i < 60; i++) {
+    ans *= cnt[i];
+  }
+
+  cout << ans.val() << endl;
 }

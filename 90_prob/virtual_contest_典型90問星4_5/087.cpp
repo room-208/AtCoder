@@ -682,20 +682,118 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+vector<vector<ll>> GetC(vector<vector<ll>> &A, ll X) {
+  vector<vector<ll>> c = A;
+  int n = c.size();
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (A[i][j] == -1) {
+        c[i][j] = X;
+      }
+    }
+  }
+  return c;
+}
+
+int GetCnt(vector<vector<ll>> &c, ll P) {
+  int n = c.size();
+  vector<vector<ll>> d = c;
+
+  for (int k = 0; k < n; k++) {      // 経由する頂点
+    for (int i = 0; i < n; i++) {    // 始点
+      for (int j = 0; j < n; j++) {  // 終点
+        d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+      }
+    }
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  int cnt = 0;
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (d[i][j] <= P) {
+        cnt++;
+      }
+    }
   }
+
+  return cnt;
+}
+
+ll GetXmax(vector<vector<ll>> &A, ll P, int K) {
+  ll right = INF_ll;
+  ll left = 1;
+
+  while (right - left > 1LL) {
+    ll mid = (right + left) / 2;
+    auto c = GetC(A, mid);
+    int cnt = GetCnt(c, P);
+
+    if (cnt >= K) {
+      left = mid;
+    } else {
+      right = mid;
+    }
+  }
+
+  return left;
+}
+
+ll GetXmin(vector<vector<ll>> &A, ll P, int K) {
+  ll right = INF_ll;
+  ll left = 0;
+
+  while (right - left > 1LL) {
+    ll mid = (right + left) / 2;
+    auto c = GetC(A, mid);
+    int cnt = GetCnt(c, P);
+
+    if (cnt <= K) {
+      right = mid;
+    } else {
+      left = mid;
+    }
+  }
+
+  return right;
+}
+
+int GetCntmax(vector<vector<ll>> &A, ll P) {
+  auto c = GetC(A, 1);
+  int cnt = GetCnt(c, P);
+  return cnt;
+}
+
+int GetCntmin(vector<vector<ll>> &A, ll P) {
+  auto c = GetC(A, INF_ll);
+  int cnt = GetCnt(c, P);
+  return cnt;
+}
+
+int main() {
+  int N, K;
+  ll P;
+  cin >> N >> P >> K;
+  vector<vector<ll>> A(N, vector<ll>(N));
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      cin >> A[i][j];
+    }
+  }
+
+  int cnt_min = GetCntmin(A, P);
+  int cnt_max = GetCntmax(A, P);
+
+  if (K < cnt_min || cnt_max < K) {
+    cout << 0 << endl;
+    return 0;
+  }
+
+  ll Xmax = GetXmax(A, P, K);
+  if (Xmax > P) {
+    cout << "Infinity" << endl;
+    return 0;
+  }
+  ll Xmin = GetXmin(A, P, K);
+
+  cout << Xmax - Xmin + 1 << endl;
 }

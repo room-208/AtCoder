@@ -27,8 +27,8 @@ using namespace atcoder;
 using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 using ll = long long;
 
-constexpr int INF_int = 1e9;
-constexpr ll INF_ll = 1e18;
+constexpr int INF_int = numeric_limits<int>::max();
+constexpr ll INF_ll = numeric_limits<ll>::max();
 
 constexpr int COM_MAX = 510000;
 mint fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
@@ -683,19 +683,40 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  int N, K;
+  cin >> N >> K;
+  vector<int> A(N), B(N);
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    cin >> A[i] >> B[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  int M = 5001;
+  vector<vector<int>> S(M + 1, vector<int>(M + 1, 0));
+  for (int i = 0; i < N; i++) {
+    S[A[i]][B[i]]++;
   }
+  for (int i = 0; i <= M; i++) {
+    for (int j = 0; j < M; j++) {
+      S[i][j + 1] += S[i][j];
+    }
+  }
+  for (int j = 0; j <= M; j++) {
+    for (int i = 0; i < M; i++) {
+      S[i + 1][j] += S[i][j];
+    }
+  }
+
+  int ans = -1;
+  for (int i = 0; i <= M; i++) {
+    for (int j = 0; j <= M; j++) {
+      int a = i + K + 1;
+      int b = j + K + 1;
+
+      if (a <= M && b <= M) {
+        chmax(ans, S[a][b] - S[a][j] - S[i][b] + S[i][j]);
+      }
+    }
+  }
+
+  cout << ans << endl;
 }

@@ -27,8 +27,8 @@ using namespace atcoder;
 using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 using ll = long long;
 
-constexpr int INF_int = 1e9;
-constexpr ll INF_ll = 1e18;
+constexpr int INF_int = numeric_limits<int>::max();
+constexpr ll INF_ll = numeric_limits<ll>::max();
 
 constexpr int COM_MAX = 510000;
 mint fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
@@ -682,20 +682,62 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+vector<ll> GetS(int N, vector<int> T, vector<int> X, vector<int> Y,
+                vector<ll> V) {
+  int Q = T.size();
+
+  vector<tuple<int, int, ll>> t;
+  for (int i = 0; i < Q; i++) {
+    if (T[i] == 0) {
+      t.push_back({X[i], Y[i], V[i]});
+    }
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  sort(t.begin(), t.end());
+
+  vector<ll> S(N, 0);
+  for (int i = 0; i < t.size(); i++) {
+    int x = get<0>(t[i]);
+    int y = get<1>(t[i]);
+    ll v = get<2>(t[i]);
+
+    S[y] = v - S[x];
+  }
+
+  return S;
+}
+
+int main() {
+  int N, Q;
+  cin >> N >> Q;
+  vector<int> T(Q), X(Q), Y(Q);
+  vector<ll> V(Q);
+  for (int i = 0; i < Q; i++) {
+    cin >> T[i] >> X[i] >> Y[i] >> V[i];
+    X[i]--;
+    Y[i]--;
+  }
+
+  vector<ll> S = GetS(N, T, X, Y, V);
+  UnionFind uf(N);
+  for (int i = 0; i < Q; i++) {
+    if (T[i] == 0) {
+      uf.unite(X[i], Y[i]);
+    } else if (T[i] == 1) {
+      if (uf.issame(X[i], Y[i])) {
+        int d = Y[i] - X[i];
+
+        if (d % 2 == 0) {
+          ll v = S[Y[i]] - S[X[i]] + V[i];
+          cout << v << endl;
+        } else {
+          ll v = S[Y[i]] + S[X[i]] - V[i];
+          cout << v << endl;
+        }
+
+      } else {
+        cout << "Ambiguous" << endl;
+      }
+    }
   }
 }
