@@ -208,18 +208,18 @@ vector<pair<char, int>> runLengthEncoding(string s) {
 //アルファベット表
 vector<vector<int>> alphabet_table(string S) {
   int N = (int)S.size();
-  vector<vector<int>> c(26, vector<int>(N + 1, INF_int));
+  vector<vector<int>> table(26, vector<int>(N + 1, INF_int));
   for (int j = N - 1; j >= 0; j--) {
     int m = S[j] - 'a';
     for (int i = 0; i < 26; i++) {
       if (i == m) {
-        c[i][j] = j;
+        table[i][j] = j;
       } else {
-        c[i][j] = c[i][j + 1];
+        table[i][j] = table[i][j + 1];
       }
     }
   }
-  return c;
+  return table;
 }
 
 // unoderedのハッシュ
