@@ -680,80 +680,34 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-vector<int> GetI(int H, int bit) {
-  vector<int> I;
-  I.push_back(0);
-  for (int i = 0; i < H - 1; i++) {
-    if (bit & (1 << i)) {
-      I.push_back(i + 1);
-    }
+unordered_map<ll, ll> mp;
+ll solve(ll X, ll Y) {
+  if (mp.count(Y)) {
+    return mp[Y];
   }
-  I.push_back(H);
-  return I;
+
+  if (Y <= X) {
+    mp[Y] = llabs(Y - X);
+    return mp[Y];
+  }
+
+  if (Y % 2 == 0) {
+    mp[Y] = min(solve(X, Y / 2) + 1, llabs((Y / 2) - X) + 1);
+    chmin(mp[Y], llabs(Y - X));
+    return mp[Y];
+  } else {
+    mp[Y] = min(solve(X, (Y - 1) / 2) + 2, solve(X, (Y + 1) / 2) + 2);
+    chmin(mp[Y], llabs(Y - X));
+    chmin(mp[Y], llabs(((Y - 1) / 2) - X) + 2);
+    chmin(mp[Y], llabs(((Y + 1) / 2) - X) + 2);
+    return mp[Y];
+  }
 }
 
 int main() {
-  int H, W, K;
-  cin >> H >> W >> K;
-  vector<string> S(H);
-  for (int i = 0; i < H; i++) {
-    cin >> S[i];
-  }
-  vector<vector<int>> A(H, vector<int>(W, 0));
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      A[i][j] = S[i][j] - '0';
-    }
-  }
+  ll X, Y;
+  cin >> X >> Y;
 
-  int ans = INF_int;
-  for (int bit = 0; bit < (1 << (H - 1)); bit++) {
-    vector<int> I = GetI(H, bit);
-
-    bool flag = true;
-    int tmp = I.size() - 2;
-    vector<int> cnt(I.size() - 1, 0);
-    vector<int> d(I.size() - 1, 0);
-    for (int j = 0; j < W; j++) {
-      d.assign(I.size() - 1, 0);
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        for (size_t i = I[k]; i < I[k + 1]; i++) {
-          d[k] += A[i][j];
-        }
-      }
-
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        if (d[k] > K) {
-          flag = false;
-          break;
-        }
-      }
-
-      if (!flag) {
-        break;
-      }
-
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        cnt[k] += d[k];
-      }
-
-      bool ok = true;
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        if (cnt[k] > K) {
-          ok = false;
-        }
-      }
-
-      if (!ok) {
-        cnt = d;
-        tmp++;
-      }
-    }
-
-    if (flag) {
-      chmin(ans, tmp);
-    }
-  }
-
-  cout << ans << endl;
+  cout << solve(X, Y) << endl;
+  cout << endl;
 }

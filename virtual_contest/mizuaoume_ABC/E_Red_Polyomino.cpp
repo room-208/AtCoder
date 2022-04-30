@@ -441,19 +441,6 @@ class Rerooting {
   }
 };
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<bool> &seen) {
-  seen[v] = true;
-
-  for (auto next_v : G[v]) {
-    if (seen[next_v]) {
-      continue;
-    }
-
-    DFS(G, next_v, seen);
-  }
-}
-
 //根付き木
 void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
@@ -680,80 +667,72 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-vector<int> GetI(int H, int bit) {
-  vector<int> I;
-  I.push_back(0);
-  for (int i = 0; i < H - 1; i++) {
-    if (bit & (1 << i)) {
-      I.push_back(i + 1);
+// 深さ優先探索
+void DFS(const vector<string> &S, vector<vector<bool>> seen, int K,
+         set<vector<pair<int, int>>> &memo_all,
+         set<vector<pair<int, int>>> &memo, int i, int j,
+         vector<pair<int, int>> p = {}) {
+  int N = S.size();
+  seen[i][j] = true;
+  p.push_back({i, j});
+  sort(p.begin(), p.end());
+
+  memo_all.insert(p);
+
+  if (p.size() == K) {
+    memo.insert(p);
+    return;
+  }
+
+  for (size_t id = 0; id < p.size(); id++) {
+    int x = p[id].first;
+    int y = p[id].second;
+    for (int k = 0; k < 4; k++) {
+      int next_i = x + dx[k];
+      int next_j = y + dy[k];
+
+      if (Is_in(next_i, next_j, N, N)) {
+        if (S[next_i][next_j] == '#') {
+          continue;
+        }
+        if (seen[next_i][next_j]) {
+          continue;
+        }
+
+        auto q = p;
+        q.push_back({next_i, next_j});
+        sort(q.begin(), q.end());
+
+        if (memo_all.count(q)) {
+          continue;
+        }
+
+        DFS(S, seen, K, memo_all, memo, next_i, next_j, p);
+      }
     }
   }
-  I.push_back(H);
-  return I;
 }
 
 int main() {
-  int H, W, K;
-  cin >> H >> W >> K;
-  vector<string> S(H);
-  for (int i = 0; i < H; i++) {
+  int N, K;
+  cin >> N >> K;
+  vector<string> S(N);
+  for (int i = 0; i < N; i++) {
     cin >> S[i];
   }
-  vector<vector<int>> A(H, vector<int>(W, 0));
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      A[i][j] = S[i][j] - '0';
+
+  set<vector<pair<int, int>>> memo_all, memo;
+  vector<vector<bool>> seen(N, vector<bool>(N, false));
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      if (S[i][j] == '#') {
+        continue;
+      }
+      DFS(S, seen, K, memo_all, memo, i, j);
+      S[i][j] = '#';
     }
   }
 
-  int ans = INF_int;
-  for (int bit = 0; bit < (1 << (H - 1)); bit++) {
-    vector<int> I = GetI(H, bit);
-
-    bool flag = true;
-    int tmp = I.size() - 2;
-    vector<int> cnt(I.size() - 1, 0);
-    vector<int> d(I.size() - 1, 0);
-    for (int j = 0; j < W; j++) {
-      d.assign(I.size() - 1, 0);
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        for (size_t i = I[k]; i < I[k + 1]; i++) {
-          d[k] += A[i][j];
-        }
-      }
-
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        if (d[k] > K) {
-          flag = false;
-          break;
-        }
-      }
-
-      if (!flag) {
-        break;
-      }
-
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        cnt[k] += d[k];
-      }
-
-      bool ok = true;
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        if (cnt[k] > K) {
-          ok = false;
-        }
-      }
-
-      if (!ok) {
-        cnt = d;
-        tmp++;
-      }
-    }
-
-    if (flag) {
-      chmin(ans, tmp);
-    }
-  }
-
-  cout << ans << endl;
+  cout << memo.size() << endl;
+  cout << endl;
 }

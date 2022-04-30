@@ -454,19 +454,6 @@ void DFS(const Graph_int &G, int v, vector<bool> &seen) {
   }
 }
 
-//根付き木
-void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
-  for (auto next_v : G[v]) {
-    if (next_v == p) {
-      continue;
-    }
-
-    cal_par(G, next_v, par, v);
-  }
-
-  par[v] = p;
-}
-
 //部分木サイズ
 void cal_subtree_size(const Graph_int &G, int v, vector<int> &subtree_size,
                       int p = -1) {
@@ -523,34 +510,6 @@ class TopologicalSort {
     return order;
   }
 };
-
-//幅優先探索
-vector<int> BFS(const Graph_int &G, int s) {
-  int N = (int)G.size();    // 頂点数
-  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
-  queue<int> que;
-
-  // 初期条件 (頂点 s を初期頂点とする)
-  dist[s] = 0;
-  que.push(s);  // s を橙色頂点にする
-
-  // BFS 開始 (キューが空になるまで探索を行う)
-  while (!que.empty()) {
-    int v = que.front();  // キューから先頭頂点を取り出す
-    que.pop();
-
-    // v からたどれる頂点をすべて調べる
-    for (int x : G[v]) {
-      // すでに発見済みの頂点は探索しない
-      if (dist[x] != -1) continue;
-
-      // 新たな白色頂点 x について距離情報を更新してキューに挿入
-      dist[x] = dist[v] + 1;
-      que.push(x);
-    }
-  }
-  return dist;
-}
 
 // 01BFS
 vector<ll> BFS_01(const Graph_Edge &G, int s) {
@@ -680,80 +639,104 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-vector<int> GetI(int H, int bit) {
-  vector<int> I;
-  I.push_back(0);
-  for (int i = 0; i < H - 1; i++) {
-    if (bit & (1 << i)) {
-      I.push_back(i + 1);
+//幅優先探索
+pair<vector<int>, vector<int>> BFS(const Graph_int &G, int s) {
+  int N = (int)G.size();    // 頂点数
+  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
+  vector<int> par(N, -1);
+  queue<int> que;
+
+  // 初期条件 (頂点 s を初期頂点とする)
+  dist[s] = 0;
+  par[s] = -1;
+  que.push(s);  // s を橙色頂点にする
+
+  // BFS 開始 (キューが空になるまで探索を行う)
+  while (!que.empty()) {
+    int v = que.front();  // キューから先頭頂点を取り出す
+    que.pop();
+
+    // v からたどれる頂点をすべて調べる
+    for (int x : G[v]) {
+      // すでに発見済みの頂点は探索しない
+      if (dist[x] != -1) continue;
+
+      // 新たな白色頂点 x について距離情報を更新してキューに挿入
+      dist[x] = dist[v] + 1;
+      par[x] = v;
+      que.push(x);
     }
   }
-  I.push_back(H);
-  return I;
+  return {dist, par};
+}
+
+//幅優先探索
+vector<int> BFS_new(const Graph_int &G, int s) {
+  int N = (int)G.size();    // 頂点数
+  vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
+  queue<int> que;
+
+  // 初期条件 (頂点 s を初期頂点とする)
+  dist[s] = 0;
+  que.push(s);  // s を橙色頂点にする
+
+  // BFS 開始 (キューが空になるまで探索を行う)
+  while (!que.empty()) {
+    int v = que.front();  // キューから先頭頂点を取り出す
+    que.pop();
+
+    // v からたどれる頂点をすべて調べる
+    for (int x : G[v]) {
+      // すでに発見済みの頂点は探索しない
+      if (dist[x] != -1) continue;
+
+      // 新たな白色頂点 x について距離情報を更新してキューに挿入
+      dist[x] = dist[v] + 1;
+      que.push(x);
+    }
+  }
+  return dist;
 }
 
 int main() {
-  int H, W, K;
-  cin >> H >> W >> K;
-  vector<string> S(H);
-  for (int i = 0; i < H; i++) {
-    cin >> S[i];
-  }
-  vector<vector<int>> A(H, vector<int>(W, 0));
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      A[i][j] = S[i][j] - '0';
-    }
+  int N, M;
+  cin >> N >> M;
+  vector<int> a(M), b(M);
+  for (int i = 0; i < M; i++) {
+    cin >> a[i] >> b[i];
+    a[i]--;
+    b[i]--;
   }
 
-  int ans = INF_int;
-  for (int bit = 0; bit < (1 << (H - 1)); bit++) {
-    vector<int> I = GetI(H, bit);
-
-    bool flag = true;
-    int tmp = I.size() - 2;
-    vector<int> cnt(I.size() - 1, 0);
-    vector<int> d(I.size() - 1, 0);
-    for (int j = 0; j < W; j++) {
-      d.assign(I.size() - 1, 0);
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        for (size_t i = I[k]; i < I[k + 1]; i++) {
-          d[k] += A[i][j];
-        }
-      }
-
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        if (d[k] > K) {
-          flag = false;
-          break;
-        }
-      }
-
-      if (!flag) {
-        break;
-      }
-
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        cnt[k] += d[k];
-      }
-
-      bool ok = true;
-      for (size_t k = 0; k < I.size() - 1; k++) {
-        if (cnt[k] > K) {
-          ok = false;
-        }
-      }
-
-      if (!ok) {
-        cnt = d;
-        tmp++;
-      }
-    }
-
-    if (flag) {
-      chmin(ans, tmp);
-    }
+  Graph_int G(N);
+  for (int i = 0; i < M; i++) {
+    G[a[i]].push_back(b[i]);
   }
 
-  cout << ans << endl;
+  vector<int> dist, par;
+  tie(dist, par) = BFS(G, 0);
+
+  set<pair<int, int>> st;
+  int v = N - 1;
+  while (par[v] != -1) {
+    st.insert({par[v], v});
+    v = par[v];
+  }
+
+  for (int i = 0; i < M; i++) {
+    pair<int, int> key = {a[i], b[i]};
+    if (st.count(key)) {
+      Graph_int G_new(N);
+      for (int j = 0; j < M; j++) {
+        if (i == j) {
+          continue;
+        }
+        G_new[a[j]].push_back(b[j]);
+      }
+      vector<int> dist_new = BFS_new(G_new, 0);
+      cout << dist_new[N - 1] << endl;
+    } else {
+      cout << dist[N - 1] << endl;
+    }
+  }
 }
