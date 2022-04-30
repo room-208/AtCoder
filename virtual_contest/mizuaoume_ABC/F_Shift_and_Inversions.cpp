@@ -680,20 +680,30 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+ll my_inv_count(vector<int> &a) {
+  ll res = 0;
+  ll N = a.size();
+  fenwick_tree<ll> fw(N);
+  for (size_t i = 0; i < N; i++) {
+    res += fw.sum(a[i] + 1, N);
+    fw.add(a[i], 1);
+  }
+  return res;
+}
+
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  vector<int> a(N);
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    cin >> a[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  ll ans = my_inv_count(a);
+  for (int i = 0; i < N; i++) {
+    cout << ans << endl;
+    ll tmp1 = a[i];
+    ll tmp2 = N - a[i] - 1;
+    ans += tmp2 - tmp1;
   }
 }
