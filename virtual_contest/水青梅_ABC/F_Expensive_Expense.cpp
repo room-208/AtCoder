@@ -359,88 +359,6 @@ struct Edge {
 using Graph_int = vector<vector<int>>;
 using Graph_Edge = vector<vector<Edge>>;
 
-class Rerooting {
- private:
-  struct DP {
-    ll dp;
-    DP() {}
-    DP(ll dp) : dp(dp) {}
-  };
-
- public:
-  vector<DP> res;
-
- private:
-  vector<vector<DP>> dp;
-  Graph_Edge G;
-
- public:
-  Rerooting(int N) {
-    dp.resize(N);
-    res.resize(N, e());
-    G.resize(N);
-  }
-  void build() {
-    int root = 0;
-    dfs_init(root);
-    dfs_reroot(root, e());
-  }
-  void add_edge(int a, int b, ll c) { G[a].push_back(Edge(b, c)); }
-
- private:
-  // mergeの単位元
-  DP e() { return DP(0); }
-  // マージ
-  DP merge(DP dp_cum, DP dp) { return DP(max(dp_cum.dp, dp.dp)); }
-  // 頂点に関する計算
-  DP add_root(int v, ll w, DP dp) { return DP(dp.dp + w); }
-  // 初期解
-  DP dfs_init(int v, ll w = 0, int p = -1) {
-    DP dp_cum = e();
-    int degree = G[v].size();
-    dp[v].resize(degree);
-    for (int i = 0; i < degree; i++) {
-      auto next_v = G[v][i];
-      if (next_v.to == p) {
-        continue;
-      }
-      dp[v][i] = dfs_init(next_v.to, next_v.w, v);
-      dp_cum = merge(dp_cum, dp[v][i]);
-    }
-    return add_root(v, w, dp_cum);
-  }
-  // 全方位
-  void dfs_reroot(int v, DP dp_p, int p = -1) {
-    int degree = G[v].size();
-    // 親方向を計算
-    for (int i = 0; i < degree; i++) {
-      auto next_v = G[v][i];
-      if (next_v.to == p) {
-        dp[v][i] = dp_p;
-      }
-    }
-    // 累積マージ
-    vector<DP> S_l(degree + 1, e()), S_r(degree + 1, e());
-    for (int i = 0; i < degree; i++) {
-      S_l[i + 1] = merge(S_l[i], dp[v][i]);
-    }
-    for (int i = degree - 1; i >= 0; i--) {
-      S_r[i] = merge(S_r[i + 1], dp[v][i]);
-    }
-    // resを計算
-    res[v] = S_l[degree];
-    // 下の階層に潜る
-    for (int i = 0; i < degree; i++) {
-      auto next_v = G[v][i];
-      if (next_v.to == p) {
-        continue;
-      }
-      DP dp_v = add_root(v, next_v.w, merge(S_l[i], S_r[i + 1]));
-      dfs_reroot(next_v.to, dp_v, v);
-    }
-  }
-};
-
 // 深さ優先探索
 void DFS(const Graph_int &G, int v, vector<bool> &seen) {
   seen[v] = true;
@@ -680,20 +598,125 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+class Rerooting {
+ private:
+  struct DP {
+    ll dp, d;
+    DP() {}
+    DP(ll dp, ll d) : dp(dp), d(d) {}
+  };
+
+ public:
+  vector<DP> res;
+
+ private:
+  vector<vector<DP>> dp;
+  vector<ll> D;
+  Graph_Edge G;
+
+ public:
+  Rerooting(int N) {
+    dp.resize(N);
+    res.resize(N, e());
+    D.resize(N);
+    G.resize(N);
+  }
+  void build() {
+    int root = 0;
+    dfs_init(root);
+    dfs_reroot(root, e());
+  }
+  void add_edge(int a, int b, ll c) { G[a].push_back(Edge(b, c)); }
+  void add_D(int v, ll d) { D[v] = d; }
+
+ private:
+  // mergeの単位元
+  DP e() { return DP(0, 0); }
+  // マージ
+  DP merge(DP dp_cum, DP dp) {
+    if (dp_cum.dp >= dp.dp) {
+      return dp_cum;
+    } else {
+      return dp;
+    }
+  }
+  // 頂点に関する計算
+  DP add_root(int v, ll w, DP dp) {
+    DP tmp(w + D[v], D[v]);
+    if (tmp.dp >= dp.dp + w) {
+      return tmp;
+    } else {
+      return DP(dp.dp + w, dp.d);
+    }
+  }
+  // 初期解
+  DP dfs_init(int v, ll w = 0, int p = -1) {
+    DP dp_cum = e();
+    int degree = G[v].size();
+    dp[v].resize(degree);
+    for (int i = 0; i < degree; i++) {
+      auto next_v = G[v][i];
+      if (next_v.to == p) {
+        continue;
+      }
+      dp[v][i] = dfs_init(next_v.to, next_v.w, v);
+      dp_cum = merge(dp_cum, dp[v][i]);
+    }
+    return add_root(v, w, dp_cum);
+  }
+  // 全方位
+  void dfs_reroot(int v, DP dp_p, int p = -1) {
+    int degree = G[v].size();
+    // 親方向を計算
+    for (int i = 0; i < degree; i++) {
+      auto next_v = G[v][i];
+      if (next_v.to == p) {
+        dp[v][i] = dp_p;
+      }
+    }
+    // 累積マージ
+    vector<DP> S_l(degree + 1, e()), S_r(degree + 1, e());
+    for (int i = 0; i < degree; i++) {
+      S_l[i + 1] = merge(S_l[i], dp[v][i]);
+    }
+    for (int i = degree - 1; i >= 0; i--) {
+      S_r[i] = merge(S_r[i + 1], dp[v][i]);
+    }
+    // resを計算
+    res[v] = S_l[degree];
+    // 下の階層に潜る
+    for (int i = 0; i < degree; i++) {
+      auto next_v = G[v][i];
+      if (next_v.to == p) {
+        continue;
+      }
+      DP dp_v = add_root(v, next_v.w, merge(S_l[i], S_r[i + 1]));
+      dfs_reroot(next_v.to, dp_v, v);
+    }
+  }
+};
+
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  Rerooting reroot(N);
+  for (int i = 0; i < N - 1; i++) {
+    int a, b;
+    ll c;
+    cin >> a >> b >> c;
+    a--;
+    b--;
+    reroot.add_edge(a, b, c);
+    reroot.add_edge(b, a, c);
+  }
   for (int i = 0; i < N; i++) {
-    cin >> A[i];
+    ll d;
+    cin >> d;
+    reroot.add_D(i, d);
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  reroot.build();
+  for (int i = 0; i < N; i++) {
+    cout << reroot.res[i].dp << endl;
   }
 }
