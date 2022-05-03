@@ -668,46 +668,44 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 // 深さ優先探索
-void DFS(const vector<string> &S, vector<vector<bool>> seen, int K,
-         set<vector<pair<int, int>>> &memo_all,
-         set<vector<pair<int, int>>> &memo, int i, int j,
-         vector<pair<int, int>> p = {}) {
+void DFS(vector<string> S, set<vector<string>> &used, int K, int &ans) {
+  if (used.count(S)) {
+    return;
+  } else {
+    used.insert(S);
+  }
+
   int N = S.size();
-  seen[i][j] = true;
-  p.push_back({i, j});
-  sort(p.begin(), p.end());
+  int size = 0;
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = 0; j < N; j++) {
+      if (S[i][j] == '@') {
+        size++;
+      }
+    }
+  }
 
-  memo_all.insert(p);
-
-  if (p.size() == K) {
-    memo.insert(p);
+  if (size == K) {
+    ans++;
     return;
   }
 
-  for (size_t id = 0; id < p.size(); id++) {
-    int x = p[id].first;
-    int y = p[id].second;
-    for (int k = 0; k < 4; k++) {
-      int next_i = x + dx[k];
-      int next_j = y + dy[k];
+  for (size_t i = 0; i < N; i++) {
+    for (size_t j = 0; j < N; j++) {
+      if (S[i][j] == '#' || S[i][j] == '@') {
+        continue;
+      }
 
-      if (Is_in(next_i, next_j, N, N)) {
-        if (S[next_i][next_j] == '#') {
-          continue;
+      for (int k = 0; k < 4; k++) {
+        int next_i = i + dx[k];
+        int next_j = j + dy[k];
+        if (Is_in(next_i, next_j, N, N)) {
+          if (S[next_i][next_j] == '@') {
+            auto T = S;
+            T[i][j] = '@';
+            DFS(T, used, K, ans);
+          }
         }
-        if (seen[next_i][next_j]) {
-          continue;
-        }
-
-        auto q = p;
-        q.push_back({next_i, next_j});
-        sort(q.begin(), q.end());
-
-        if (memo_all.count(q)) {
-          continue;
-        }
-
-        DFS(S, seen, K, memo_all, memo, next_i, next_j, p);
       }
     }
   }
@@ -721,18 +719,18 @@ int main() {
     cin >> S[i];
   }
 
-  set<vector<pair<int, int>>> memo_all, memo;
-  vector<vector<bool>> seen(N, vector<bool>(N, false));
+  set<vector<string>> used;
+  int ans = 0;
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
       if (S[i][j] == '#') {
         continue;
       }
-      DFS(S, seen, K, memo_all, memo, i, j);
+      S[i][j] = '@';
+      DFS(S, used, K, ans);
       S[i][j] = '#';
     }
   }
 
-  cout << memo.size() << endl;
-  cout << endl;
+  cout << ans << endl;
 }

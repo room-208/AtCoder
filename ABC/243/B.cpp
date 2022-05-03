@@ -24,7 +24,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint1000000007;
+using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 using ll = long long;
 
 constexpr int INF_int = 1e9;
@@ -441,6 +441,19 @@ class Rerooting {
   }
 };
 
+// 深さ優先探索
+void DFS(const Graph_int &G, int v, vector<bool> &seen) {
+  seen[v] = true;
+
+  for (auto next_v : G[v]) {
+    if (seen[next_v]) {
+      continue;
+    }
+
+    DFS(G, next_v, seen);
+  }
+}
+
 //根付き木
 void cal_par(const Graph_int &G, int v, vector<int> &par, int p = -1) {
   for (auto next_v : G[v]) {
@@ -667,96 +680,37 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-// 深さ優先探索
-void DFS(const Graph_int &G, int v, vector<vector<mint>> &dp,
-         const vector<char> &c, int p = -1) {
-  for (auto next_v : G[v]) {
-    if (next_v == p) {
-      continue;
-    }
-    DFS(G, next_v, dp, c, v);
-  }
-
-  if (c[v] == 'a') {
-    // a
-    dp[v][0] = 1;
-    for (auto next_v : G[v]) {
-      if (next_v == p) {
-        continue;
-      }
-      dp[v][0] *= (dp[next_v][0] + dp[next_v][2]);
-    }
-
-    // a,b
-    dp[v][2] = 1;
-    for (auto next_v : G[v]) {
-      if (next_v == p) {
-        continue;
-      }
-      dp[v][2] *= (dp[next_v][0] + dp[next_v][1] + dp[next_v][2] * 2);
-    }
-    mint tmp = 1;
-    for (auto next_v : G[v]) {
-      if (next_v == p) {
-        continue;
-      }
-      tmp *= (dp[next_v][2] + dp[next_v][0]);
-    }
-    dp[v][2] -= tmp;
-  } else if (c[v] == 'b') {
-    // b
-    dp[v][1] = 1;
-    for (auto next_v : G[v]) {
-      if (next_v == p) {
-        continue;
-      }
-      dp[v][1] *= (dp[next_v][1] + dp[next_v][2]);
-    }
-
-    // a,b
-    dp[v][2] = 1;
-    for (auto next_v : G[v]) {
-      if (next_v == p) {
-        continue;
-      }
-      dp[v][2] *= (dp[next_v][0] + dp[next_v][1] + dp[next_v][2] * 2);
-    }
-    mint tmp = 1;
-    for (auto next_v : G[v]) {
-      if (next_v == p) {
-        continue;
-      }
-      tmp *= (dp[next_v][2] + dp[next_v][1]);
-    }
-    dp[v][2] -= tmp;
-  }
-}
-
 int main() {
   int N;
   cin >> N;
-  vector<char> c(N);
+  vector<int> A(N);
   for (int i = 0; i < N; i++) {
-    cin >> c[i];
+    cin >> A[i];
   }
-  Graph_int G(N);
-  for (int i = 0; i < N - 1; i++) {
-    int a, b;
-    cin >> a >> b;
-    a--;
-    b--;
-    G[a].push_back(b);
-    G[b].push_back(a);
+  vector<int> B(N);
+  for (int i = 0; i < N; i++) {
+    cin >> B[i];
   }
 
-  vector<vector<mint>> dp(N, vector<mint>(3, 0));
-  DFS(G, 0, dp, c);
-
-  /*
+  int ans1 = 0;
   for (int i = 0; i < N; i++) {
-    cout << i + 1 << " " << c[i] << "  " << dp[i][0].val() << " "
-         << dp[i][1].val() << " " << dp[i][2].val() << endl;
+    if (A[i] == B[i]) {
+      ans1++;
+    }
   }
-  */
-  cout << dp[0][2].val() << endl;
+
+  int ans2 = 0;
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      if (i == j) {
+        continue;
+      }
+      if (A[i] == B[j]) {
+        ans2++;
+      }
+    }
+  }
+
+  cout << ans1 << endl;
+  cout << ans2 << endl;
 }
