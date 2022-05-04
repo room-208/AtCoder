@@ -689,19 +689,37 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
   string S;
   cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N = S.size();
+
+  sort(S.begin(), S.end());
+  unordered_map<char, int> mp;
+  for (int i = 0; i < 26; i++) {
+    mp['a' + i] = 0;
+  }
+  for (auto &&p : runLengthEncoding(S)) {
+    mp[p.first] = p.second;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  COMinit();
+
+  vector<vector<mint>> dp(27, vector<mint>(N + 1, 0));
+  dp[0][0] = 1;
+  for (int i = 1; i <= 26; i++) {
+    dp[i] = dp[i - 1];
+    for (int j = 1; j <= mp['a' + i - 1]; j++) {
+      for (int n = 0; n <= N; n++) {
+        dp[i][n + j] += dp[i - 1][n] * COM(n + j, j);
+      }
+    }
   }
+
+  mint ans = 0;
+  for (int i = 1; i <= N; i++) {
+    ans += dp[26][i];
+  }
+
+  cout << ans.val();
+  cout << endl;
 }

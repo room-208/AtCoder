@@ -684,91 +684,73 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+pair<int, int> to_pair(int a, int b) {
+  assert(a != b);
+  return {min(a, b), max(a, b)};
+}
+
 int main() {
   int N;
   cin >> N;
-  vector<vector<int>> A(N, vector<int>(N - 1));
+  vector<queue<int>> A(N);
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N - 1; j++) {
-      cin >> A[i][j];
-      A[i][j]--;
+      int a;
+      cin >> a;
+      a--;
+      A[i].push(a);
     }
   }
 
-  vector<vector<int>> node(N, vector<int>(N, -1));
-  vector<pair<int, int>> node_inv;
-  int n = 0;
+  set<pair<int, int>> buf;
   for (int i = 0; i < N; i++) {
-    for (int j = 0; j < N - 1; j++) {
-      int k = i;
-      int l = A[i][j];
-      if (k > l) {
-        swap(k, l);
-      }
-      if (node[k][l] == -1) {
-        node[k][l] = n;
-        node_inv.push_back({k, l});
-        n++;
-      }
-    }
-  }
-
-  int SIZE = (N * (N - 1)) / 2;
-  scc_graph g(SIZE);
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < N - 2; j++) {
-      int a0 = i;
-      int a1 = i;
-      int b0 = A[i][j];
-      int b1 = A[i][j + 1];
-      if (a0 > b0) {
-        swap(a0, b0);
-      }
-      if (a1 > b1) {
-        swap(a1, b1);
-      }
-      int u = node[a0][b0];
-      int v = node[a1][b1];
-      g.add_edge(u, v);
-    }
-  }
-
-  auto scc = g.scc();
-
-  bool flag = true;
-  for (size_t i = 0; i < scc.size(); i++) {
-    if (scc[i].size() >= 2) {
-      flag = false;
-    }
-  }
-
-  if (!flag) {
-    cout << -1 << endl;
-    return 0;
-  }
-
-  vector<unordered_set<int>> st(SIZE);
-  vector<int> d(N, 0);
-  for (auto &&nodes : scc) {
-    int m = nodes.front();
-    int a, b;
-    tie(a, b) = node_inv[m];
-
-    int c = max(d[a], d[b]);
-    st[c].insert(a);
-    st[c].insert(b);
-
-    while (st[d[a]].count(a)) {
-      d[a]++;
-    }
-    while (st[d[b]].count(b)) {
-      d[b]++;
+    int to = A[i].front();
+    if (A[to].front() == i) {
+      buf.insert(to_pair(i, to));
     }
   }
 
   int ans = 0;
-  while (!st[ans].empty()) {
+  while (!buf.empty()) {
     ans++;
+
+    for (auto &&p : buf) {
+      int a = p.first;
+      int b = p.second;
+      A[a].pop();
+      A[b].pop();
+    }
+
+    set<pair<int, int>> buf_new;
+    for (auto &&p : buf) {
+      int a = p.first;
+      int b = p.second;
+
+      if (!A[a].empty()) {
+        int to_a = A[a].front();
+        if (A[to_a].front() == a) {
+          buf_new.insert(to_pair(a, to_a));
+        }
+      }
+      if (!A[b].empty()) {
+        int to_b = A[b].front();
+
+        if (A[to_b].front() == b) {
+          buf_new.insert(to_pair(b, to_b));
+        }
+      }
+    }
+
+    buf = buf_new;
   }
-  cout << ans + 1 << endl;
+
+  for (int i = 0; i < N; i++) {
+    if (!A[i].empty()) {
+      cout << -1 << endl;
+      return 0;
+    }
+  }
+
+  cout << ans;
+  cout << endl;
 }

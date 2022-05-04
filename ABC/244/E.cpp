@@ -6,7 +6,6 @@
 #include <atcoder/modint>
 #include <atcoder/scc>
 #include <atcoder/segtree>
-#include <bitset>
 #include <cmath>
 #include <deque>
 #include <functional>
@@ -51,13 +50,6 @@ mint COM(int n, int k) {
   if (n < k) return 0;
   if (n < 0 || k < 0) return 0;
   return fac[n] * (finv[k] * finv[n - k]);
-}
-
-// 順列組合せ
-mint PER(int n, int k) {
-  if (n < k) return 0;
-  if (n < 0 || k < 0) return 0;
-  return fac[n] * finv[n - k];
 }
 
 //等差数列の和
@@ -689,19 +681,59 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N, M, K, S, T, X;
+  cin >> N >> M >> K >> S >> T >> X;
+  S--;
+  T--;
+  X--;
+  vector<int> U(M), V(M);
+  for (int i = 0; i < M; i++) {
+    cin >> U[i] >> V[i];
+    U[i]--;
+    V[i]--;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  UnionFind uf(N);
+  for (int i = 0; i < M; i++) {
+    uf.unite(U[i], V[i]);
   }
+
+  if (!uf.issame(S, T)) {
+    cout << 0 << endl;
+    return 0;
+  }
+
+  Graph_int G(N);
+  for (int i = 0; i < M; i++) {
+    G[U[i]].push_back(V[i]);
+    G[V[i]].push_back(U[i]);
+  }
+
+  vector<vector<mint>> dp(N, vector<mint>(2, 0));
+  dp[S][0] = 1;
+
+  set<int> buf;
+  buf.insert(S);
+
+  for (int i = 0; i < K; i++) {
+    vector<vector<mint>> dp_new(N, vector<mint>(2, 0));
+    set<int> buf_new;
+    for (auto &&u : buf) {
+      for (auto &&v : G[u]) {
+        buf_new.insert(v);
+        if (v == X) {
+          dp_new[v][0] += dp[u][1];
+          dp_new[v][1] += dp[u][0];
+        } else {
+          dp_new[v][0] += dp[u][0];
+          dp_new[v][1] += dp[u][1];
+        }
+      }
+    }
+    dp = dp_new;
+    buf = buf_new;
+  }
+
+  cout << dp[T][0].val();
+  cout << endl;
 }

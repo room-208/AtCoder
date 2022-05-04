@@ -533,13 +533,15 @@ class TopologicalSort {
 };
 
 //幅優先探索
-vector<int> BFS(const Graph_int &G, int s) {
+pair<vector<int>, vector<int>> BFS(const Graph_int &G, int s) {
   int N = (int)G.size();    // 頂点数
   vector<int> dist(N, -1);  // 全頂点を「未訪問」に初期化
+  vector<int> bit(N, 0);
   queue<int> que;
 
   // 初期条件 (頂点 s を初期頂点とする)
   dist[s] = 0;
+  bit[s] = 0;
   que.push(s);  // s を橙色頂点にする
 
   // BFS 開始 (キューが空になるまで探索を行う)
@@ -554,154 +556,70 @@ vector<int> BFS(const Graph_int &G, int s) {
 
       // 新たな白色頂点 x について距離情報を更新してキューに挿入
       dist[x] = dist[v] + 1;
+      bit[x] = bit[v] | (1 << x);
       que.push(x);
     }
   }
-  return dist;
-}
 
-// 01BFS
-vector<ll> BFS_01(const Graph_Edge &G, int s) {
-  int N = (int)G.size();       // 頂点数
-  vector<ll> dist(N, INF_ll);  // 全頂点を「未訪問」に初期化
-  deque<int> que;
-
-  // 初期条件 (頂点 s を初期頂点とする)
-  dist[s] = 0;
-  que.push_front(s);
-
-  // BFS 開始 (キューが空になるまで探索を行う)
-  while (!que.empty()) {
-    int v = que.front();  // キューから先頭頂点を取り出す
-    que.pop_front();
-
-    // v からたどれる頂点をすべて調べる
-    for (auto x : G[v]) {
-      if (chmin(dist[x.to], dist[v] + x.w)) {
-        if (x.w == 0) {
-          que.push_front(x.to);
-        }
-        if (x.w == 1) {
-          que.push_back(x.to);
-        }
-      }
-    }
-  }
-  return dist;
-}
-
-//ベルマン・フォード法
-vector<ll> Bellman_Ford(const Graph_Edge &G, int s) {
-  int N = (int)G.size();
-  bool exist_negative_cycle = false;  // 負閉路をもつかどうか
-  vector<ll> dist(N, INF_ll);
-  dist[s] = 0;
-
-  for (int iter = 0; iter < N; ++iter) {
-    bool update = false;  // 更新が発生したかどうかを表すフラグ
-    for (int v = 0; v < N; ++v) {
-      // dist[v] = INF のときは頂点 v からの緩和を行わない
-      if (dist[v] == INF_ll) continue;
-
-      for (auto e : G[v]) {
-        // 緩和処理を行い，更新されたら update を true にする
-        if (chmin(dist[e.to], dist[v] + e.w)) {
-          update = true;
-        }
-      }
-    }
-
-    // 更新が行われなかったら，すでに最短路が求められている
-    if (!update) break;
-
-    // N 回目の反復で更新が行われたならば，負閉路をもつ
-    if (iter == N - 1 && update) exist_negative_cycle = true;
-  }
-  return dist;
-}
-
-//ダイクストラ法
-vector<ll> Dijkstra(const Graph_Edge &G, int s) {
-  int N = (int)G.size();
-  vector<ll> dist(N, INF_ll);
-  dist[s] = 0;
-
-  // (d[v], v) のペアを要素としたヒープを作る
-  priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>>
-      que;
-  que.push(make_pair(dist[s], s));
-
-  // ダイクストラ法の反復を開始
-  while (!que.empty()) {
-    // v: 使用済みでない頂点のうち d[v] が最小の頂点
-    // d: v に対するキー値
-    int v = que.top().second;
-    ll d = que.top().first;
-    que.pop();
-
-    // d > dist[v] は，(d, v) がゴミであることを意味する
-    if (d > dist[v]) continue;
-
-    // 頂点 v を始点とした各辺を緩和
-    for (auto e : G[v]) {
-      if (chmin(dist[e.to], dist[v] + e.w)) {
-        // 更新があるならヒープに新たに挿入
-        que.push(make_pair(dist[e.to], e.to));
-      }
-    }
-  }
-  return dist;
-}
-
-//オーバーフロー判定
-//__builtin_add_overflow
-//__builtin_mul_overflow
-
-//ノード変換
-int to_node(int i, int j, int W) { return W * i + j; }
-
-// ij変換
-pair<int, int> to_ij(int v, int W) {
-  int i = v / W;
-  int j = v - W * i;
-
-  return make_pair(i, j);
-}
-
-// in_out判定
-bool Is_in(int i, int j, int H, int W) {
-  if (0 <= i && i < H && 0 <= j && j < W) {
-    return true;
-  }
-
-  return false;
-}
-
-int dx[4] = {1, 0, -1, 0};
-int dy[4] = {0, 1, 0, -1};
-
-struct my_struct {
-  int a, b;
-};
-
-bool operator<(const my_struct &s_1, const my_struct &s_2) {
-  return s_1.b > s_2.b;
+  return {dist, bit};
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N, M;
+  cin >> N >> M;
+  vector<int> u(M), v(M);
+  for (int i = 0; i < M; i++) {
+    cin >> u[i] >> v[i];
+    u[i]--;
+    v[i]--;
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  Graph_int G(N);
+  for (int i = 0; i < M; i++) {
+    G[u[i]].push_back(v[i]);
+    G[v[i]].push_back(u[i]);
   }
+
+  vector<vector<ll>> dp((1 << N), vector<ll>(N, INF_ll));
+  queue<pair<int, int>> que;
+  for (int i = 0; i < N; i++) {
+    dp[(1 << i)][i] = 1;
+    que.push({(1 << i), i});
+  }
+
+  while (!que.empty()) {
+    int S = que.front().first;
+    int u = que.front().second;
+    que.pop();
+
+    for (auto &&v : G[u]) {
+      if (S & (1 << v)) {
+        int T = S & ~(1 << v);
+        if (dp[T][v] != INF_ll) {
+          continue;
+        }
+        dp[T][v] = dp[S][u] + 1;
+        que.push({T, v});
+      } else {
+        int T = S | (1 << v);
+        if (dp[T][v] != INF_ll) {
+          continue;
+        }
+        dp[T][v] = dp[S][u] + 1;
+        que.push({T, v});
+      }
+    }
+  }
+
+  ll ans = 0;
+  for (int S = 1; S < (1 << N); S++) {
+    ll tmp = INF_ll;
+    for (int v = 0; v < N; v++) {
+      chmin(tmp, dp[S][v]);
+    }
+    ans += tmp;
+  }
+
+  cout << ans;
+  cout << endl;
 }

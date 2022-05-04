@@ -6,7 +6,6 @@
 #include <atcoder/modint>
 #include <atcoder/scc>
 #include <atcoder/segtree>
-#include <bitset>
 #include <cmath>
 #include <deque>
 #include <functional>
@@ -51,13 +50,6 @@ mint COM(int n, int k) {
   if (n < k) return 0;
   if (n < 0 || k < 0) return 0;
   return fac[n] * (finv[k] * finv[n - k]);
-}
-
-// 順列組合せ
-mint PER(int n, int k) {
-  if (n < k) return 0;
-  if (n < 0 || k < 0) return 0;
-  return fac[n] * finv[n - k];
 }
 
 //等差数列の和
@@ -691,17 +683,23 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N;
   cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+
+  set<int> st;
+  for (int i = 1; i <= 2 * N + 1; i++) {
+    st.insert(i);
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  st.erase(1);
+  cout << 1 << endl;
+
+  int k;
+  cin >> k;
+
+  while (k != 0) {
+    st.erase(k);
+    auto itr = st.begin();
+    cout << *itr << endl;
+    st.erase(itr);
+    cin >> k;
   }
 }
