@@ -31,7 +31,7 @@ using ll = long long;
 constexpr int INF_int = 1e9;
 constexpr ll INF_ll = 1e18;
 
-constexpr int COM_MAX = 510000;
+constexpr int COM_MAX = 1000000;
 mint fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
 
 // テーブルを作る前処理
