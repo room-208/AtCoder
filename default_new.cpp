@@ -653,9 +653,11 @@ vector<ll> Dijkstra(const Graph_Edge &G, int s) {
   return dist;
 }
 
-//オーバーフロー判定
+//組み込み関数（GCC）
 //__builtin_add_overflow
 //__builtin_mul_overflow
+//__builtin_popcount()
+//__builtin_popcountll()
 
 //ノード変換
 int to_node(int i, int j, int W) { return W * i + j; }
