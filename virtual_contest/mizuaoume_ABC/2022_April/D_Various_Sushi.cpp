@@ -714,24 +714,62 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 int main() {
   int N, K;
   cin >> N >> K;
-  vector<ll> t(N), d(N);
+  vector<int> t(N);
+  vector<ll> d(N);
   for (int i = 0; i < N; i++) {
     cin >> t[i] >> d[i];
-    t[i]--;
   }
 
   tie(d, t) = GetSortedPair(d, t, true);
-  map<ll, vector<ll>> mp;
 
-  for (int i = 0; i < N; i++) {
-    mp[t[i]].push_back(d[i]);
-  }
-
+  unordered_set<int> hash;
+  vector<pair<int, ll>> vec;
   ll ans = -1;
-  for (ll x = 1; x <= N; x++) {
-    chmax(ans, x * x);
+  ll sum = 0;
+  for (int i = 0; i < K; i++) {
+    sum += d[i];
+    if (hash.count(t[i])) {
+      vec.push_back({t[i], d[i]});
+    } else {
+      hash.insert(t[i]);
+    }
+  }
+  chmax(ans, sum + 1);
+
+  auto hash_new = hash;
+  queue<pair<int, ll>> que;
+  for (int i = K; i < N; i++) {
+    if (hash_new.count(t[i])) {
+      continue;
+    } else {
+      hash_new.insert(t[i]);
+      que.push({t[i], d[i]});
+    }
   }
 
-  cout << ans;
-  cout << endl;
+  for (ll x = 2; x <= N; x++) {
+    if (hash.size() < x) {
+      int t_old, t_new;
+      ll d_old, d_new;
+
+      if (vec.empty()) {
+        break;
+      }
+      if (que.empty()) {
+        break;
+      }
+
+      tie(t_old, d_old) = vec.back();
+      tie(t_new, d_new) = que.front();
+      vec.pop_back();
+      que.pop();
+      hash.insert(t_new);
+
+      sum += d_new - d_old;
+    }
+
+    chmax(ans, sum + x * x);
+  }
+
+  cout << ans << endl;
 }
