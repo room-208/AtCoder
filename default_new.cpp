@@ -653,6 +653,27 @@ vector<ll> Dijkstra(const Graph_Edge &G, int s) {
   return dist;
 }
 
+// ソート済ペア
+template <class Ta, class Tb>
+pair<vector<Ta>, vector<Tb>> GetSortedPair(vector<Ta> a, vector<Tb> b,
+                                           bool reverse_flag = false) {
+  assert(a.size() == b.size());
+  int N = a.size();
+  vector<pair<Ta, Tb>> p(N);
+  for (int i = 0; i < N; i++) {
+    p[i] = {a[i], b[i]};
+  }
+  sort(p.begin(), p.end());
+  if (reverse_flag) {
+    reverse(p.begin(), p.end());
+  }
+  for (int i = 0; i < N; i++) {
+    a[i] = p[i].first;
+    b[i] = p[i].second;
+  }
+  return {a, b};
+}
+
 //組み込み関数（GCC）
 //__builtin_add_overflow
 //__builtin_mul_overflow

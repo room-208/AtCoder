@@ -192,6 +192,27 @@ bool chmin(T &a, const T &b) {
   return 0;
 }
 
+// ソート済ペア
+template <class Ta, class Tb>
+pair<vector<Ta>, vector<Tb>> GetSortedPair(vector<Ta> a, vector<Tb> b,
+                                           bool reverse_flag = false) {
+  assert(a.size() == b.size());
+  int N = a.size();
+  vector<pair<Ta, Tb>> p(N);
+  for (int i = 0; i < N; i++) {
+    p[i] = {a[i], b[i]};
+  }
+  sort(p.begin(), p.end());
+  if (reverse_flag) {
+    reverse(p.begin(), p.end());
+  }
+  for (int i = 0; i < N; i++) {
+    a[i] = p[i].first;
+    b[i] = p[i].second;
+  }
+  return {a, b};
+}
+
 int main() {
   int N, M;
   cin >> N >> M;
@@ -209,26 +230,8 @@ int main() {
     cin >> D[i];
   }
 
-  vector<pair<ll, ll>> p;
-  for (int i = 0; i < N; i++) {
-    p.push_back({A[i], B[i]});
-  }
-  sort(p.begin(), p.end());
-  reverse(p.begin(), p.end());
-  for (int i = 0; i < N; i++) {
-    A[i] = p[i].first;
-    B[i] = p[i].second;
-  }
-
-  p.clear();
-  for (int i = 0; i < M; i++) {
-    p.push_back({C[i], D[i]});
-  }
-  sort(p.begin(), p.end());
-  for (int i = 0; i < M; i++) {
-    C[i] = p[i].first;
-    D[i] = p[i].second;
-  }
+  tie(A, B) = GetSortedPair(A, B, true);
+  tie(C, D) = GetSortedPair(C, D);
 
   multiset<ll> st;
   ll last_m = M;
