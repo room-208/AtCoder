@@ -653,27 +653,6 @@ vector<ll> Dijkstra(const Graph_Edge &G, int s) {
   return dist;
 }
 
-// ソート済ペア
-template <class Ta, class Tb>
-pair<vector<Ta>, vector<Tb>> GetSortedPair(vector<Ta> a, vector<Tb> b,
-                                           bool reverse_flag = false) {
-  assert(a.size() == b.size());
-  int N = a.size();
-  vector<pair<Ta, Tb>> p(N);
-  for (int i = 0; i < N; i++) {
-    p[i] = {a[i], b[i]};
-  }
-  sort(p.begin(), p.end());
-  if (reverse_flag) {
-    reverse(p.begin(), p.end());
-  }
-  for (int i = 0; i < N; i++) {
-    a[i] = p[i].first;
-    b[i] = p[i].second;
-  }
-  return {a, b};
-}
-
 //組み込み関数（GCC）
 //__builtin_add_overflow
 //__builtin_mul_overflow
@@ -711,27 +690,50 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+double getx(double a, double v, double t) { return v * t + 0.5 * a * t * t; }
+
 int main() {
-  int N, K;
-  cin >> N >> K;
-  vector<ll> t(N), d(N);
+  int N;
+  cin >> N;
+  vector<double> t(N), v(N + 1);
   for (int i = 0; i < N; i++) {
-    cin >> t[i] >> d[i];
-    t[i]--;
+    cin >> t[i];
   }
-
-  tie(d, t) = GetSortedPair(d, t, true);
-  map<ll, vector<ll>> mp;
-
   for (int i = 0; i < N; i++) {
-    mp[t[i]].push_back(d[i]);
+    cin >> v[i];
+  }
+  v[N] = 0.;
+
+  vector<double> T(N + 1);
+  T[0] = 0.;
+  for (int i = 0; i < N; i++) {
+    T[i + 1] = T[i] + t[i];
   }
 
-  ll ans = -1;
-  for (ll x = 1; x <= N; x++) {
-    chmax(ans, x * x);
+  double x = 0.;
+  double v_s = 0.;
+  double v_e;
+  for (int i = 0; i < N; i++) {
+    v_e = v[i + 1];
+
+    double t_mid = (T[i + 1] + T[i] + v_e - v_s) / 2.;
+    double v_mid = t_mid - T[i] + v_s;
+
+    if (v_mid <= v[i]) {
+      x += getx(1., v_s, t_mid - T[i]);
+      x += getx(-1., v_mid, T[i + 1] - t_mid);
+    } else {
+      double t_s = T[i] + v[i] - v_s;
+      double t_e = T[i + 1] - v[i] + v_e;
+      x += getx(1., v_s, t_s - T[i]);
+      x += getx(0., v[i], t_e - t_s);
+      x += getx(-1., v[i], T[i + 1] - t_e);
+    }
+
+    v_s = v_e;
   }
 
-  cout << ans;
-  cout << endl;
+  printf("%.10f\n", x);
+
+  bool flag = true;
 }

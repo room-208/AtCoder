@@ -31,7 +31,7 @@ using ll = long long;
 constexpr int INF_int = 1e9;
 constexpr ll INF_ll = 1e18;
 
-constexpr int COM_MAX = 1000000;
+constexpr int COM_MAX = 510000;
 mint fac[COM_MAX], finv[COM_MAX], inv[COM_MAX];
 
 // テーブルを作る前処理
@@ -653,32 +653,9 @@ vector<ll> Dijkstra(const Graph_Edge &G, int s) {
   return dist;
 }
 
-// ソート済ペア
-template <class Ta, class Tb>
-pair<vector<Ta>, vector<Tb>> GetSortedPair(vector<Ta> a, vector<Tb> b,
-                                           bool reverse_flag = false) {
-  assert(a.size() == b.size());
-  int N = a.size();
-  vector<pair<Ta, Tb>> p(N);
-  for (int i = 0; i < N; i++) {
-    p[i] = {a[i], b[i]};
-  }
-  sort(p.begin(), p.end());
-  if (reverse_flag) {
-    reverse(p.begin(), p.end());
-  }
-  for (int i = 0; i < N; i++) {
-    a[i] = p[i].first;
-    b[i] = p[i].second;
-  }
-  return {a, b};
-}
-
-//組み込み関数（GCC）
+//オーバーフロー判定
 //__builtin_add_overflow
 //__builtin_mul_overflow
-//__builtin_popcount()
-//__builtin_popcountll()
 
 //ノード変換
 int to_node(int i, int j, int W) { return W * i + j; }
@@ -712,24 +689,74 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N, K;
+  int N;
+  ll K;
   cin >> N >> K;
-  vector<ll> t(N), d(N);
+  vector<int> P(N);
   for (int i = 0; i < N; i++) {
-    cin >> t[i] >> d[i];
-    t[i]--;
+    cin >> P[i];
+    P[i]--;
+  }
+  vector<ll> C(N);
+  for (int i = 0; i < N; i++) {
+    cin >> C[i];
   }
 
-  tie(d, t) = GetSortedPair(d, t, true);
-  map<ll, vector<ll>> mp;
+  ll ans = -INF_ll;
+  for (int s = 0; s < N; s++) {
+    ll X = K;
 
-  for (int i = 0; i < N; i++) {
-    mp[t[i]].push_back(d[i]);
-  }
+    int v = s;
+    int next_v = P[v];
+    vector<ll> dist(N, -1);
+    vector<ll> score(N, 0);
+    dist[v] = 0;
+    score[v] = 0;
+    while ((dist[next_v] == -1) && X > 0) {
+      X--;
+      score[next_v] = score[v] + C[P[v]];
+      chmax(ans, score[next_v]);
+      dist[next_v] = dist[v] + 1;
+      v = next_v;
+      next_v = P[v];
+    }
 
-  ll ans = -1;
-  for (ll x = 1; x <= N; x++) {
-    chmax(ans, x * x);
+    if (X == 0) {
+      continue;
+    }
+
+    ll cycle = dist[v] + 1 - dist[next_v];
+    ll cycle_score = score[v] + C[P[v]] - score[next_v];
+    ll score_now = score[v];
+
+    X--;
+    score_now += C[P[v]];
+    chmax(ans, score_now);
+    v = P[v];
+
+    if (X == 0) {
+      continue;
+    }
+
+    ll r = X % cycle;
+    ll q = (X - r) / cycle;
+
+    if (q >= 1) {
+      for (int loop = 0; loop < cycle; loop++) {
+        score_now += C[P[v]];
+        chmax(ans, score_now);
+        v = P[v];
+      }
+      score_now += (q - 1) * cycle_score;
+      chmax(ans, score_now);
+    }
+
+    while (r > 0) {
+      r--;
+      score_now += C[P[v]];
+      chmax(ans, score_now);
+      v = P[v];
+    }
   }
 
   cout << ans;

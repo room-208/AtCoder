@@ -25,7 +25,7 @@
 
 using namespace std;
 using namespace atcoder;
-using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
+using mint = modint1000000007;
 using ll = long long;
 
 constexpr int INF_int = 1e9;
@@ -653,27 +653,6 @@ vector<ll> Dijkstra(const Graph_Edge &G, int s) {
   return dist;
 }
 
-// ソート済ペア
-template <class Ta, class Tb>
-pair<vector<Ta>, vector<Tb>> GetSortedPair(vector<Ta> a, vector<Tb> b,
-                                           bool reverse_flag = false) {
-  assert(a.size() == b.size());
-  int N = a.size();
-  vector<pair<Ta, Tb>> p(N);
-  for (int i = 0; i < N; i++) {
-    p[i] = {a[i], b[i]};
-  }
-  sort(p.begin(), p.end());
-  if (reverse_flag) {
-    reverse(p.begin(), p.end());
-  }
-  for (int i = 0; i < N; i++) {
-    a[i] = p[i].first;
-    b[i] = p[i].second;
-  }
-  return {a, b};
-}
-
 //組み込み関数（GCC）
 //__builtin_add_overflow
 //__builtin_mul_overflow
@@ -711,27 +690,99 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
+bool IsPositive(int K, deque<ll> Po, deque<ll> Ne) {
+  int MAx_Ne_EVEN;
+  if (Ne.size() % 2 == 0) {
+    MAx_Ne_EVEN = Ne.size();
+  } else {
+    MAx_Ne_EVEN = Ne.size() - 1;
+  }
+
+  K -= MAx_Ne_EVEN;
+  if (Po.size() >= K) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 int main() {
   int N, K;
   cin >> N >> K;
-  vector<ll> t(N), d(N);
+  vector<ll> A(N);
   for (int i = 0; i < N; i++) {
-    cin >> t[i] >> d[i];
-    t[i]--;
+    cin >> A[i];
   }
 
-  tie(d, t) = GetSortedPair(d, t, true);
-  map<ll, vector<ll>> mp;
-
+  deque<ll> Po, Ne, Ze;
   for (int i = 0; i < N; i++) {
-    mp[t[i]].push_back(d[i]);
+    if (A[i] > 0) {
+      Po.push_back(A[i]);
+    } else if (A[i] < 0) {
+      Ne.push_back(-A[i]);
+    } else {
+      Ze.push_back(A[i]);
+    }
+  }
+  sort(Po.begin(), Po.end());
+  sort(Ne.begin(), Ne.end());
+
+  if (IsPositive(K, Po, Ne)) {
+    reverse(Po.begin(), Po.end());
+    reverse(Ne.begin(), Ne.end());
+
+    mint ans = 1;
+    if (K % 2 == 1) {
+      ans *= Po.front();
+      Po.pop_front();
+      K--;
+    }
+    if (Po.size() % 2 == 1) {
+      Po.pop_back();
+    }
+    if (Ne.size() % 2 == 1) {
+      Ne.pop_back();
+    }
+
+    deque<ll> B;
+    for (size_t i = 0; i < Po.size(); i += 2) {
+      B.push_back(Po[i] * Po[i + 1]);
+    }
+    for (size_t i = 0; i < Ne.size(); i += 2) {
+      B.push_back(Ne[i] * Ne[i + 1]);
+    }
+    sort(B.begin(), B.end());
+    reverse(B.begin(), B.end());
+
+    while (K > 0) {
+      K -= 2;
+      ans *= B.front();
+      B.pop_front();
+    }
+    cout << ans.val() << endl;
+    return 0;
   }
 
-  ll ans = -1;
-  for (ll x = 1; x <= N; x++) {
-    chmax(ans, x * x);
+  if (!Ze.empty()) {
+    cout << 0 << endl;
+    return 0;
   }
 
-  cout << ans;
-  cout << endl;
+  mint ans = -1;
+  deque<ll> B;
+  for (auto &&e : Po) {
+    B.push_back(e);
+  }
+  for (auto &&e : Ne) {
+    B.push_back(e);
+  }
+  sort(B.begin(), B.end());
+
+  while (K > 0) {
+    K--;
+    ans *= B.front();
+    B.pop_front();
+  }
+  cout << ans.val() << endl;
+  return 0;
 }
