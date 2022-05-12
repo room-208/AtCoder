@@ -155,7 +155,7 @@ ll EXTGCD(ll a, ll b, ll &x, ll &y) {
 }
 
 // osa_k法
-vector<int> osa_k(int n) {
+vector<int> OsaK(int n) {
   vector<int> res(n + 1);
   iota(res.begin(), res.end(), 0);
   for (int i = 2; i * i <= n; ++i) {
@@ -172,6 +172,18 @@ vector<int> osa_k(int n) {
     }
   }
   return res;
+}
+
+// 素数を取得する
+vector<int> GetPrime(int n) {
+  vector<int> osak = OsaK(n);
+  vector<int> prime;
+  for (int k = 2; k <= n; k++) {
+    if (k == osak[k]) {
+      prime.push_back(k);
+    }
+  }
+  return prime;
 }
 
 //最大・最小化
@@ -647,6 +659,20 @@ vector<ll> Dijkstra(const Graph_Edge &G, int s) {
       if (chmin(dist[e.to], dist[v] + e.w)) {
         // 更新があるならヒープに新たに挿入
         que.push(make_pair(dist[e.to], e.to));
+      }
+    }
+  }
+  return dist;
+}
+
+// ワーシャル・フロイド法
+vector<vector<ll>> WarshallFloyd(vector<vector<ll>> &w) {
+  vector<vector<ll>> dist = w;
+  int N = dist.size();
+  for (int k = 0; k < N; k++) {
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
+        dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
       }
     }
   }
