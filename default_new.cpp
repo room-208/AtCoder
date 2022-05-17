@@ -61,6 +61,7 @@ mint PER(int n, int k) {
 }
 
 //等差数列の和
+// a：初項 d：等差 n：数列の数
 ll tousa_sum(ll a, ll d, ll n) { return (a * 2 + d * (n - 1)) * n / 2LL; }
 
 // 床関数
