@@ -27,6 +27,7 @@ using namespace std;
 using namespace atcoder;
 using mint = modint998244353;  // modint1000000007 static_modint<1000000009>;
 using ll = long long;
+using ull = unsigned long long;
 
 constexpr int INF_int = 1e9;
 constexpr ll INF_ll = 1e18;
@@ -242,6 +243,67 @@ vector<vector<int>> alphabet_table(string S) {
   }
   return table;
 }
+
+class RollingHash {
+ private:
+  vector<ull> base_cands;
+  ull base1, base2;
+
+ private:
+  ull GetRandBase(mt19937 &mt) {
+    int index = uniform_int_distribution<int>(0, base_cands.size() - 1)(mt);
+    ull res = base_cands[index];
+    base_cands.erase(base_cands.begin() + index);
+    return res;
+  }
+  vector<ull> GetHashValue(const string &S, int len, ull base) const {
+    if (len > S.size()) {
+      return {};
+    }
+    ull base_pow_len = 1;
+    for (int i = 0; i < len; i++) {
+      base_pow_len *= base;
+    }
+    vector<ull> hashs;
+    hashs.reserve(S.size() - len + 1);
+    ull hash_val = 0;
+    for (int i = 0; i < len; i++) {
+      hash_val = hash_val * base + S[i];
+    }
+    hashs.emplace_back(hash_val);
+    for (int i = 1; i + len - 1 < S.size(); i++) {
+      hash_val = hash_val * base + S[i + len - 1] - base_pow_len * S[i - 1];
+      hashs.emplace_back(hash_val);
+    }
+    return hashs;
+  }
+
+ public:
+  RollingHash() {
+    base_cands = {100000007ULL, 1000000007ULL, 37ULL, 2ULL};
+    random_device seed_gen;
+    mt19937 mt(seed_gen());
+    base1 = GetRandBase(mt);
+    base2 = GetRandBase(mt);
+  }
+  vector<pair<ull, ull>> GetHashPairValues(const string &S, int len, int start,
+                                           int end) const {
+    auto S_sub = S.substr(start, end - start + 1);
+    vector<ull> hash1 = GetHashValue(S_sub, len, base1);
+    vector<ull> hash2 = GetHashValue(S_sub, len, base2);
+    vector<pair<ull, ull>> hash_pair;
+    hash_pair.reserve(hash1.size());
+    for (size_t i = 0; i < hash1.size(); i++) {
+      hash_pair.emplace_back(hash1[i], hash2[i]);
+    }
+    return hash_pair;
+  }
+  pair<ull, ull> GetHashPairValue(const string &T) const {
+    ull hash1 = GetHashValue(T, T.size(), base1).front();
+    ull hash2 = GetHashValue(T, T.size(), base2).front();
+    return {hash1, hash2};
+  }
+};
 
 // unoderedのハッシュ
 struct HashPair {
