@@ -813,6 +813,7 @@ int main() {
     bool ok = false;
     int mid = (left + right) / 2;
     for (int i = 0; i < N; i++) {
+      if (i + mid * 2 > N) break;
       if (i + mid < N) {
         string T = S.substr(i, mid);
         auto hashs = rh.GetHashPairValues(S, mid, i + mid, N);
