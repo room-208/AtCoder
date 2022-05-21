@@ -250,12 +250,14 @@ class RollingHash {
   ull base1, base2;
 
  private:
+  // 基数をランダムに取得します
   ull GetRandBase(mt19937 &mt) {
     int index = uniform_int_distribution<int>(0, base_cands.size() - 1)(mt);
     ull res = base_cands[index];
     base_cands.erase(base_cands.begin() + index);
     return res;
   }
+  // Sのハッシュ値を取得します
   vector<ull> GetHashValue(const string &S, int len, ull base) const {
     if (len > S.size()) {
       return {};
@@ -286,6 +288,7 @@ class RollingHash {
     base1 = GetRandBase(mt);
     base2 = GetRandBase(mt);
   }
+  // Sの[start,end]のlenの長さの部分列のハッシュ値を取得します
   vector<pair<ull, ull>> GetHashPairValues(const string &S, int len, int start,
                                            int end) const {
     auto S_sub = S.substr(start, end - start + 1);
@@ -298,6 +301,7 @@ class RollingHash {
     }
     return hash_pair;
   }
+  // Tのハッシュ値を取得します
   pair<ull, ull> GetHashPairValue(const string &T) const {
     ull hash1 = GetHashValue(T, T.size(), base1).front();
     ull hash2 = GetHashValue(T, T.size(), base2).front();
