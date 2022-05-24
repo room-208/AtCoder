@@ -329,7 +329,7 @@ struct HashPair {
 };
 
 //座標圧縮
-vector<ll> compress(vector<ll> &x) {
+vector<ll> CompressCoordinate(vector<ll> &x) {
   map<ll, ll> mp;
 
   for (int i = 0; i < (int)x.size(); i++) {
@@ -765,6 +765,27 @@ pair<vector<Ta>, vector<Tb>> GetSortedPair(vector<Ta> a, vector<Tb> b,
     b[i] = p[i].second;
   }
   return {a, b};
+}
+
+// ソート済タプル
+template <class Ta, class Tb, class Tc>
+tuple<vector<Ta>, vector<Tb>, vector<Tc>> GetSortedTuple(
+    vector<Ta> a, vector<Tb> b, vector<Tc> c, bool reverse_flag = false) {
+  assert(a.size() == b.size());
+  assert(b.size() == c.size());
+  int N = a.size();
+  vector<tuple<Ta, Tb, Tc>> t(N);
+  for (int i = 0; i < N; i++) {
+    t[i] = {a[i], b[i], c[i]};
+  }
+  sort(t.begin(), t.end());
+  if (reverse_flag) {
+    reverse(t.begin(), t.end());
+  }
+  for (int i = 0; i < N; i++) {
+    tie(a[i], b[i], c[i]) = t[i];
+  }
+  return {a, b, c};
 }
 
 //組み込み関数（GCC）
