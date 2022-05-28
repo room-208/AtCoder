@@ -383,10 +383,55 @@ vector<int> LIS(const vector<int> &A) {
   return P;
 }
 
-//セグ木・遅延セグ木
-// segtree<ll, seg::op, seg::e> sgt;
-// lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
-// seg::composition, seg::id> sgt;
+// Range Mindex Query (最小値とindexのペアを返すセグメント木)
+namespace rmq {
+struct Pair {
+  ll val;
+  int index;
+};
+// マージ演算
+Pair op(Pair a, Pair b) {
+  if (a.val >= b.val) {
+    return a;
+  }
+  return b;
+}
+Pair e() { return {-INF_ll, -1}; }
+// 区間更新
+Pair id() { return {-1, -1}; }
+Pair mapping(Pair f, Pair x) {
+  if (f.val == id().val) {
+    return x;
+  } else {
+    return f;
+  }
+}
+Pair composition(Pair f, Pair g) {
+  if (f.val == id().val) {
+    return g;
+  } else {
+    return f;
+  }
+}
+// 二分探索
+ll target;
+bool f(Pair x) { return x.val < target; };
+// 初期化
+void Init(vector<ll> A, segtree<rmq::Pair, rmq::op, rmq::e> &sgt) {
+  vector<Pair> init(A.size());
+  for (int i = 0; i < A.size(); i++) {
+    init[i] = {A[i], i};
+  }
+  sgt = segtree<rmq::Pair, rmq::op, rmq::e>(init);
+}
+}  // namespace rmq
+
+// RMQのエイリアス
+using RMQ = segtree<rmq::Pair, rmq::op, rmq::e>;
+using Lazy_RMQ = lazy_segtree<rmq::Pair, rmq::op, rmq::e, rmq::Pair,
+                              rmq::mapping, rmq::composition, rmq::id>;
+
+// セグメント木・遅延セグメント木
 namespace seg {
 const ll ID = -1;
 ll op(ll a, ll b) { return max(a, b); }
@@ -411,6 +456,11 @@ ll id() { return ID; }
 ll target;
 bool f(ll v) { return v < target; }
 }  // namespace seg
+
+// セグメント木のエイリアス
+using Segtree = segtree<ll, seg::op, seg::e>;
+using LazySegtree = lazy_segtree<ll, seg::op, seg::e, ll, seg::mapping,
+                                 seg::composition, seg::id>;
 
 // Union-Find
 struct UnionFind {
