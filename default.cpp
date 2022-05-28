@@ -104,6 +104,7 @@ ll my_ceil(ll a, ll b) {
 }
 
 // 平方関数
+// y*y <= x を満たす最大の y を返します。
 ll my_sqrt(ll x) {
   ll left = 0;
   ll right = numeric_limits<int>::max();
@@ -116,6 +117,21 @@ ll my_sqrt(ll x) {
     }
   }
   return left;
+}
+
+// a^k <= n < a^(k+1) を満たす k を返します。
+ll my_log(ll a, ll n) {
+  assert(n > 0);
+  assert(a > 1);
+  ull pow = 1;
+  for (int k = 0; k <= 100; k++) {
+    pow *= a;
+    if (n < pow) {
+      return k;
+    }
+  }
+  assert(false);
+  return -1;
 }
 
 //転倒数
