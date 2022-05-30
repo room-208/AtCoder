@@ -891,75 +891,14 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
   return s_1.b > s_2.b;
 }
 
-deque<ll> GetUpdate(deque<ll> B, deque<ll> X_keta) {
-  assert(B.size() == X_keta.size());
-  deque<ll> Y_keta = X_keta;
-  Y_keta[0] = 0;
-  for (int i = 1; i < B.size(); i++) {
-    if (Y_keta[i] + 1 == B[i]) {
-      Y_keta[i] = 0;
-    } else {
-      Y_keta[i]++;
-      break;
-    }
-  }
-  return Y_keta;
-}
-
-ll solve(deque<ll> B, map<deque<ll>, ll> mp) {
-  if (B.size() == 1) {
-    ll res = 0;
-    for (auto &&p : mp) {
-      res += p.second;
-    }
-    return res;
-  }
-
-  map<deque<ll>, ll> mp_Y;
-  for (auto &&p : mp) {
-    deque<ll> X_keta = p.first;
-    ll cnt = p.second;
-
-    // 何もしない。
-    auto Y_keta = X_keta;
-    Y_keta.pop_front();
-    mp_Y[Y_keta] += cnt;
-
-    //　繰り上げる。
-    if (X_keta.front() > 0) {
-      Y_keta = GetUpdate(B, X_keta);
-      Y_keta.pop_front();
-      mp_Y[Y_keta] += cnt;
-    }
-  }
-  B.pop_front();
-  return solve(B, mp_Y);
-}
-
 int main() {
-  int N;
-  ll X;
-  cin >> N >> X;
-  deque<ll> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int M1, D1, M2, D2;
+  cin >> M1 >> D1;
+  cin >> M2 >> D2;
+
+  if (M1 != M2) {
+    cout << 1 << endl;
+  } else {
+    cout << 0 << endl;
   }
-
-  deque<ll> B(N, 100);
-  for (int i = 0; i < N - 1; i++) {
-    B[i] = A[i + 1] / A[i];
-  }
-
-  deque<ll> X_keta;
-  for (int i = N - 1; i >= 0; i--) {
-    ll r = X / A[i];
-    X_keta.push_back(r);
-    X -= r * A[i];
-  }
-  reverse(X_keta.begin(), X_keta.end());
-
-  map<deque<ll>, ll> mp;
-  mp[X_keta] = 1;
-
-  cout << solve(B, mp) << endl;
 }
