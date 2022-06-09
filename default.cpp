@@ -55,6 +55,16 @@ mint COM(int n, int k) {
   return fac[n] * (finv[k] * finv[n - k]);
 }
 
+// 二項係数計算 (long long)
+ll COMLL(ll n, ll r) {
+  ll res = 1;
+  for (ll i = 0; i < r; i++) {
+    res *= (n - i);
+    res /= (i + 1);
+  }
+  return res;
+}
+
 // 順列組合せ
 mint PER(int n, int k) {
   if (n < k) return 0;
