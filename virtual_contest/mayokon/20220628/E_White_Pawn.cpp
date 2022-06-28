@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <atcoder/fenwicktree>
 #include <atcoder/lazysegtree>
-#include <atcoder/maxflow>
-#include <atcoder/mincostflow>
 #include <atcoder/modint>
 #include <atcoder/scc>
 #include <atcoder/segtree>
@@ -905,19 +903,45 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  ll N, M;
+  cin >> N >> M;
+  vector<ll> X(M), Y(M);
+  for (int i = 0; i < M; i++) {
+    cin >> X[i] >> Y[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  tie(X, Y) = GetSortedPair(X, Y);
+  ll x = 0;
+  vector<ll> p_vec, m_vec;
+  set<ll> st;
+  st.insert(N);
+  for (int i = 0; i < M; i++) {
+    if (x < X[i]) {
+      for (auto &&m : m_vec) {
+        st.erase(m);
+      }
+      for (auto &&p : p_vec) {
+        st.insert(p);
+      }
+      m_vec.clear();
+      p_vec.clear();
+      x = X[i];
+    }
+
+    if (st.count(Y[i])) {
+      m_vec.push_back(Y[i]);
+    }
+    if (st.count(Y[i] - 1) || st.count(Y[i] + 1)) {
+      p_vec.push_back(Y[i]);
+    }
   }
+
+  for (auto &&m : m_vec) {
+    st.erase(m);
+  }
+  for (auto &&p : p_vec) {
+    st.insert(p);
+  }
+
+  cout << st.size() << endl;
 }

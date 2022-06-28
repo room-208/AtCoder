@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <atcoder/fenwicktree>
 #include <atcoder/lazysegtree>
-#include <atcoder/maxflow>
-#include <atcoder/mincostflow>
 #include <atcoder/modint>
 #include <atcoder/scc>
 #include <atcoder/segtree>
@@ -905,19 +903,34 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
+  int N, M, K;
+  cin >> N >> M >> K;
+  Graph_int G(N);
+  for (int i = 0; i < M; i++) {
+    int u, v;
+    cin >> u >> v;
+    u--;
+    v--;
+    G[u].push_back(v);
+    G[v].push_back(u);
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  vector<mint> dp(N, 0);
+  dp[0] = 1;
+  for (int k = 0; k < K; k++) {
+    mint sum = 0;
+    for (int i = 0; i < N; i++) {
+      sum += dp[i];
+    }
+    vector<mint> dp_new(N, 0);
+    for (int i = 0; i < N; i++) {
+      dp_new[i] = sum - dp[i];
+      for (auto &&v : G[i]) {
+        dp_new[i] -= dp[v];
+      }
+    }
+    dp = dp_new;
   }
+
+  cout << dp[0].val() << endl;
 }

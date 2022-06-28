@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <atcoder/fenwicktree>
 #include <atcoder/lazysegtree>
-#include <atcoder/maxflow>
-#include <atcoder/mincostflow>
 #include <atcoder/modint>
 #include <atcoder/scc>
 #include <atcoder/segtree>
@@ -905,19 +903,16 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
   string S;
   cin >> S;
-  vector<int> A(N);
-  for (int i = 0; i < N; i++) {
-    cin >> A[i];
-  }
+  map<string, int> mp;
+  mp["SUN"] = 7;
+  mp["MON"] = 6;
+  mp["TUE"] = 5;
+  mp["WED"] = 4;
+  mp["THU"] = 3;
+  mp["FRI"] = 2;
+  mp["SAT"] = 1;
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
-  }
+  cout << mp[S] << endl;
 }

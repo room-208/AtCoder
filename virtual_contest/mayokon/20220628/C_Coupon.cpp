@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <atcoder/fenwicktree>
 #include <atcoder/lazysegtree>
-#include <atcoder/maxflow>
-#include <atcoder/mincostflow>
 #include <atcoder/modint>
 #include <atcoder/scc>
 #include <atcoder/segtree>
@@ -905,19 +903,29 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
-  int N;
-  cin >> N;
-  string S;
-  cin >> S;
-  vector<int> A(N);
+  ll N, K, X;
+  cin >> N >> K >> X;
+  vector<ll> A(N);
   for (int i = 0; i < N; i++) {
     cin >> A[i];
   }
 
-  bool flag = true;
-  if (flag) {
-    cout << "Yes" << endl;
-  } else {
-    cout << "No" << endl;
+  for (int i = 0; i < N; i++) {
+    ll k = my_floor(A[i], X);
+    if (k >= K) {
+      A[i] -= K * X;
+      K = 0;
+      break;
+    } else {
+      K -= k;
+      A[i] -= k * X;
+    }
   }
+
+  sort(A.rbegin(), A.rend());
+  ll cnt = 0;
+  for (int i = K; i < N; i++) {
+    cnt += A[i];
+  }
+  cout << cnt << endl;
 }
