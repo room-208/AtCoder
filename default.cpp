@@ -905,6 +905,8 @@ bool operator<(const my_struct &s_1, const my_struct &s_2) {
 }
 
 int main() {
+  ios::sync_with_stdio(false);
+  std::cin.tie(nullptr);
   int N;
   cin >> N;
   string S;
