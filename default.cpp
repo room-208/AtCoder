@@ -825,6 +825,38 @@ vector<vector<ll>> WarshallFloyd(vector<vector<ll>> &w) {
   return dist;
 }
 
+// ダブリング
+class Doubling {
+ private:
+  int logK;
+  int N;
+  vector<vector<int>> doubling;
+
+ public:
+  Doubling(vector<int> G, int logK = 60) : logK(logK) {
+    int N = G.size();
+    doubling.resize(logK);
+    for (int k = 0; k < logK; k++) {
+      doubling[k].resize(N);
+    }
+    for (int i = 0; i < N; i++) {
+      doubling[0][i] = G[i];
+    }
+    for (int k = 0; k < logK - 1; k++) {
+      for (int i = 0; i < N; i++) {
+        doubling[k + 1][i] = doubling[k][doubling[k][i]];
+      }
+    }
+  }
+  int get_transition(ll K, int now) {
+    for (int k = 0; K > 0; k++) {
+      if (K & 1) now = doubling[k][now];
+      K = K >> 1;
+    }
+    return now;
+  }
+};
+
 // ソート済ペア
 template <class Ta, class Tb>
 pair<vector<Ta>, vector<Tb>> GetSortedPair(vector<Ta> a, vector<Tb> b,
